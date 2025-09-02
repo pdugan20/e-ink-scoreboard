@@ -158,9 +158,35 @@ def get_scores(league):
         logger.error(f"Error fetching scores: {e}")
         return jsonify({'error': str(e)}), 500
 
+def fetch_mlb_standings():
+    """Fetch current MLB standings"""
+    try:
+        # Use current year for standings
+        current_year = datetime.now().year
+        url = f"{MLB_API_BASE}/standings?leagueId=103,104&season={current_year}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        
+        standings = {}
+        for record in data.get('records', []):
+            for team in record.get('teamRecords', []):
+                team_name = team.get('team', {}).get('name', '')
+                wins = team.get('wins', 0)
+                losses = team.get('losses', 0)
+                standings[team_name] = f"{wins}-{losses}"
+        
+        return standings
+    except Exception as e:
+        logger.error(f"Error fetching MLB standings: {e}")
+        return {}
+
 def fetch_mlb_games():
     """Fetch MLB games for today"""
     try:
+        # Get standings data
+        standings = fetch_mlb_standings()
+        
         today = datetime.now().strftime('%Y-%m-%d')
         url = f"{MLB_API_BASE}/schedule/games/?sportId=1&date={today}"
         response = requests.get(url, timeout=10)
@@ -177,14 +203,22 @@ def fetch_mlb_games():
                     inning_state = game.get('linescore', {}).get('inningState', '')
                     status = f"{inning_state} {inning}"
                 elif status == 'Scheduled' or status == 'Pre-Game':
-                    game_time = datetime.fromisoformat(game.get('gameDate', '').replace('Z', '+00:00'))
-                    status = game_time.strftime('%-I:%M %p ET')
+                    game_time_utc = datetime.fromisoformat(game.get('gameDate', '').replace('Z', '+00:00'))
+                    # Convert UTC to ET (UTC-4 during daylight time, UTC-5 during standard time)
+                    # For simplicity, we'll assume daylight time (EDT = UTC-4)
+                    et_time = game_time_utc.replace(tzinfo=None) - timedelta(hours=4)
+                    status = et_time.strftime('%-I:%M %p ET')
+                
+                away_team = game.get('teams', {}).get('away', {}).get('team', {}).get('name', '')
+                home_team = game.get('teams', {}).get('home', {}).get('team', {}).get('name', '')
                 
                 game_info = {
-                    'away_team': game.get('teams', {}).get('away', {}).get('team', {}).get('name', ''),
-                    'home_team': game.get('teams', {}).get('home', {}).get('team', {}).get('name', ''),
+                    'away_team': away_team,
+                    'home_team': home_team,
                     'away_score': game.get('teams', {}).get('away', {}).get('score', 0),
                     'home_score': game.get('teams', {}).get('home', {}).get('score', 0),
+                    'away_record': standings.get(away_team, ''),
+                    'home_record': standings.get(home_team, ''),
                     'status': status
                 }
                 games.append(game_info)
@@ -198,11 +232,16 @@ def fetch_mlb_games():
             
             for date_data in data.get('dates', []):
                 for game in date_data.get('games', [])[:6]:  # Limit to 6 games
+                    away_team = game.get('teams', {}).get('away', {}).get('team', {}).get('name', '')
+                    home_team = game.get('teams', {}).get('home', {}).get('team', {}).get('name', '')
+                    
                     game_info = {
-                        'away_team': game.get('teams', {}).get('away', {}).get('team', {}).get('name', ''),
-                        'home_team': game.get('teams', {}).get('home', {}).get('team', {}).get('name', ''),
+                        'away_team': away_team,
+                        'home_team': home_team,
                         'away_score': game.get('teams', {}).get('away', {}).get('score', 0),
                         'home_score': game.get('teams', {}).get('home', {}).get('score', 0),
+                        'away_record': standings.get(away_team, ''),
+                        'home_record': standings.get(home_team, ''),
                         'status': 'Final'
                     }
                     games.append(game_info)

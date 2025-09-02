@@ -1,7 +1,7 @@
 // MLB Team Colors (from teamcolorcodes.com)
 // Each team has primary, secondary, and tertiary colors
 
-const mlbTeamColors = {
+export const mlbTeamColors = {
   Yankees: { primary: '#003087', secondary: '#E4002C', tertiary: '#FFFFFF' },
   'Red Sox': { primary: '#BD3039', secondary: '#0C2340', tertiary: '#FFFFFF' },
   Dodgers: { primary: '#005A9C', secondary: '#EF3E42', tertiary: '#FFFFFF' },

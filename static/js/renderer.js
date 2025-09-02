@@ -1,6 +1,8 @@
 // Game rendering and display logic
+import { favoriteTeams, dynamicColors, dynamicColorsOnlyFavorites } from './config.js';
+import { mapApiTeamName, getTeamLogo, generateGradientBackground, convertTimeToTimezone } from './teams.js';
 
-function renderGames(games, league = 'mlb') {
+export function renderGames(games, league = 'mlb') {
   const container = document.getElementById('games');
   container.innerHTML = '';
 
@@ -15,10 +17,15 @@ function renderGames(games, league = 'mlb') {
     const gameEl = document.createElement('div');
     gameEl.className = 'game-pill';
 
-    // Check if this game has the favorite team
+    // Map API team names to our internal names for lookups
+    const awayTeamMapped = mapApiTeamName(game.away_team, league);
+    const homeTeamMapped = mapApiTeamName(game.home_team, league);
+
+    // Check if this game has the favorite team (check both API and mapped names)
     const favoriteTeam = favoriteTeams[league];
     const hasFavoriteTeam = favoriteTeam && 
-      (game.away_team === favoriteTeam || game.home_team === favoriteTeam);
+      (game.away_team === favoriteTeam || game.home_team === favoriteTeam ||
+       awayTeamMapped === favoriteTeam || homeTeamMapped === favoriteTeam);
 
     // Apply dynamic colors if enabled and conditions are met
     const shouldApplyDynamicColors = dynamicColors && 
@@ -26,17 +33,17 @@ function renderGames(games, league = 'mlb') {
     
     if (shouldApplyDynamicColors) {
       const gradientBg = generateGradientBackground(
-        game.away_team,
-        game.home_team,
+        awayTeamMapped,
+        homeTeamMapped,
         league
       );
       gameEl.style.background = gradientBg;
       gameEl.classList.add('dynamic-colors');
     }
 
-    // Use secondary logos when dynamic colors are applied to this game
-    const awayLogo = getTeamLogo(game.away_team, league, shouldApplyDynamicColors);
-    const homeLogo = getTeamLogo(game.home_team, league, shouldApplyDynamicColors);
+    // Use secondary logos when dynamic colors are applied to this game (use mapped names)
+    const awayLogo = getTeamLogo(awayTeamMapped, league, shouldApplyDynamicColors);
+    const homeLogo = getTeamLogo(homeTeamMapped, league, shouldApplyDynamicColors);
 
     // Check game status and scores
     const isFinal = game.status === 'Final';
@@ -51,9 +58,9 @@ function renderGames(games, league = 'mlb') {
             <div class="matchup">
                 <div class="team-row">
                     <div class="team-info">
-                        ${awayLogo ? `<img src="${awayLogo}" alt="${game.away_team}" class="team-logo">` : ''}
+                        ${awayLogo ? `<img src="${awayLogo}" alt="${awayTeamMapped}" class="team-logo">` : ''}
                         <div class="team-details">
-                            <div class="team-name">${game.away_team}</div>
+                            <div class="team-name">${awayTeamMapped}</div>
                             ${game.away_record ? `<div class="team-record">${game.away_record}</div>` : ''}
                         </div>
                     </div>
@@ -61,22 +68,22 @@ function renderGames(games, league = 'mlb') {
                 </div>
                 <div class="team-row">
                     <div class="team-info">
-                        ${homeLogo ? `<img src="${homeLogo}" alt="${game.home_team}" class="team-logo">` : ''}
+                        ${homeLogo ? `<img src="${homeLogo}" alt="${homeTeamMapped}" class="team-logo">` : ''}
                         <div class="team-details">
-                            <div class="team-name">${game.home_team}</div>
+                            <div class="team-name">${homeTeamMapped}</div>
                             ${game.home_record ? `<div class="team-record">${game.home_record}</div>` : ''}
                         </div>
                     </div>
                     ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
                 </div>
             </div>
-            <div class="game-status">${game.status}</div>
+            <div class="game-status">${convertTimeToTimezone(game.status)}</div>
         `;
     container.appendChild(gameEl);
   });
 }
 
-function sortGamesByFavorite(games, league) {
+export function sortGamesByFavorite(games, league) {
   const favoriteTeam = favoriteTeams[league];
 
   if (!favoriteTeam) {
@@ -97,7 +104,7 @@ function sortGamesByFavorite(games, league) {
   return [...favoriteGames, ...otherGames];
 }
 
-function updateHeaderTitle(league) {
+export function updateHeaderTitle(league) {
   const now = new Date();
   const days = [
     'Sunday',
@@ -132,7 +139,7 @@ function updateHeaderTitle(league) {
   updateCurrentTime();
 }
 
-function updateCurrentTime() {
+export function updateCurrentTime() {
   const now = new Date();
   let hours = now.getHours();
   const minutes = now.getMinutes().toString().padStart(2, '0');
@@ -144,7 +151,10 @@ function updateCurrentTime() {
     `${hours}:${minutes} ${ampm}`;
 }
 
-function updateSizeIndicator() {
+export function updateSizeIndicator() {
+  // Import targetWidth and targetHeight from controls.js when needed
+  const targetWidth = window.targetWidth || 800;
+  const targetHeight = window.targetHeight || 400;
   document.getElementById('size-indicator').textContent =
     `${targetWidth} x ${targetHeight}`;
 }

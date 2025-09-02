@@ -1,11 +1,11 @@
 // MLB Teams that should use white logos when dynamicColors is enabled
 // Teams listed here will use their white logo from /assets/logos/mlb-white/
-// White logos should use the same filename as the regular logo
-// Special cases can override the filename mapping
+// White logos use the same filename as the regular logo (no suffix needed)
 
-const mlbUseWhiteLogos = [
+export const mlbUseWhiteLogos = [
+  'Astros',
   'Red Sox',
-  'Royals', 
+  'Royals',
   'Athletics',
   'White Sox',
   'Dodgers',
@@ -17,6 +17,4 @@ const mlbUseWhiteLogos = [
 ];
 
 // Special filename mappings for teams that don't follow the standard naming
-const mlbWhiteLogoOverrides = {
-  'Astros': 'astros-light',  // Uses astros-light.png instead of astros.png
-};
+export const mlbWhiteLogoOverrides = {};

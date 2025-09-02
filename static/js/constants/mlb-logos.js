@@ -1,7 +1,7 @@
 // MLB Team Logo Mappings
 // Maps team names to logo filenames
 
-const mlbTeamLogos = {
+export const mlbTeamLogos = {
   Yankees: 'yankees',
   'Red Sox': 'redsox',
   Dodgers: 'dodgers',

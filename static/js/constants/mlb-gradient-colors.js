@@ -3,7 +3,7 @@
 // Options: 'primary', 'secondary', or 'tertiary'
 // If not specified here, defaults to 'primary'
 
-const mlbGradientColors = {
+export const mlbGradientColors = {
   Giants: 'secondary',
   Astros: 'secondary',
   Pirates: 'secondary',

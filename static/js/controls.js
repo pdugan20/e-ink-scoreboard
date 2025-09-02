@@ -1,11 +1,17 @@
 // UI controls and interaction logic
+import { loadTestData, loadMLBData, loadNFLData, loadCFBData, fetchLiveData } from './data.js';
+import { updateSizeIndicator, updateCurrentTime } from './renderer.js';
 
-// Track target dimensions
-let targetWidth = 800;
-let targetHeight = 400;
+// Track target dimensions - make them globally accessible
+export let targetWidth = 800;
+export let targetHeight = 400;
 
-// Dev tray toggle
-function toggleDevTray() {
+// Also make them available on window for other files
+window.targetWidth = targetWidth;
+window.targetHeight = targetHeight;
+
+// Dev tray toggle - make globally accessible for HTML onclick handlers
+window.toggleDevTray = function toggleDevTray() {
   const controls = document.getElementById('devControls');
   const toggle = document.getElementById('devToggle');
 
@@ -24,8 +30,8 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Resize functions
-function setSize(width, height) {
+// Resize functions - make globally accessible for HTML onclick handlers
+window.setSize = function setSize(width, height) {
   const frame = document.getElementById('device-frame');
   const display = document.getElementById('display');
   frame.style.width = width + 40 + 'px'; // Add padding
@@ -33,7 +39,7 @@ function setSize(width, height) {
   targetWidth = width;
   targetHeight = height;
   updateSizeIndicator();
-}
+};
 
 // Make frame resizable with mouse
 let isResizing = false;
@@ -74,8 +80,14 @@ function initResizable() {
   });
 }
 
+// Make data loading functions globally accessible for HTML onclick handlers
+window.loadMLBData = loadMLBData;
+window.loadNFLData = loadNFLData;  
+window.loadCFBData = loadCFBData;
+window.fetchLiveData = fetchLiveData;
+
 // Initialize the app
-async function initApp() {
+export async function initApp() {
   await loadTestData();
   loadMLBData();
   updateSizeIndicator();
