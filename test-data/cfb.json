@@ -1,0 +1,86 @@
+[
+  {
+    "away_team": "Tennessee Tech",
+    "home_team": "Georgia",
+    "away_score": 3,
+    "home_score": 48,
+    "status": "Final"
+  },
+  {
+    "away_team": "Western Michigan",
+    "home_team": "Ohio State",
+    "away_score": 0,
+    "home_score": 56,
+    "status": "Final"
+  },
+  {
+    "away_team": "Texas",
+    "home_team": "Michigan",
+    "away_score": 31,
+    "home_score": 12,
+    "status": "Final"
+  },
+  {
+    "away_team": "South Florida",
+    "home_team": "Alabama",
+    "away_score": 16,
+    "home_score": 42,
+    "status": "Final"
+  },
+  {
+    "away_team": "Northern Illinois",
+    "home_team": "Notre Dame",
+    "away_score": 16,
+    "home_score": 14,
+    "status": "Final"
+  },
+  {
+    "away_team": "Middle Tennessee",
+    "home_team": "Ole Miss",
+    "away_score": 3,
+    "home_score": 52,
+    "status": "Final"
+  },
+  {
+    "away_team": "Boise State",
+    "home_team": "Oregon",
+    "away_score": 34,
+    "home_score": 37,
+    "status": "Final"
+  },
+  {
+    "away_team": "Bowling Green",
+    "home_team": "Penn State",
+    "away_score": 27,
+    "home_score": 34,
+    "status": "Final"
+  },
+  {
+    "away_team": "Florida A&M",
+    "home_team": "Miami",
+    "away_score": 7,
+    "home_score": 56,
+    "status": "Final"
+  },
+  {
+    "away_team": "Akron",
+    "home_team": "USC",
+    "away_score": 6,
+    "home_score": 48,
+    "status": "Final"
+  },
+  {
+    "away_team": "Colorado State",
+    "home_team": "Colorado",
+    "away_score": 21,
+    "home_score": 28,
+    "status": "Q4 8:15"
+  },
+  {
+    "away_team": "Florida State",
+    "home_team": "Boston College",
+    "away_score": 24,
+    "home_score": 17,
+    "status": "Q3 4:32"
+  }
+]

@@ -1,0 +1,93 @@
+[
+  {
+    "away_team": "Steelers",
+    "home_team": "Falcons",
+    "away_score": 18,
+    "home_score": 10,
+    "status": "Final"
+  },
+  {
+    "away_team": "Cardinals",
+    "home_team": "Bills",
+    "away_score": 28,
+    "home_score": 34,
+    "status": "Final"
+  },
+  {
+    "away_team": "Titans",
+    "home_team": "Bears",
+    "away_score": 17,
+    "home_score": 24,
+    "status": "Final"
+  },
+  {
+    "away_team": "Patriots",
+    "home_team": "Bengals",
+    "away_score": 16,
+    "home_score": 10,
+    "status": "Final"
+  },
+  {
+    "away_team": "Texans",
+    "home_team": "Colts",
+    "away_score": 29,
+    "home_score": 27,
+    "status": "Final"
+  },
+  {
+    "away_team": "Jaguars",
+    "home_team": "Dolphins",
+    "away_score": 17,
+    "home_score": 20,
+    "status": "Final"
+  },
+  {
+    "away_team": "Vikings",
+    "home_team": "Giants",
+    "away_score": 14,
+    "home_score": 17,
+    "status": "Q4 3:45"
+  },
+  {
+    "away_team": "Packers",
+    "home_team": "Eagles",
+    "away_score": 21,
+    "home_score": 28,
+    "status": "Q3 11:22"
+  },
+  {
+    "away_team": "Broncos",
+    "home_team": "Seahawks",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "8:20 PM ET"
+  },
+  {
+    "away_team": "Panthers",
+    "home_team": "Saints",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "1:00 PM ET"
+  },
+  {
+    "away_team": "Lions",
+    "home_team": "Rams",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "4:25 PM ET"
+  },
+  {
+    "away_team": "Cowboys",
+    "home_team": "Browns",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "4:25 PM ET"
+  },
+  {
+    "away_team": "Chiefs",
+    "home_team": "Ravens",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "8:20 PM ET"
+  }
+]

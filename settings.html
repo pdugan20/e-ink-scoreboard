@@ -1,0 +1,67 @@
+<div class="form-group">
+    <label for="selectedLeague" class="form-label">Sports League:</label>
+    <select class="form-control" id="selectedLeague" name="selectedLeague">
+        <option value="MLB">MLB - Baseball</option>
+        <option value="NFL">NFL - Football</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="selectedTeam" class="form-label">Favorite Team (Optional):</label>
+    <input type="text" class="form-control" id="selectedTeam" name="selectedTeam" 
+           placeholder="e.g., Yankees, Patriots" 
+           value="">
+    <small class="form-text text-muted">
+        Enter a team name to filter scores for that team only. Leave blank to show all games.
+    </small>
+</div>
+
+<div class="form-group">
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="showStandings" name="showStandings">
+        <label class="form-check-label" for="showStandings">
+            Show Standings (Coming Soon)
+        </label>
+    </div>
+</div>
+
+<div class="form-group">
+    <label for="refreshInterval" class="form-label">Refresh Interval (minutes):</label>
+    <input type="number" class="form-control" id="refreshInterval" name="refreshInterval" 
+           min="5" max="60" value="15">
+    <small class="form-text text-muted">
+        How often to refresh the scores (5-60 minutes)
+    </small>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Set initial values from settings if available
+    if (typeof pluginSettings !== 'undefined') {
+        if (pluginSettings.selectedLeague) {
+            document.getElementById('selectedLeague').value = pluginSettings.selectedLeague;
+        }
+        if (pluginSettings.selectedTeam) {
+            document.getElementById('selectedTeam').value = pluginSettings.selectedTeam;
+        }
+        if (pluginSettings.showStandings) {
+            document.getElementById('showStandings').checked = true;
+        }
+        if (pluginSettings.refreshInterval) {
+            document.getElementById('refreshInterval').value = pluginSettings.refreshInterval;
+        }
+    }
+    
+    // Update placeholder based on league selection
+    document.getElementById('selectedLeague').addEventListener('change', function() {
+        var league = this.value;
+        var teamInput = document.getElementById('selectedTeam');
+        
+        if (league === 'MLB') {
+            teamInput.placeholder = 'e.g., Yankees, Red Sox, Dodgers';
+        } else if (league === 'NFL') {
+            teamInput.placeholder = 'e.g., Patriots, Cowboys, Chiefs';
+        }
+    });
+});
+</script>

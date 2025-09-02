@@ -1,0 +1,204 @@
+/* Development-only styles for preview environment */
+
+:root {
+  /* Dev UI Colors */
+  --dev-bg-primary: white;
+  --dev-bg-secondary: #f8f9fa;
+  --dev-bg-tertiary: #f0f0f0;
+  --dev-border-light: #eee;
+  --dev-border-medium: #ddd;
+  --dev-border-dark: #bbb;
+  --dev-text-primary: #333;
+  --dev-text-secondary: #666;
+  --dev-text-muted: #999;
+  --dev-blue: #007aff;
+  --dev-blue-dark: #0051d5;
+  --dev-blue-light: #e3f2fd;
+  --dev-blue-border: #1976d2;
+  --dev-gray: #6c757d;
+  --dev-gray-dark: #495057;
+  --dev-green: #34c759;
+  --dev-red: #ff3b30;
+  
+  /* Dev Spacing */
+  --dev-space-xs: 4px;
+  --dev-space-sm: 8px;
+  --dev-space-md: 12px;
+  --dev-space-lg: 16px;
+  --dev-space-xl: 20px;
+  
+  /* Dev Border Radius */
+  --dev-radius-sm: 6px;
+  --dev-radius-md: 8px;
+  --dev-radius-lg: 12px;
+  --dev-radius-pill: 20px;
+  
+  /* Dev Shadows */
+  --dev-shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+  --dev-shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+  --dev-shadow-lg: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+/* Development environment setup */
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--dev-bg-tertiary);
+  padding: var(--dev-space-xl);
+}
+
+/* Dev Controls Tray */
+.dev-tray {
+  position: fixed;
+  bottom: var(--dev-space-xl);
+  right: var(--dev-space-xl);
+  z-index: 1000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.dev-toggle {
+  background: var(--dev-bg-primary);
+  color: var(--dev-text-primary);
+  border: 1px solid var(--dev-border-medium);
+  padding: var(--dev-space-sm) var(--dev-space-lg);
+  border-radius: var(--dev-radius-md);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--dev-shadow-sm);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.dev-toggle:hover {
+  background: var(--dev-bg-secondary);
+  box-shadow: var(--dev-shadow-md);
+}
+
+.dev-toggle.expanded {
+  display: none;
+}
+
+.controls {
+  background: var(--dev-bg-primary);
+  border: 1px solid var(--dev-border-medium);
+  border-radius: var(--dev-radius-lg);
+  box-shadow: var(--dev-shadow-lg);
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  min-width: 280px;
+  margin-top: var(--dev-space-sm);
+}
+
+.controls.show {
+  display: flex;
+}
+
+.controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--dev-space-md) var(--dev-space-lg);
+  border-bottom: 1px solid var(--dev-border-light);
+  font-weight: 600;
+  color: var(--dev-text-primary);
+  font-size: 14px;
+  border-radius: var(--dev-radius-lg) var(--dev-radius-lg) 0 0;
+}
+
+.dismiss-btn {
+  background: none !important;
+  border: none !important;
+  outline: none;
+  cursor: pointer;
+  padding: 0 !important;
+  color: var(--dev-text-secondary) !important;
+  transition: color 0.2s ease;
+  border-radius: 0 !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  text-align: right;
+}
+
+.dismiss-btn:hover {
+  color: var(--dev-text-primary) !important;
+}
+
+.control-section {
+  padding: var(--dev-space-lg);
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.control-section:last-child {
+  border-bottom: none;
+  border-radius: 0 0 var(--dev-radius-lg) var(--dev-radius-lg);
+}
+
+.control-section label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dev-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--dev-space-sm);
+  display: block;
+}
+
+.control-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dev-space-sm);
+}
+
+.controls button {
+  background: var(--dev-bg-primary);
+  color: var(--dev-text-primary);
+  border: 1px solid var(--dev-border-medium);
+  padding: var(--dev-space-sm) var(--dev-space-md);
+  border-radius: var(--dev-radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.controls button:hover {
+  background: var(--dev-bg-secondary);
+  border-color: var(--dev-border-dark);
+}
+
+.controls button.active {
+  background: var(--dev-blue-light);
+  border-color: var(--dev-blue-border);
+  color: var(--dev-blue-border);
+}
+
+/* Hot reload indicator */
+.reload-indicator {
+  position: fixed;
+  top: var(--dev-space-xl);
+  right: var(--dev-space-xl);
+  background: var(--dev-green);
+  color: white;
+  padding: var(--dev-space-sm) var(--dev-space-lg);
+  border-radius: var(--dev-radius-pill);
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 1000;
+}
+
+.reload-indicator.show {
+  opacity: 1;
+}
+
+.reload-indicator.error {
+  background: var(--dev-red);
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Scores Preview</title>
+    <link rel="stylesheet" href="/static/styles/display-styles.css">
+    <link rel="stylesheet" href="/static/styles/dev-styles.css">
+</head>
+<body>
+    <!-- Dev Controls Tray -->
+    <div class="dev-tray">
+        <button class="dev-toggle" onclick="toggleDevTray()" id="devToggle">Settings</button>
+        <div class="controls" id="devControls">
+            <div class="controls-header">
+                <span>Settings</span>
+                <button class="dismiss-btn" onclick="toggleDevTray()">Close</button>
+            </div>
+            <div class="control-section">
+                <label>Data Source</label>
+                <div class="control-buttons">
+                    <button onclick="loadMLBData()">MLB</button>
+                    <button onclick="loadNFLData()">NFL</button>
+                    <button onclick="loadCFBData()">CFB</button>
+                    <button onclick="fetchLiveData()">Fetch Live</button>
+                </div>
+            </div>
+            <div class="control-section">
+                <label>Display Size</label>
+                <div class="control-buttons">
+                    <button onclick="setSize(800, 400)">800×400</button>
+                    <button onclick="setSize(1600, 1200)">1600×1200</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="device-frame" id="device-frame">
+        <div class="display" id="display">
+            <div class="size-indicator" id="size-indicator">800 x 400</div>
+            <div class="header" id="header">
+                <h1 id="header-title">MLB Scores for Tuesday, September 2</h1>
+                <div class="current-time" id="current-time">12:34 PM</div>
+            </div>
+            <div class="games-grid" id="games">
+                <!-- Games will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/constants/mlb-logos.js"></script>
+    <script src="/static/js/constants/mlb-secondary-logos.js"></script>
+    <script src="/static/js/constants/mlb-colors.js"></script>
+    <script src="/static/js/constants/mlb-gradient-colors.js"></script>
+    <script src="/static/js/teams.js"></script>
+    <script src="/static/js/renderer.js"></script>
+    <script src="/static/js/data.js"></script>
+    <script src="/static/js/controls.js"></script>
+</body>
+</html>

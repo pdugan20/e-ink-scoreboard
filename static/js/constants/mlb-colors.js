@@ -1,0 +1,47 @@
+// MLB Team Colors (from teamcolorcodes.com)
+// Each team has primary, secondary, and tertiary colors
+
+const mlbTeamColors = {
+  Yankees: { primary: '#003087', secondary: '#E4002C', tertiary: '#FFFFFF' },
+  'Red Sox': { primary: '#BD3039', secondary: '#0C2340', tertiary: '#FFFFFF' },
+  Dodgers: { primary: '#005A9C', secondary: '#EF3E42', tertiary: '#FFFFFF' },
+  Giants: { primary: '#FD5A1E', secondary: '#27251F', tertiary: '#EFD19F' },
+  Astros: { primary: '#EB6E1F', secondary: '#002D62', tertiary: '#F4911E' },
+  Rangers: { primary: '#003278', secondary: '#C0111F', tertiary: '#FFFFFF' },
+  Phillies: { primary: '#E81828', secondary: '#002D72', tertiary: '#FFFFFF' },
+  Braves: { primary: '#CE1141', secondary: '#13274F', tertiary: '#EAAA00' },
+  Cubs: { primary: '#0E3386', secondary: '#CC3433', tertiary: '#FFFFFF' },
+  Cardinals: { primary: '#C41E3A', secondary: '#0C2340', tertiary: '#FEDB00' },
+  'Blue Jays': {
+    primary: '#134A8E',
+    secondary: '#1D2D5C',
+    tertiary: '#E8291C',
+  },
+  Orioles: { primary: '#DF4601', secondary: '#27251F', tertiary: '#FFFFFF' },
+  'White Sox': {
+    primary: '#27251F',
+    secondary: '#C4CED4',
+    tertiary: '#FFFFFF',
+  },
+  Guardians: { primary: '#00385D', secondary: '#E50022', tertiary: '#FFFFFF' },
+  Tigers: { primary: '#0C2340', secondary: '#FA4616', tertiary: '#FFFFFF' },
+  Royals: { primary: '#004687', secondary: '#BD9B60', tertiary: '#FFFFFF' },
+  Twins: { primary: '#002B5C', secondary: '#D31145', tertiary: '#B9975B' },
+  Angels: { primary: '#BA0021', secondary: '#003263', tertiary: '#C4CED4' },
+  Athletics: { primary: '#003831', secondary: '#EFB21E', tertiary: '#FFFFFF' },
+  Mariners: { primary: '#005C5C', secondary: '#0C2C56', tertiary: '#C4CED4' },
+  Rays: { primary: '#092C5C', secondary: '#8FBCE6', tertiary: '#F5D130' },
+  Brewers: { primary: '#0A2351', secondary: '#B6922E', tertiary: '#FFFFFF' },
+  Reds: { primary: '#C6011F', secondary: '#000000', tertiary: '#FFFFFF' },
+  Mets: { primary: '#002D72', secondary: '#FF5910', tertiary: '#FFFFFF' },
+  Marlins: { primary: '#00A3E0', secondary: '#EF3340', tertiary: '#41748D' },
+  Nationals: { primary: '#AB0003', secondary: '#14225A', tertiary: '#FFFFFF' },
+  Diamondbacks: {
+    primary: '#A71930',
+    secondary: '#E3D4AD',
+    tertiary: '#000000',
+  },
+  Rockies: { primary: '#333366', secondary: '#131413', tertiary: '#C4CED4' },
+  Padres: { primary: '#2F241D', secondary: '#FFC425', tertiary: '#FFFFFF' },
+  Pirates: { primary: '#FDB827', secondary: '#27251F', tertiary: '#FFFFFF' },
+};

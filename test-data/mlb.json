@@ -1,0 +1,110 @@
+[
+  {
+    "away_team": "Cardinals",
+    "away_record": "69-69",
+    "home_team": "Brewers",
+    "home_record": "81-57",
+    "away_score": 3,
+    "home_score": 9,
+    "status": "Final"
+  },
+  {
+    "away_team": "White Sox",
+    "away_record": "31-108",
+    "home_team": "Orioles",
+    "home_record": "80-59",
+    "away_score": 3,
+    "home_score": 13,
+    "status": "Final"
+  },
+  {
+    "away_team": "Astros",
+    "away_record": "75-63",
+    "home_team": "Reds",
+    "home_record": "66-73",
+    "away_score": 3,
+    "home_score": 5,
+    "status": "Final"
+  },
+  {
+    "away_team": "Guardians",
+    "away_record": "79-59",
+    "home_team": "Royals",
+    "home_record": "75-64",
+    "away_score": 4,
+    "home_score": 2,
+    "status": "Final"
+  },
+  {
+    "away_team": "Dodgers",
+    "away_record": "83-55",
+    "home_team": "Diamondbacks",
+    "home_record": "77-61",
+    "away_score": 8,
+    "home_score": 3,
+    "status": "Bot 7th"
+  },
+  {
+    "away_team": "Tigers",
+    "away_record": "70-69",
+    "home_team": "Padres",
+    "home_record": "79-61",
+    "away_score": 2,
+    "home_score": 1,
+    "status": "Top 5th"
+  },
+  {
+    "away_team": "Twins",
+    "away_record": "75-62",
+    "home_team": "Rays",
+    "home_record": "67-70",
+    "away_score": 1,
+    "home_score": 2,
+    "status": "Bot 6th"
+  },
+  {
+    "away_team": "Mariners",
+    "away_record": "69-69",
+    "home_team": "Athletics",
+    "home_record": "60-78",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "7:07 PM ET"
+  },
+  {
+    "away_team": "Red Sox",
+    "away_record": "70-68",
+    "home_team": "Mets",
+    "home_record": "74-64",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "7:10 PM ET"
+  },
+  {
+    "away_team": "Pirates",
+    "away_record": "64-73",
+    "home_team": "Cubs",
+    "home_record": "71-67",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "8:05 PM ET"
+  },
+  {
+    "away_team": "Yankees",
+    "away_record": "80-58",
+    "home_team": "Rangers",
+    "home_record": "65-73",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "8:35 PM ET"
+  },
+  {
+    "away_team": "Giants",
+    "away_record": "71-67",
+    "home_team": "Rockies",
+    "home_record": "56-82",
+    "away_score": 0,
+    "home_score": 0,
+    "status": "9:40 PM ET"
+  }
+]

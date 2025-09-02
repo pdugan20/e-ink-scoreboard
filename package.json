@@ -1,0 +1,18 @@
+{
+  "name": "sports-scores-plugin",
+  "version": "1.0.0",
+  "description": "InkyPi plugin for displaying sports scores",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint static/js/**/*.js",
+    "lint:fix": "eslint static/js/**/*.js --fix",
+    "format": "prettier --write static/js/**/*.js",
+    "format:check": "prettier --check static/js/**/*.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "@eslint/js": "^8.0.0"
+  }
+}
