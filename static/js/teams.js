@@ -9,7 +9,7 @@ import { mlbGradientColors } from './constants/mlb-gradient-colors.js';
 export function mapApiTeamName(apiTeamName, league = 'mlb') {
   if (league === 'mlb') {
     const mlbNameMap = {
-      'Arizona Diamondbacks': 'Diamondbacks',
+      'Arizona Diamondbacks': 'D-backs',
       'Atlanta Braves': 'Braves',
       'Baltimore Orioles': 'Orioles',
       'Boston Red Sox': 'Red Sox',
@@ -97,6 +97,24 @@ export function generateGradientBackground(awayTeam, homeTeam, league = 'mlb') {
   // Away team on left, home team on right (matching the display order)
   // Adding 90% opacity to lighten the colors slightly
   return `linear-gradient(105deg, ${awayColor}E6 0%, ${awayColor}E6 25%, ${homeColor}E6 75%, ${homeColor}E6 100%)`;
+}
+
+export function formatGameStatus(statusString, gameData = null) {
+  let formattedStatus = statusString;
+  
+  // Convert "Bottom" to "Bot" for brevity
+  if (statusString.includes('Bottom ')) {
+    formattedStatus = statusString.replace('Bottom ', 'Bot ');
+  }
+  
+  // Add middot and outs for active games
+  if (gameData && (statusString.includes('Top ') || statusString.includes('Bottom ') || statusString.includes('Bot ')) && gameData.outs !== undefined) {
+    const outs = gameData.outs || 0;
+    formattedStatus += ` · ${outs} out${outs === 1 ? '' : 's'}`;
+  }
+  
+  // Convert ET times to configured timezone, or return as-is
+  return convertTimeToTimezone(formattedStatus);
 }
 
 export function convertTimeToTimezone(timeString) {

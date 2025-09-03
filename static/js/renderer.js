@@ -1,6 +1,6 @@
 // Game rendering and display logic
 import { favoriteTeams, dynamicColors, dynamicColorsOnlyFavorites } from './config.js';
-import { mapApiTeamName, getTeamLogo, generateGradientBackground, convertTimeToTimezone } from './teams.js';
+import { mapApiTeamName, getTeamLogo, generateGradientBackground, formatGameStatus } from './teams.js';
 
 export function renderGames(games, league = 'mlb') {
   const container = document.getElementById('games');
@@ -64,7 +64,7 @@ export function renderGames(games, league = 'mlb') {
                             ${game.away_record ? `<div class="team-record">${game.away_record}</div>` : ''}
                         </div>
                     </div>
-                    ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${awayLosing ? ' losing-score' : ''}">${game.away_score}</div>`}
+                    ${isScheduled ? '<div class="score scheduled-dash">0</div>' : `<div class="score${awayLosing ? ' losing-score' : ''}">${game.away_score}</div>`}
                 </div>
                 <div class="team-row">
                     <div class="team-info">
@@ -74,10 +74,10 @@ export function renderGames(games, league = 'mlb') {
                             ${game.home_record ? `<div class="team-record">${game.home_record}</div>` : ''}
                         </div>
                     </div>
-                    ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
+                    ${isScheduled ? '<div class="score scheduled-dash">0</div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
                 </div>
             </div>
-            <div class="game-status">${convertTimeToTimezone(game.status)}</div>
+            <div class="game-status">${formatGameStatus(game.status, game)}</div>
         `;
     container.appendChild(gameEl);
   });

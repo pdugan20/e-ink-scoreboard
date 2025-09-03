@@ -38,11 +38,17 @@
   {
     "away_team": "Dodgers",
     "away_record": "83-55",
-    "home_team": "Diamondbacks",
+    "home_team": "D-backs",
     "home_record": "77-61",
     "away_score": 8,
     "home_score": 3,
-    "status": "Bot 7th"
+    "status": "Bot 7th",
+    "bases": {
+      "first": true,
+      "second": false,
+      "third": true
+    },
+    "outs": 2
   },
   {
     "away_team": "Tigers",
@@ -51,7 +57,13 @@
     "home_record": "79-61",
     "away_score": 2,
     "home_score": 1,
-    "status": "Top 5th"
+    "status": "Top 5th",
+    "bases": {
+      "first": false,
+      "second": true,
+      "third": false
+    },
+    "outs": 1
   },
   {
     "away_team": "Twins",
@@ -60,7 +72,13 @@
     "home_record": "67-70",
     "away_score": 1,
     "home_score": 2,
-    "status": "Bot 6th"
+    "status": "Bot 6th",
+    "bases": {
+      "first": true,
+      "second": true,
+      "third": false
+    },
+    "outs": 0
   },
   {
     "away_team": "Mariners",
