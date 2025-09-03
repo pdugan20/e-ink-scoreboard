@@ -1,15 +1,27 @@
 // Game rendering and display logic
-import { favoriteTeams, currentTheme, THEMES, LEAGUES, GAME_STATUS, DAYS, MONTHS, FEATURE_FLAGS } from './config.js';
+import {
+  favoriteTeams,
+  currentTheme,
+  LEAGUES,
+  GAME_STATUS,
+  DAYS,
+  MONTHS,
+  FEATURE_FLAGS,
+} from './config.js';
 import { MLB_STATUS_PATTERNS } from './constants/mlb-constants.js';
-import { mapApiTeamName, getTeamLogo, generateGradientBackground, convertTimeToTimezone } from './teams.js';
+import {
+  mapApiTeamName,
+  getTeamLogo,
+  generateGradientBackground,
+  convertTimeToTimezone,
+} from './teams.js';
 import { generateBaseballDiamondComponent } from './diamond.js';
 import { themeManager } from './theme-manager.js';
-
 
 export function renderGames(games, league = LEAGUES.MLB) {
   const container = document.getElementById('games');
   container.innerHTML = '';
-  
+
   // Initialize theme manager
   themeManager.setTheme(currentTheme);
 
@@ -30,13 +42,17 @@ export function renderGames(games, league = LEAGUES.MLB) {
 
     // Check if this game has the favorite team (check both API and mapped names)
     const favoriteTeam = favoriteTeams[league];
-    const hasFavoriteTeam = favoriteTeam && 
-      (game.away_team === favoriteTeam || game.home_team === favoriteTeam ||
-       awayTeamMapped === favoriteTeam || homeTeamMapped === favoriteTeam);
+    const hasFavoriteTeam =
+      favoriteTeam &&
+      (game.away_team === favoriteTeam ||
+        game.home_team === favoriteTeam ||
+        awayTeamMapped === favoriteTeam ||
+        homeTeamMapped === favoriteTeam);
 
     // Apply dynamic colors based on theme
-    const shouldApplyDynamicColors = themeManager.shouldUseDynamicColors(hasFavoriteTeam);
-    
+    const shouldApplyDynamicColors =
+      themeManager.shouldUseDynamicColors(hasFavoriteTeam);
+
     if (shouldApplyDynamicColors) {
       const gradientBg = generateGradientBackground(
         awayTeamMapped,
@@ -46,7 +62,7 @@ export function renderGames(games, league = LEAGUES.MLB) {
       gameEl.style.background = gradientBg;
       gameEl.classList.add('dynamic-colors');
     }
-    
+
     // Add theme class
     const themeClass = themeManager.getThemeClass();
     if (themeClass) {
@@ -55,13 +71,19 @@ export function renderGames(games, league = LEAGUES.MLB) {
 
     // Use secondary logos when dynamic colors are applied to this game (use mapped names)
     const showLogos = themeManager.shouldShowLogos();
-    const awayLogo = showLogos ? getTeamLogo(awayTeamMapped, league, shouldApplyDynamicColors) : null;
-    const homeLogo = showLogos ? getTeamLogo(homeTeamMapped, league, shouldApplyDynamicColors) : null;
+    const awayLogo = showLogos
+      ? getTeamLogo(awayTeamMapped, league, shouldApplyDynamicColors)
+      : null;
+    const homeLogo = showLogos
+      ? getTeamLogo(homeTeamMapped, league, shouldApplyDynamicColors)
+      : null;
 
     // Check game status and scores
-    const isFinal = game.status === GAME_STATUS.FINAL || game.status === 'Game Over';
+    const isFinal =
+      game.status === GAME_STATUS.FINAL || game.status === 'Game Over';
     const isScheduled =
-      game.status.includes(MLB_STATUS_PATTERNS.PM_ET) || game.status.includes(MLB_STATUS_PATTERNS.AM_ET);
+      game.status.includes(MLB_STATUS_PATTERNS.PM_ET) ||
+      game.status.includes(MLB_STATUS_PATTERNS.AM_ET);
     const awayScore = parseInt(game.away_score);
     const homeScore = parseInt(game.home_score);
     const awayLosing = isFinal && awayScore < homeScore;

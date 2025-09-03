@@ -123,6 +123,15 @@ def index():
     except FileNotFoundError:
         return "preview.html not found", 404
 
+@app.route('/display')
+def display():
+    """Serve clean display HTML for screenshots (no dev UI)"""
+    try:
+        with open('display.html', 'r') as f:
+            return f.read()
+    except FileNotFoundError:
+        return "Display template not found", 404
+
 @app.route('/check-updates')
 def check_updates():
     """Endpoint to check if files have changed"""
