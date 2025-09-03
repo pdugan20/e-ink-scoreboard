@@ -1,5 +1,6 @@
 // Baseball Diamond Component
 // Renders a baseball diamond showing base runners and outs
+import { currentTheme, THEMES } from './config.js';
 
 // Helper function to get CSS variable values
 function getCSSVariable(variableName) {
@@ -39,6 +40,11 @@ function formatInningsStatus(status, isDynamicColors = false) {
 }
 
 export function generateBaseballDiamondComponent(game, isDynamicColors = false, gameStatus = '') {
+  // Treat "Game Over" as "Final"
+  if (gameStatus === 'Game Over') {
+    gameStatus = 'Final';
+  }
+  
   // Only show diamond for live games with bases/outs data
   if (!game.bases || game.outs === undefined) {
     // For final games, show diamond with F in center
@@ -75,9 +81,12 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
   const outs = game.outs;
   
   // Get base colors from CSS variables
-  const baseFilledColor = isDynamicColors 
-    ? getCSSVariable('--diamond-base-filled-dynamic')
-    : getCSSVariable('--diamond-base-filled');
+  const isMLBScoreboard = currentTheme === THEMES.MLB_SCOREBOARD;
+  const baseFilledColor = isMLBScoreboard 
+    ? getCSSVariable('--mlb-scoreboard-base-filled')
+    : isDynamicColors 
+      ? getCSSVariable('--diamond-base-filled-dynamic')
+      : getCSSVariable('--diamond-base-filled');
   const baseEmptyColor = isDynamicColors 
     ? getCSSVariable('--diamond-base-empty-dynamic')
     : getCSSVariable('--diamond-base-empty');
@@ -99,9 +108,9 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
   // Generate outs indicators
   const outDots = Array.from({ length: 3 }, (_, i) => {
     const isFilled = i < outs;
-    const dynamicClass = isDynamicColors ? ' dynamic' : '';
+    const themeClass = isMLBScoreboard ? ' mlb-scoreboard' : isDynamicColors ? ' dynamic' : '';
     const filledClass = isFilled ? ' filled' : '';
-    return `<div class="out-dot${dynamicClass}${filledClass}"></div>`;
+    return `<div class="out-dot${themeClass}${filledClass}"></div>`;
   }).join('');
 
   return `
