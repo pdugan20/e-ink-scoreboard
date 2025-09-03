@@ -1,10 +1,11 @@
 // Game rendering and display logic
-import { favoriteTeams, dynamicColors, dynamicColorsOnlyFavorites } from './config.js';
+import { favoriteTeams, currentTheme, THEMES, LEAGUES, GAME_STATUS, DAYS, MONTHS, FEATURE_FLAGS } from './config.js';
+import { MLB_STATUS_PATTERNS } from './constants/mlb-constants.js';
 import { mapApiTeamName, getTeamLogo, generateGradientBackground, convertTimeToTimezone } from './teams.js';
 import { generateBaseballDiamondComponent } from './diamond.js';
 
 
-export function renderGames(games, league = 'mlb') {
+export function renderGames(games, league = LEAGUES.MLB) {
   const container = document.getElementById('games');
   container.innerHTML = '';
 
@@ -29,9 +30,10 @@ export function renderGames(games, league = 'mlb') {
       (game.away_team === favoriteTeam || game.home_team === favoriteTeam ||
        awayTeamMapped === favoriteTeam || homeTeamMapped === favoriteTeam);
 
-    // Apply dynamic colors if enabled and conditions are met
-    const shouldApplyDynamicColors = dynamicColors && 
-      (!dynamicColorsOnlyFavorites || hasFavoriteTeam);
+    // Apply dynamic colors based on theme
+    const shouldApplyDynamicColors = 
+      (currentTheme === THEMES.DEFAULT && hasFavoriteTeam) ||
+      (currentTheme === THEMES.TEAM_COLORS);
     
     if (shouldApplyDynamicColors) {
       const gradientBg = generateGradientBackground(
@@ -48,9 +50,9 @@ export function renderGames(games, league = 'mlb') {
     const homeLogo = getTeamLogo(homeTeamMapped, league, shouldApplyDynamicColors);
 
     // Check game status and scores
-    const isFinal = game.status === 'Final';
+    const isFinal = game.status === GAME_STATUS.FINAL;
     const isScheduled =
-      game.status.includes('PM ET') || game.status.includes('AM ET');
+      game.status.includes(MLB_STATUS_PATTERNS.PM_ET) || game.status.includes(MLB_STATUS_PATTERNS.AM_ET);
     const awayScore = parseInt(game.away_score);
     const homeScore = parseInt(game.home_score);
     const awayLosing = isFinal && awayScore < homeScore;
@@ -63,7 +65,7 @@ export function renderGames(games, league = 'mlb') {
                         <div class="team-info">
                             ${awayLogo ? `<img src="${awayLogo}" alt="${awayTeamMapped}" class="team-logo">` : ''}
                             <div class="team-details">
-                                <div class="team-name">${awayTeamMapped}</div>
+                                <div class="team-name">${awayTeamMapped} ${FEATURE_FLAGS.SHOW_STANDINGS && game.away_record ? `<span class="team-record">${game.away_record}</span>` : ''}</div>
                             </div>
                         </div>
                         ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${awayLosing ? ' losing-score' : ''}">${game.away_score}</div>`}
@@ -72,7 +74,7 @@ export function renderGames(games, league = 'mlb') {
                         <div class="team-info">
                             ${homeLogo ? `<img src="${homeLogo}" alt="${homeTeamMapped}" class="team-logo">` : ''}
                             <div class="team-details">
-                                <div class="team-name">${homeTeamMapped}</div>
+                                <div class="team-name">${homeTeamMapped} ${FEATURE_FLAGS.SHOW_STANDINGS && game.home_record ? `<span class="team-record">${game.home_record}</span>` : ''}</div>
                             </div>
                         </div>
                         ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
@@ -108,32 +110,9 @@ export function sortGamesByFavorite(games, league) {
 
 export function updateHeaderTitle(league) {
   const now = new Date();
-  const days = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ];
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
 
-  const dayName = days[now.getDay()];
-  const monthName = months[now.getMonth()];
+  const dayName = DAYS[now.getDay()];
+  const monthName = MONTHS[now.getMonth()];
   const dayNum = now.getDate();
 
   document.getElementById('header-title').textContent =

@@ -1,5 +1,6 @@
 // Team helper functions
-import { displayTimezone } from './config.js';
+import { displayTimezone, LEAGUES, TIME_PERIODS, COLOR_TYPES, TIMEZONE_ABBREVIATIONS } from './config.js';
+import { MLB_TEAM_NAME_MAP } from './constants/mlb-constants.js';
 import { mlbTeamLogos } from './constants/mlb-logos.js';
 import {
   mlbUseWhiteLogos,
@@ -9,49 +10,16 @@ import { mlbTeamColors } from './constants/mlb-colors.js';
 import { mlbGradientColors } from './constants/mlb-gradient-colors.js';
 
 // Map API team names to our internal team names
-export function mapApiTeamName(apiTeamName, league = 'mlb') {
-  if (league === 'mlb') {
-    const mlbNameMap = {
-      'Arizona Diamondbacks': 'D-backs',
-      'Atlanta Braves': 'Braves',
-      'Baltimore Orioles': 'Orioles',
-      'Boston Red Sox': 'Red Sox',
-      'Chicago Cubs': 'Cubs',
-      'Chicago White Sox': 'White Sox',
-      'Cincinnati Reds': 'Reds',
-      'Cleveland Guardians': 'Guardians',
-      'Colorado Rockies': 'Rockies',
-      'Detroit Tigers': 'Tigers',
-      'Houston Astros': 'Astros',
-      'Kansas City Royals': 'Royals',
-      'Los Angeles Angels': 'Angels',
-      'Los Angeles Dodgers': 'Dodgers',
-      'Miami Marlins': 'Marlins',
-      'Milwaukee Brewers': 'Brewers',
-      'Minnesota Twins': 'Twins',
-      'New York Mets': 'Mets',
-      'New York Yankees': 'Yankees',
-      'Oakland Athletics': 'Athletics',
-      'Philadelphia Phillies': 'Phillies',
-      'Pittsburgh Pirates': 'Pirates',
-      'San Diego Padres': 'Padres',
-      'San Francisco Giants': 'Giants',
-      'Seattle Mariners': 'Mariners',
-      'St. Louis Cardinals': 'Cardinals',
-      'Tampa Bay Rays': 'Rays',
-      'Texas Rangers': 'Rangers',
-      'Toronto Blue Jays': 'Blue Jays',
-      'Washington Nationals': 'Nationals',
-    };
-
-    return mlbNameMap[apiTeamName] || apiTeamName;
+export function mapApiTeamName(apiTeamName, league = LEAGUES.MLB) {
+  if (league === LEAGUES.MLB) {
+    return MLB_TEAM_NAME_MAP[apiTeamName] || apiTeamName;
   }
   return apiTeamName;
 }
 
 // Helper functions
-export function getTeamLogo(teamName, league = 'mlb', useDynamicLogo = false) {
-  if (league === 'mlb') {
+export function getTeamLogo(teamName, league = LEAGUES.MLB, useDynamicLogo = false) {
+  if (league === LEAGUES.MLB) {
     // Check for white logo when dynamic colors are enabled
     if (
       useDynamicLogo &&
@@ -73,25 +41,25 @@ export function getTeamLogo(teamName, league = 'mlb', useDynamicLogo = false) {
   return null;
 }
 
-export function getTeamColor(teamName, league = 'mlb', colorType = 'primary') {
-  if (league === 'mlb' && mlbTeamColors[teamName]) {
+export function getTeamColor(teamName, league = LEAGUES.MLB, colorType = COLOR_TYPES.PRIMARY) {
+  if (league === LEAGUES.MLB && mlbTeamColors[teamName]) {
     return (
       mlbTeamColors[teamName][colorType] || mlbTeamColors[teamName].primary
     );
   }
-  return '#666666'; // Default gray fallback
+  return 'var(--color-gray-600)'; // Default gray fallback
 }
 
-export function getGradientColor(teamName, league = 'mlb') {
+export function getGradientColor(teamName, league = LEAGUES.MLB) {
   // Check if there's an override for this team's gradient color
-  if (league === 'mlb' && mlbGradientColors && mlbGradientColors[teamName]) {
+  if (league === LEAGUES.MLB && mlbGradientColors && mlbGradientColors[teamName]) {
     return getTeamColor(teamName, league, mlbGradientColors[teamName]);
   }
   // Default to primary color
-  return getTeamColor(teamName, league, 'primary');
+  return getTeamColor(teamName, league, COLOR_TYPES.PRIMARY);
 }
 
-export function generateGradientBackground(awayTeam, homeTeam, league = 'mlb') {
+export function generateGradientBackground(awayTeam, homeTeam, league = LEAGUES.MLB) {
   // Get the appropriate color for each team (with overrides)
   const awayColor = getGradientColor(awayTeam, league);
   const homeColor = getGradientColor(homeTeam, league);
@@ -105,7 +73,7 @@ export function generateGradientBackground(awayTeam, homeTeam, league = 'mlb') {
 export function convertTimeToTimezone(timeString) {
   // Convert ET times to the configured timezone
   // Input format: "10:40 PM ET" or "11:35 PM ET"
-  if (!timeString.includes('ET')) {
+  if (!timeString.includes(TIME_PERIODS.ET)) {
     return timeString; // Return as-is if not an ET time
   }
 
@@ -123,9 +91,9 @@ export function convertTimeToTimezone(timeString) {
     const [hours, minutes] = time.split(':');
     let hour24 = parseInt(hours);
 
-    if (period === 'PM' && hour24 !== 12) {
+    if (period === TIME_PERIODS.PM && hour24 !== 12) {
       hour24 += 12;
-    } else if (period === 'AM' && hour24 === 12) {
+    } else if (period === TIME_PERIODS.AM && hour24 === 12) {
       hour24 = 0;
     }
 
@@ -156,20 +124,20 @@ export function convertTimeToTimezone(timeString) {
 
     // Convert back to 12-hour format
     let displayHour = convertedHour;
-    let displayPeriod = 'AM';
+    let displayPeriod = TIME_PERIODS.AM;
 
     if (convertedHour === 0) {
       displayHour = 12;
-      displayPeriod = 'AM';
+      displayPeriod = TIME_PERIODS.AM;
     } else if (convertedHour < 12) {
       displayHour = convertedHour;
-      displayPeriod = 'AM';
+      displayPeriod = TIME_PERIODS.AM;
     } else if (convertedHour === 12) {
       displayHour = 12;
-      displayPeriod = 'PM';
+      displayPeriod = TIME_PERIODS.PM;
     } else {
       displayHour = convertedHour - 12;
-      displayPeriod = 'PM';
+      displayPeriod = TIME_PERIODS.PM;
     }
 
     return `${displayHour}:${minutes.padStart(2, '0')} ${displayPeriod}`;
@@ -180,15 +148,5 @@ export function convertTimeToTimezone(timeString) {
 }
 
 export function getTimezoneAbbreviation(timezone) {
-  const abbreviations = {
-    'America/New_York': 'ET',
-    'America/Chicago': 'CT',
-    'America/Denver': 'MT',
-    'America/Los_Angeles': 'PT',
-    'America/Phoenix': 'MST',
-    'America/Anchorage': 'AKT',
-    'Pacific/Honolulu': 'HST',
-  };
-
-  return abbreviations[timezone] || timezone.split('/').pop();
+  return TIMEZONE_ABBREVIATIONS[timezone] || timezone.split('/').pop();
 }

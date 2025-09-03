@@ -231,6 +231,19 @@ def fetch_mlb_games():
                     'status': status,
                     'venue': venue_name if venue_name else None
                 }
+                
+                # Add bases and outs data for in-progress games
+                if 'In Progress' in game.get('status', {}).get('detailedState', ''):
+                    linescore = game.get('linescore', {})
+                    offense = linescore.get('offense', {})
+                    defense = linescore.get('defense', {})
+                    
+                    game_info['bases'] = {
+                        'first': offense.get('first') is not None,
+                        'second': offense.get('second') is not None,
+                        'third': offense.get('third') is not None
+                    }
+                    game_info['outs'] = linescore.get('outs', 0)
                 games.append(game_info)
         
         # If no games today, try yesterday

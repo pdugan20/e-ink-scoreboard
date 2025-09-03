@@ -51,7 +51,7 @@ function initResizable() {
   // Add resize handle
   const resizeHandle = document.createElement('div');
   resizeHandle.style.cssText =
-    'position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, #666 50%);';
+    'position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, var(--color-gray-600) 50%);';
   frame.style.position = 'relative';
   frame.appendChild(resizeHandle);
 
