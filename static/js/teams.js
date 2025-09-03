@@ -9,7 +9,7 @@ import { mlbGradientColors } from './constants/mlb-gradient-colors.js';
 export function mapApiTeamName(apiTeamName, league = 'mlb') {
   if (league === 'mlb') {
     const mlbNameMap = {
-      'Arizona Diamondbacks': 'Diamondbacks',
+      'Arizona Diamondbacks': 'Arizona',
       'Atlanta Braves': 'Braves',
       'Baltimore Orioles': 'Orioles',
       'Boston Red Sox': 'Red Sox',
@@ -172,7 +172,7 @@ export function convertTimeToTimezone(timeString) {
     // Get timezone abbreviation
     const timezoneAbbrev = getTimezoneAbbreviation(displayTimezone);
 
-    return `${displayHour}:${minutes.padStart(2, '0')} ${displayPeriod} ${timezoneAbbrev}`;
+    return `${displayHour}:${minutes.padStart(2, '0')} ${displayPeriod}`;
   } catch (error) {
     console.warn('Error converting timezone:', error);
     return timeString; // Return original on error

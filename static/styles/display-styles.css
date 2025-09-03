@@ -149,8 +149,8 @@ body {
   padding: 15px;
   height: calc(100% - 65px);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: 10px;
   box-sizing: border-box;
 }
@@ -164,6 +164,9 @@ body {
   justify-content: space-between;
   background: var(--eink-pill-bg);
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Dynamic color pills styling */
@@ -197,6 +200,14 @@ body {
 .game-pill .matchup {
   flex: 1;
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-pill .teams-and-scores {
+  flex: 1;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 4px;
@@ -204,8 +215,8 @@ body {
 
 .game-pill .team-row {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  gap: 8px;
   min-height: 0;
 }
 
@@ -253,7 +264,7 @@ body {
   font-size: calc(var(--text-sm) - 1px);
   font-weight: bold;
   min-width: 20px;
-  text-align: right;
+  text-align: center;
   flex-shrink: 0;
 }
 
@@ -268,14 +279,93 @@ body {
 
 .game-pill .game-status {
   text-align: center;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--eink-text-secondary);
   margin-top: 1px;
   margin-bottom: 6px;
   flex-shrink: 0;
-  white-space: nowrap;
+  white-space: pre-line;
+  overflow: hidden;
+}
+
+.game-status small {
+  font-size: 9px;
+  color: var(--eink-text-tertiary);
+  display: block;
+  margin-top: 1px;
+  max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.baseball-diamond-component.scheduled-game {
+  text-align: right;
+  padding-right: 4px;
+}
+
+.baseball-diamond-component.scheduled-game .game-status {
+  text-align: right;
+}
+
+/* Baseball Diamond Component */
+.baseball-diamond-component {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 40px;
+}
+
+.baseball-diamond-component:has(.final-diamond-svg) {
+  gap: 2px;
+}
+
+.diamond-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.baseball-diamond-svg {
+  width: 24px;
+  height: 17px;
+}
+
+.final-diamond-png {
+  height: 24px;
+  width: auto;
+  margin-bottom: -5px;
+}
+
+.outs-indicator {
+  display: flex;
+  gap: 2.5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.out-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(128, 128, 128, 0.4);
+}
+
+.out-dot.filled {
+  background: #999999;
+}
+
+/* Dynamic colors for baseball diamond */
+.out-dot.dynamic {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.out-dot.dynamic.filled {
+  background: rgba(255, 255, 255, 0.8);
 }
 
 /* Size indicator */

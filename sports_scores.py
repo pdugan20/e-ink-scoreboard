@@ -21,7 +21,7 @@ DEFAULT_LEAGUE = "MLB"
 class SportsScores(BasePlugin):
     def __init__(self, config, **dependencies):
         super().__init__(config, **dependencies)
-        self.mlb_api_base = "https://statsapi.mlb.com/api/v1"
+        self.mlb_api_base = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb"
         self.nfl_api_base = "https://site.api.espn.com/apis/site/v2/sports/football/nfl"
         
     def generate_settings_template(self):
@@ -55,24 +55,32 @@ class SportsScores(BasePlugin):
     def fetch_mlb_games(self, date_str):
         """Fetch MLB games for a specific date"""
         try:
-            url = f"{self.mlb_api_base}/schedule/games/?sportId=1&date={date_str}"
+            url = f"{self.mlb_api_base}/scoreboard"
+            if date_str:
+                url += f"?dates={date_str}"
             response = requests.get(url, timeout=10)
             response.raise_for_status()
             data = response.json()
             
             games = []
-            for date_data in data.get('dates', []):
-                for game in date_data.get('games', []):
+            for event in data.get('events', []):
+                competition = event.get('competitions', [{}])[0]
+                competitors = competition.get('competitors', [])
+                venue = competition.get('venue', {})
+                
+                if len(competitors) >= 2:
+                    home_team = next((c for c in competitors if c.get('homeAway') == 'home'), {})
+                    away_team = next((c for c in competitors if c.get('homeAway') == 'away'), {})
+                    
                     game_info = {
-                        'game_id': game.get('gamePk'),
-                        'status': game.get('status', {}).get('detailedState', ''),
-                        'home_team': game.get('teams', {}).get('home', {}).get('team', {}).get('name', ''),
-                        'away_team': game.get('teams', {}).get('away', {}).get('team', {}).get('name', ''),
-                        'home_score': game.get('teams', {}).get('home', {}).get('score', 0),
-                        'away_score': game.get('teams', {}).get('away', {}).get('score', 0),
-                        'inning': game.get('linescore', {}).get('currentInning', 0),
-                        'inning_state': game.get('linescore', {}).get('inningState', ''),
-                        'game_date': game.get('gameDate', '')
+                        'game_id': event.get('id'),
+                        'status': competition.get('status', {}).get('type', {}).get('description', ''),
+                        'home_team': home_team.get('team', {}).get('displayName', ''),
+                        'away_team': away_team.get('team', {}).get('displayName', ''),
+                        'home_score': home_team.get('score', 0),
+                        'away_score': away_team.get('score', 0),
+                        'venue': venue.get('fullName', ''),
+                        'game_date': event.get('date', '')
                     }
                     games.append(game_info)
             

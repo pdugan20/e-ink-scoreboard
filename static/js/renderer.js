@@ -1,6 +1,8 @@
 // Game rendering and display logic
 import { favoriteTeams, dynamicColors, dynamicColorsOnlyFavorites } from './config.js';
 import { mapApiTeamName, getTeamLogo, generateGradientBackground, convertTimeToTimezone } from './teams.js';
+import { generateBaseballDiamondComponent } from './diamond.js';
+
 
 export function renderGames(games, league = 'mlb') {
   const container = document.getElementById('games');
@@ -9,7 +11,7 @@ export function renderGames(games, league = 'mlb') {
   // Sort games to show favorite team first if playing
   const sortedGames = sortGamesByFavorite(games, league);
 
-  // Limit to maximum 12 games (4x3 grid)
+  // Limit to maximum 12 games (3x4 grid)
   const maxGames = 12;
   const displayGames = sortedGames.slice(0, maxGames);
 
@@ -56,28 +58,28 @@ export function renderGames(games, league = 'mlb') {
 
     gameEl.innerHTML = `
             <div class="matchup">
-                <div class="team-row">
-                    <div class="team-info">
-                        ${awayLogo ? `<img src="${awayLogo}" alt="${awayTeamMapped}" class="team-logo">` : ''}
-                        <div class="team-details">
-                            <div class="team-name">${awayTeamMapped}</div>
-                            ${game.away_record ? `<div class="team-record">${game.away_record}</div>` : ''}
+                <div class="teams-and-scores">
+                    <div class="team-row">
+                        <div class="team-info">
+                            ${awayLogo ? `<img src="${awayLogo}" alt="${awayTeamMapped}" class="team-logo">` : ''}
+                            <div class="team-details">
+                                <div class="team-name">${awayTeamMapped}</div>
+                            </div>
                         </div>
+                        ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${awayLosing ? ' losing-score' : ''}">${game.away_score}</div>`}
                     </div>
-                    ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${awayLosing ? ' losing-score' : ''}">${game.away_score}</div>`}
-                </div>
-                <div class="team-row">
-                    <div class="team-info">
-                        ${homeLogo ? `<img src="${homeLogo}" alt="${homeTeamMapped}" class="team-logo">` : ''}
-                        <div class="team-details">
-                            <div class="team-name">${homeTeamMapped}</div>
-                            ${game.home_record ? `<div class="team-record">${game.home_record}</div>` : ''}
+                    <div class="team-row">
+                        <div class="team-info">
+                            ${homeLogo ? `<img src="${homeLogo}" alt="${homeTeamMapped}" class="team-logo">` : ''}
+                            <div class="team-details">
+                                <div class="team-name">${homeTeamMapped}</div>
+                            </div>
                         </div>
+                        ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
                     </div>
-                    ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
                 </div>
+                ${generateBaseballDiamondComponent(game, shouldApplyDynamicColors, convertTimeToTimezone(game.status))}
             </div>
-            <div class="game-status">${convertTimeToTimezone(game.status)}</div>
         `;
     container.appendChild(gameEl);
   });

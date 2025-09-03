@@ -218,6 +218,9 @@ def fetch_mlb_games():
                     et_time = game_time_utc.replace(tzinfo=None) - timedelta(hours=4)
                     status = et_time.strftime('%-I:%M %p ET')
                 
+                # Get venue information
+                venue_name = game.get('venue', {}).get('name', '')
+                
                 game_info = {
                     'away_team': away_team,
                     'home_team': home_team,
@@ -225,7 +228,8 @@ def fetch_mlb_games():
                     'home_score': game.get('teams', {}).get('home', {}).get('score', 0),
                     'away_record': standings.get(away_team, ''),
                     'home_record': standings.get(home_team, ''),
-                    'status': status
+                    'status': status,
+                    'venue': venue_name if venue_name else None
                 }
                 games.append(game_info)
         

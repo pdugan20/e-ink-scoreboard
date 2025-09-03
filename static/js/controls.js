@@ -100,8 +100,8 @@ export async function initApp() {
 // Initialize when page loads
 initApp();
 
-// Auto-refresh every 30 seconds
-setInterval(() => {
-  console.log('Auto-refreshing...');
-  fetchLiveData();
-}, 30000);
+// Auto-refresh every 30 seconds (disabled - only manual fetch)
+// setInterval(() => {
+//   console.log('Auto-refreshing...');
+//   fetchLiveData();
+// }, 30000);
