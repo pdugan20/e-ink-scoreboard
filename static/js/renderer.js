@@ -28,8 +28,8 @@ export function renderGames(games, league = LEAGUES.MLB) {
   // Sort games to show favorite team first if playing
   const sortedGames = sortGamesByFavorite(games, league);
 
-  // Limit to maximum 12 games (3x4 grid)
-  const maxGames = 12;
+  // Limit to maximum 15 games (3x5 grid)
+  const maxGames = 15;
   const displayGames = sortedGames.slice(0, maxGames);
 
   displayGames.forEach((game) => {
@@ -166,7 +166,7 @@ export function updateCurrentTime() {
 export function updateSizeIndicator() {
   // Import targetWidth and targetHeight from controls.js when needed
   const targetWidth = window.targetWidth || 800;
-  const targetHeight = window.targetHeight || 400;
+  const targetHeight = window.targetHeight || 480;
   document.getElementById('size-indicator').textContent =
     `${targetWidth} x ${targetHeight}`;
 }

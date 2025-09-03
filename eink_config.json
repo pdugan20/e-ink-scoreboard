@@ -2,7 +2,7 @@
   "web_server_url": "http://localhost:5001/display",
   "screenshot_path": "/tmp/sports_display.png",
   "display_width": 800,
-  "display_height": 400,
+  "display_height": 480,
   "screenshot_scale": 2,
   "refresh_interval": 120,
   "max_retries": 3,

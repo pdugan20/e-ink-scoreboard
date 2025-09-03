@@ -25,7 +25,7 @@ CONFIG = {
     "web_server_url": "http://localhost:5000/preview",
     "screenshot_path": "/tmp/sports_display.png",
     "display_width": 800,
-    "display_height": 400,
+    "display_height": 480,
     "screenshot_scale": 2,  # Take screenshot at 2x resolution for clarity
     "refresh_interval": 120,  # 2 minutes
     "max_retries": 3,

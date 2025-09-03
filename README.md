@@ -6,7 +6,7 @@ Display live sports scores on your e-ink display with professional quality and r
 
 - **Live MLB Scores**: Real-time baseball game scores with inning information
 - **Professional Quality**: 2x DPI rendering for crisp text and team logos
-- **Clean Layout**: Optimized 800x400 display showing 12 games in a 3x4 grid
+- **Clean Layout**: Optimized 800x480 display showing up to 15 games in a 3x5 grid
 - **Auto-refresh**: Configurable refresh interval (5 minutes to 2+ hours)
 - **Mac Testing**: Full development environment with live preview
 - **Raspberry Pi Ready**: Complete deployment guide with systemd services
@@ -51,7 +51,7 @@ Edit `eink_config.json` to customize:
 {
   "web_server_url": "http://localhost:5001/display",
   "display_width": 800,
-  "display_height": 400,
+  "display_height": 480,
   "screenshot_scale": 2,
   "refresh_interval": 300,
   "max_retries": 3,
@@ -68,9 +68,9 @@ Edit `eink_config.json` to customize:
 ## Technical Details
 
 ### Screenshot Quality
-- **Playwright rendering**: Precise 800x400 viewport with 2x DPI
-- **High-res capture**: 1600x800 screenshot for crisp text/logos
-- **Smart downsampling**: LANCZOS filtering to 800x400 final image
+- **Playwright rendering**: Precise 800x480 viewport with 2x DPI
+- **High-res capture**: 1600x960 screenshot for crisp text/logos
+- **Smart downsampling**: LANCZOS filtering to 800x480 final image
 - **Fallback support**: Chrome/Chromium headless if Playwright unavailable
 
 ### Data Sources

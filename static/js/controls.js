@@ -4,7 +4,7 @@ import { updateSizeIndicator, updateCurrentTime } from './renderer.js';
 
 // Track target dimensions - make them globally accessible
 export let targetWidth = 800;
-export let targetHeight = 400;
+export let targetHeight = 480;
 
 // Also make them available on window for other files
 window.targetWidth = targetWidth;

@@ -33,25 +33,41 @@ sudo apt install -y chromium-browser
 sudo apt install -y libjpeg-dev libopenjp2-7 libtiff5-dev
 ```
 
-## 3. Enable SPI for Inky Display
+## 3. Enable SPI and I2C for Inky Display
 
 ```bash
-# Enable SPI interface
-sudo raspi-config
-# Navigate to: Interfacing Options > SPI > Enable
+# Enable SPI and I2C interfaces (required for Inky displays)
+sudo raspi-config nonint do_spi 0
+sudo raspi-config nonint do_i2c 0
 
-# Or edit config directly:
-echo 'dtparam=spi=on' | sudo tee -a /boot/config.txt
+# Add SPI configuration to avoid chip-select conflicts
+echo 'dtoverlay=spi0-0cs' | sudo tee -a /boot/firmware/config.txt
+
+# Reboot to apply changes
 sudo reboot
 ```
 
 ## 4. Install Inky Library
 
-```bash
-# Install Inky display library
-pip3 install inky
+Choose one installation method:
 
-# Test installation
+### Option A: Full Pimoroni Install (Recommended)
+```bash
+git clone https://github.com/pimoroni/inky
+cd inky
+./install.sh
+```
+
+### Option B: Pip Install Only
+```bash
+# Create Pimoroni virtual environment
+python3 -m venv --system-site-packages ~/.virtualenvs/pimoroni
+source ~/.virtualenvs/pimoroni/bin/activate
+pip install inky
+```
+
+### Test Installation
+```bash
 python3 -c "from inky import Inky; print('Inky library installed successfully')"
 ```
 
@@ -106,7 +122,7 @@ python eink_display.py --once
 
 **Screenshot Quality:**
 - Uses Playwright for precise viewport control and 2x DPI rendering
-- Takes 1600x800 screenshot, downsamples to 800x400 for crisp text/logos
+- Takes 1600x960 screenshot, downsamples to 800x480 for crisp text/logos
 - Falls back to Chromium if Playwright unavailable
 
 ## 8. Automatic Startup (Systemd Services)
@@ -236,7 +252,7 @@ python eink_display.py --once
 ### Screenshot Issues
 ```bash
 # Test Chromium manually
-chromium-browser --headless --screenshot=/tmp/test.png --window-size=800,400 http://localhost:5001/display
+chromium-browser --headless --screenshot=/tmp/test.png --window-size=800,480 http://localhost:5001/display
 
 # Check screenshot was created
 ls -la /tmp/test.png
@@ -244,8 +260,12 @@ ls -la /tmp/test.png
 
 ### SPI/Display Issues
 ```bash
-# Check SPI is enabled
+# Check SPI and I2C are enabled
 lsmod | grep spi
+lsmod | grep i2c
+
+# Check config file
+cat /boot/firmware/config.txt | grep -E "(spi|i2c|dtoverlay)"
 
 # Test Inky library
 python3 -c "from inky import Inky; inky = Inky(); print(f'Display: {inky.width}x{inky.height}')"

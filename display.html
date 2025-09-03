@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +14,18 @@
             background: white;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        
+
         /* Hide dev elements */
         .dev-tray,
         .device-frame,
         .size-indicator {
             display: none !important;
         }
-        
+
         /* Make display full width/height */
         .display {
             width: 800px !important;
-            height: 400px !important;
+            height: 480px !important;
             margin: 0 !important;
             border: none !important;
             border-radius: 0 !important;
@@ -32,25 +33,35 @@
             background: white;
             overflow: hidden;
         }
-        
-        /* Optimize layout for 800x400 eink display */
+
+        /* Optimize layout for 800x480 eink display - 3x5 grid */
         .games-grid {
-            padding: 12px !important;
-            gap: 10px !important;
+            gap: 8px !important;
             height: calc(100% - 65px) !important;
+            grid-template-rows: repeat(5, 1fr) !important;
         }
-        
+
         .game-pill {
-            padding: 10px !important;
+            padding: 6px 8px !important;
             min-height: auto !important;
+            font-size: 0.85em !important;
         }
-        
+
+        .game-pill .team-name {
+            font-size: 0.9em !important;
+        }
+
+        .game-pill .score {
+            font-size: 1.1em !important;
+        }
+
         .header {
             padding: 20px 15px !important;
             height: auto !important;
         }
     </style>
 </head>
+
 <body>
     <div class="display" id="display">
         <div class="header" id="header">
@@ -64,27 +75,28 @@
             <!-- Games will be inserted here -->
         </div>
     </div>
-    
+
     <script type="module">
         // Display-specific initialization - use live data by default
         import './static/js/constants/mlb-logos.js';
-        import './static/js/constants/mlb-secondary-logos.js'; 
+        import './static/js/constants/mlb-secondary-logos.js';
         import './static/js/constants/mlb-colors.js';
         import './static/js/constants/mlb-gradient-colors.js';
-        import { fetchLiveData } from './static/js/data.js';
+        import { loadTestData, loadMLBData, fetchLiveData } from './static/js/data.js';
         import { updateCurrentTime } from './static/js/renderer.js';
-        
+
         // Initialize with live data for the eink display
         async function initDisplay() {
             await fetchLiveData();
             updateCurrentTime();
-            
+
             // Update time every minute
             setInterval(updateCurrentTime, 60000);
         }
-        
+
         // Initialize when page loads
         initDisplay();
     </script>
 </body>
+
 </html>
