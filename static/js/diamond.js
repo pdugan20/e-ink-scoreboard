@@ -1,6 +1,23 @@
 // Baseball Diamond Component
 // Renders a baseball diamond showing base runners and outs
 
+function formatInningsStatus(status, isDynamicColors = false) {
+  // Replace "Top" with upward arrow and "Bot" with downward arrow
+  if (status.includes('Top ')) {
+    const inning = status.replace('Top ', '');
+    const arrowColor = isDynamicColors ? 'rgba(255,255,255,0.8)' : 'rgba(136,136,136,0.8)';
+    return `<svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; vertical-align: middle;"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg>${inning}`;
+  }
+  
+  if (status.includes('Bot ')) {
+    const inning = status.replace('Bot ', '');
+    const arrowColor = isDynamicColors ? 'rgba(255,255,255,0.8)' : 'rgba(136,136,136,0.8)';
+    return `<svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; margin-bottom: 1px; vertical-align: middle; transform: rotate(180deg);"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg>${inning}`;
+  }
+  
+  return status;
+}
+
 export function generateBaseballDiamondComponent(game, isDynamicColors = false, gameStatus = '') {
   // Only show diamond for live games with bases/outs data
   if (!game.bases || game.outs === undefined) {
@@ -13,7 +30,7 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
       return `
         <div class="baseball-diamond-component">
           <div class="diamond-wrapper">${finalDiamond}</div>
-          <div class="game-status">${gameStatus}</div>
+          <div class="game-status">${formatInningsStatus(gameStatus, isDynamicColors)}</div>
         </div>
       `;
     }
@@ -26,9 +43,10 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
       console.log('Missing venue for scheduled game:', game);
     }
     
+    const formattedStatus = formatInningsStatus(gameStatus, isDynamicColors);
     const displayText = game.venue && isScheduled 
-      ? `${gameStatus}<br><small>${game.venue}</small>` 
-      : gameStatus;
+      ? `${formattedStatus}<br><small>${game.venue}</small>` 
+      : formattedStatus;
     const alignmentClass = isScheduled ? 'scheduled-game' : '';
     return displayText ? `<div class="baseball-diamond-component ${alignmentClass}"><div class="game-status">${displayText}</div></div>` : '';
   }
@@ -66,7 +84,7 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
       <div class="outs-indicator">
         ${outDots}
       </div>
-      ${gameStatus ? `<div class="game-status">${gameStatus}</div>` : ''}
+      ${gameStatus ? `<div class="game-status">${formatInningsStatus(gameStatus, isDynamicColors)}</div>` : ''}
     </div>
   `;
 }

@@ -28,7 +28,7 @@ export const mlbTeamLogos = {
   Mets: 'mets',
   Marlins: 'marlins',
   Nationals: 'nationals',
-  Arizona: 'diamondbacks',
+  'D-backs': 'diamondbacks',
   Rockies: 'rockies',
   Padres: 'padres',
   Pirates: 'pirates',

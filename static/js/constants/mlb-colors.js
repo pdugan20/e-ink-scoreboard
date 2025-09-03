@@ -36,7 +36,7 @@ export const mlbTeamColors = {
   Mets: { primary: '#002D72', secondary: '#FF5910', tertiary: '#FFFFFF' },
   Marlins: { primary: '#00A3E0', secondary: '#EF3340', tertiary: '#41748D' },
   Nationals: { primary: '#AB0003', secondary: '#14225A', tertiary: '#FFFFFF' },
-  Arizona: {
+  'D-backs': {
     primary: '#A71930',
     secondary: '#E3D4AD',
     tertiary: '#000000',

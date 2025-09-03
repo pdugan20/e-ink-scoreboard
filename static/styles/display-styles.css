@@ -279,10 +279,10 @@ body {
 
 .game-pill .game-status {
   text-align: center;
-  font-size: 10px;
+  font-size: 9px;
   color: var(--eink-text-secondary);
   margin-top: 1px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   flex-shrink: 0;
   white-space: pre-line;
   overflow: hidden;

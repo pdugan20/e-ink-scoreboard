@@ -1,7 +1,10 @@
 // Team helper functions
 import { displayTimezone } from './config.js';
 import { mlbTeamLogos } from './constants/mlb-logos.js';
-import { mlbUseWhiteLogos, mlbWhiteLogoOverrides } from './constants/mlb-secondary-logos.js';
+import {
+  mlbUseWhiteLogos,
+  mlbWhiteLogoOverrides,
+} from './constants/mlb-secondary-logos.js';
 import { mlbTeamColors } from './constants/mlb-colors.js';
 import { mlbGradientColors } from './constants/mlb-gradient-colors.js';
 
@@ -9,7 +12,7 @@ import { mlbGradientColors } from './constants/mlb-gradient-colors.js';
 export function mapApiTeamName(apiTeamName, league = 'mlb') {
   if (league === 'mlb') {
     const mlbNameMap = {
-      'Arizona Diamondbacks': 'Arizona',
+      'Arizona Diamondbacks': 'D-backs',
       'Atlanta Braves': 'Braves',
       'Baltimore Orioles': 'Orioles',
       'Boston Red Sox': 'Red Sox',
@@ -46,7 +49,7 @@ export function mapApiTeamName(apiTeamName, league = 'mlb') {
   return apiTeamName;
 }
 
-// Helper functions  
+// Helper functions
 export function getTeamLogo(teamName, league = 'mlb', useDynamicLogo = false) {
   if (league === 'mlb') {
     // Check for white logo when dynamic colors are enabled
@@ -168,9 +171,6 @@ export function convertTimeToTimezone(timeString) {
       displayHour = convertedHour - 12;
       displayPeriod = 'PM';
     }
-
-    // Get timezone abbreviation
-    const timezoneAbbrev = getTimezoneAbbreviation(displayTimezone);
 
     return `${displayHour}:${minutes.padStart(2, '0')} ${displayPeriod}`;
   } catch (error) {
