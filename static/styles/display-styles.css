@@ -472,50 +472,50 @@ body {
 }
 
 /* MLB Scoreboard Theme */
-.mlb-scoreboard-theme .display {
+.theme-mlb-scoreboard .display {
   background: var(--mlb-scoreboard-bg) !important;
 }
 
-.mlb-scoreboard-theme.game-pill,
-.game-pill.mlb-scoreboard-theme {
+.theme-mlb-scoreboard .game-pill,
+.game-pill.mlb-scoreboard {
   background: var(--mlb-scoreboard-pill-bg) !important;
   border: 1px solid var(--mlb-scoreboard-border-40) !important;
   color: var(--color-white);
 }
 
-.game-pill.mlb-scoreboard-theme .team-name {
+.game-pill.mlb-scoreboard .team-name {
   color: var(--color-white);
   font-weight: var(--font-weight-medium);
 }
 
-.game-pill.mlb-scoreboard-theme .team-record {
+.game-pill.mlb-scoreboard .team-record {
   color: var(--color-white-80);
   opacity: 0.8;
 }
 
-.game-pill.mlb-scoreboard-theme .score {
+.game-pill.mlb-scoreboard .score {
   color: var(--color-white);
   font-weight: var(--font-weight-bold);
 }
 
-.game-pill.mlb-scoreboard-theme .score.losing-score {
+.game-pill.mlb-scoreboard .score.losing-score {
   opacity: 0.6;
 }
 
-.game-pill.mlb-scoreboard-theme .game-status {
+.game-pill.mlb-scoreboard .game-status {
   color: var(--color-white-90);
 }
 
-.game-pill.mlb-scoreboard-theme .game-status small {
+.game-pill.mlb-scoreboard .game-status small {
   color: var(--color-white-80);
 }
 
-.mlb-scoreboard-theme .header {
+.theme-mlb-scoreboard .header {
   border-bottom: 1.5px solid var(--mlb-scoreboard-border-40) !important;
 }
 
-.mlb-scoreboard-theme .header h1,
-.mlb-scoreboard-theme .header .current-time {
+.theme-mlb-scoreboard .header h1,
+.theme-mlb-scoreboard .header .current-time {
   color: var(--color-white) !important;
 }
 

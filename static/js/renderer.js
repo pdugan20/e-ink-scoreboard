@@ -3,18 +3,15 @@ import { favoriteTeams, currentTheme, THEMES, LEAGUES, GAME_STATUS, DAYS, MONTHS
 import { MLB_STATUS_PATTERNS } from './constants/mlb-constants.js';
 import { mapApiTeamName, getTeamLogo, generateGradientBackground, convertTimeToTimezone } from './teams.js';
 import { generateBaseballDiamondComponent } from './diamond.js';
+import { themeManager } from './theme-manager.js';
 
 
 export function renderGames(games, league = LEAGUES.MLB) {
   const container = document.getElementById('games');
   container.innerHTML = '';
   
-  // Apply theme to body
-  if (currentTheme === THEMES.MLB_SCOREBOARD) {
-    document.body.classList.add('mlb-scoreboard-theme');
-  } else {
-    document.body.classList.remove('mlb-scoreboard-theme');
-  }
+  // Initialize theme manager
+  themeManager.setTheme(currentTheme);
 
   // Sort games to show favorite team first if playing
   const sortedGames = sortGamesByFavorite(games, league);
@@ -37,12 +34,8 @@ export function renderGames(games, league = LEAGUES.MLB) {
       (game.away_team === favoriteTeam || game.home_team === favoriteTeam ||
        awayTeamMapped === favoriteTeam || homeTeamMapped === favoriteTeam);
 
-    // Apply dynamic colors based on theme (disabled for MLB_SCOREBOARD)
-    const shouldApplyDynamicColors = 
-      currentTheme !== THEMES.MLB_SCOREBOARD && (
-        (currentTheme === THEMES.DEFAULT && hasFavoriteTeam) ||
-        (currentTheme === THEMES.TEAM_COLORS)
-      );
+    // Apply dynamic colors based on theme
+    const shouldApplyDynamicColors = themeManager.shouldUseDynamicColors(hasFavoriteTeam);
     
     if (shouldApplyDynamicColors) {
       const gradientBg = generateGradientBackground(
@@ -54,15 +47,16 @@ export function renderGames(games, league = LEAGUES.MLB) {
       gameEl.classList.add('dynamic-colors');
     }
     
-    // Add MLB_SCOREBOARD theme class
-    if (currentTheme === THEMES.MLB_SCOREBOARD) {
-      gameEl.classList.add('mlb-scoreboard-theme');
+    // Add theme class
+    const themeClass = themeManager.getThemeClass();
+    if (themeClass) {
+      gameEl.classList.add(themeClass);
     }
 
     // Use secondary logos when dynamic colors are applied to this game (use mapped names)
-    // Hide logos for MLB_SCOREBOARD theme
-    const awayLogo = currentTheme === THEMES.MLB_SCOREBOARD ? null : getTeamLogo(awayTeamMapped, league, shouldApplyDynamicColors);
-    const homeLogo = currentTheme === THEMES.MLB_SCOREBOARD ? null : getTeamLogo(homeTeamMapped, league, shouldApplyDynamicColors);
+    const showLogos = themeManager.shouldShowLogos();
+    const awayLogo = showLogos ? getTeamLogo(awayTeamMapped, league, shouldApplyDynamicColors) : null;
+    const homeLogo = showLogos ? getTeamLogo(homeTeamMapped, league, shouldApplyDynamicColors) : null;
 
     // Check game status and scores
     const isFinal = game.status === GAME_STATUS.FINAL || game.status === 'Game Over';
@@ -95,7 +89,7 @@ export function renderGames(games, league = LEAGUES.MLB) {
                         ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
                     </div>
                 </div>
-                ${generateBaseballDiamondComponent(game, shouldApplyDynamicColors || currentTheme === THEMES.MLB_SCOREBOARD, convertTimeToTimezone(game.status))}
+                ${generateBaseballDiamondComponent(game, themeManager.shouldUseDynamicDiamond(shouldApplyDynamicColors), convertTimeToTimezone(game.status))}
             </div>
         `;
     container.appendChild(gameEl);

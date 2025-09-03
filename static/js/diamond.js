@@ -1,6 +1,6 @@
 // Baseball Diamond Component
 // Renders a baseball diamond showing base runners and outs
-import { currentTheme, THEMES } from './config.js';
+import { themeManager } from './theme-manager.js';
 
 // Helper function to get CSS variable values
 function getCSSVariable(variableName) {
@@ -81,7 +81,7 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
   const outs = game.outs;
   
   // Get base colors from CSS variables
-  const isMLBScoreboard = currentTheme === THEMES.MLB_SCOREBOARD;
+  const isMLBScoreboard = themeManager.isMLBScoreboard();
   const baseFilledColor = isMLBScoreboard 
     ? getCSSVariable('--mlb-scoreboard-base-filled')
     : isDynamicColors 
