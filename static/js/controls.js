@@ -103,5 +103,5 @@ initApp();
 // Auto-refresh every 30 seconds
 setInterval(() => {
   console.log('Auto-refreshing...');
-  // fetchLiveData();
+  fetchLiveData();
 }, 30000);

@@ -64,8 +64,13 @@
 }
 
 body {
-  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, sans-serif;
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
 }
 
 /* Device Frame */
@@ -109,10 +114,22 @@ body {
 /* Header */
 .header {
   padding: var(--display-padding);
+  padding-left: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid var(--eink-text);
+  border-bottom: 1.5px solid var(--eink-border-light);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.league-logo {
+  height: 1.3rem;
+  width: auto;
 }
 
 .header h1 {
@@ -152,11 +169,11 @@ body {
 /* Dynamic color pills styling */
 .game-pill.dynamic-colors {
   border: none;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .game-pill.dynamic-colors .team-name {
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -165,7 +182,7 @@ body {
 }
 
 .game-pill.dynamic-colors .score {
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: bold;
 }
 

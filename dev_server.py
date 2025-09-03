@@ -188,7 +188,7 @@ def fetch_mlb_games():
         standings = fetch_mlb_standings()
         
         today = datetime.now().strftime('%Y-%m-%d')
-        url = f"{MLB_API_BASE}/schedule/games/?sportId=1&date={today}"
+        url = f"{MLB_API_BASE}/schedule/games/?sportId=1&date={today}&hydrate=linescore"
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
@@ -196,21 +196,27 @@ def fetch_mlb_games():
         games = []
         for date_data in data.get('dates', []):
             for game in date_data.get('games', []):
+                # Get team names first
+                away_team = game.get('teams', {}).get('away', {}).get('team', {}).get('name', '')
+                home_team = game.get('teams', {}).get('home', {}).get('team', {}).get('name', '')
+                
                 # Determine game status
                 status = game.get('status', {}).get('detailedState', '')
                 if 'In Progress' in status:
-                    inning = game.get('linescore', {}).get('currentInning', 0)
-                    inning_state = game.get('linescore', {}).get('inningState', '')
-                    status = f"{inning_state} {inning}"
+                    linescore = game.get('linescore', {})
+                    inning_ordinal = linescore.get('currentInningOrdinal')
+                    inning_state = linescore.get('inningState')
+                    
+                    if inning_ordinal and inning_state:
+                        status = f"{inning_state} {inning_ordinal}"
+                    else:
+                        status = "In Progress"
                 elif status == 'Scheduled' or status == 'Pre-Game':
                     game_time_utc = datetime.fromisoformat(game.get('gameDate', '').replace('Z', '+00:00'))
                     # Convert UTC to ET (UTC-4 during daylight time, UTC-5 during standard time)
                     # For simplicity, we'll assume daylight time (EDT = UTC-4)
                     et_time = game_time_utc.replace(tzinfo=None) - timedelta(hours=4)
                     status = et_time.strftime('%-I:%M %p ET')
-                
-                away_team = game.get('teams', {}).get('away', {}).get('team', {}).get('name', '')
-                home_team = game.get('teams', {}).get('home', {}).get('team', {}).get('name', '')
                 
                 game_info = {
                     'away_team': away_team,
@@ -246,7 +252,7 @@ def fetch_mlb_games():
                     }
                     games.append(game_info)
         
-        return games[:6]  # Return max 6 games
+        return games  # Return all games
         
     except Exception as e:
         logger.error(f"Error fetching MLB games: {e}")
