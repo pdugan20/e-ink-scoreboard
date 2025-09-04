@@ -187,7 +187,7 @@ class EinkDisplayController:
         """Take screenshot on Linux/Pi using chromium-browser"""
         try:
             cmd = [
-                "chromium-browser",
+                "chromium",
                 "--headless",
                 "--disable-gpu",
                 "--no-sandbox",
@@ -302,7 +302,7 @@ class EinkDisplayController:
                     logger.error("Display update failed")
                 
                 logger.info(f"Next refresh in {self.config['refresh_interval']} seconds")
-                time.sleep(self.config['refresh_interval'])
+                time.sleep(int(self.config['refresh_interval']))
                 
             except KeyboardInterrupt:
                 logger.info("Shutting down...")
