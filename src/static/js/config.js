@@ -31,7 +31,7 @@ export const THEMES = {
 };
 
 // Theme configuration
-export const currentTheme = THEMES.DEFAULT;
+export const currentTheme = THEMES.MLB_SCOREBOARD;
 
 // League constants
 export const LEAGUES = {

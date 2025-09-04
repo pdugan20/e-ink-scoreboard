@@ -424,8 +424,13 @@ body {
   margin-bottom: -4px;
 }
 
-.baseball-diamond-component:has(.final-diamond-png) {
+/* Theme-specific spacing for final games */
+.baseball-diamond-component.default-spacing:has(.final-diamond-png) {
   gap: var(--space-3);
+}
+
+.baseball-diamond-component.mlb-scoreboard-spacing:has(.final-diamond-png) {
+  gap: var(--space-6);
 }
 
 .diamond-wrapper {
