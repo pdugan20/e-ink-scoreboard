@@ -110,19 +110,13 @@
   --eink-border-medium: var(--color-gray-300);
   --eink-border-dark: var(--color-gray-400);
 
-  /* E-ink Optimized Variables (blues that dither to gray for better e-ink visibility) */
-  --eink-optimized-text-secondary: #333;
-  --eink-optimized-text-muted: #444;
-  --eink-optimized-border-light: #B3D9FF;
-  --eink-optimized-border-medium: #7BB3F0;
-  --eink-optimized-border-dark: #4A90E2;
-
-  /* E-ink Optimized Baseball Diamond Colors (blues that dither to gray) */
-  --eink-optimized-diamond-base-filled: #4A90E2;
-  --eink-optimized-diamond-base-empty: #87CEEB;
-  --eink-optimized-diamond-arrow: #4A90E2;
-  --eink-optimized-out-dot-empty: #87CEEB;
-  --eink-optimized-out-dot-filled: #4A90E2;
+  /* E-ink Optimized Variables */
+  --eink-optimized-text-secondary: #333;  /* Keep existing for clock/losing scores */
+  --eink-optimized-text-muted: #444;      /* Keep existing for team records */
+  
+  /* Simplified two-color system for UI elements */
+  --eink-optimized-light: var(--eink-optimized-text-secondary);  /* Same as clock/losing scores */
+  --eink-optimized-dark: #000000;   /* Pure black for filled bases/dots/borders */
 
   /* Display Layout */
   --display-padding: 2.5%;
@@ -533,7 +527,7 @@ body {
 
 /* E-ink Optimized Contrast Theme */
 body.eink-optimized .header .current-time {
-  color: var(--eink-text) !important;
+  color: var(--eink-optimized-text-secondary) !important;
 }
 
 body.eink-optimized .game-pill:not(.dynamic-colors) .team-record {
@@ -550,11 +544,11 @@ body.eink-optimized .game-pill:not(.dynamic-colors) .game-status small {
 
 body.eink-optimized .game-pill:not(.dynamic-colors) {
   background: transparent !important;
-  border-color: var(--eink-optimized-border-light) !important;
+  border-color: var(--eink-optimized-dark) !important;
 }
 
 body.eink-optimized .header {
-  border-bottom-color: var(--eink-optimized-border-light) !important;
+  border-bottom-color: var(--eink-optimized-dark) !important;
 }
 
 body.eink-optimized .game-pill:not(.dynamic-colors) .score.losing-score {
@@ -564,11 +558,11 @@ body.eink-optimized .game-pill:not(.dynamic-colors) .score.losing-score {
 
 /* E-ink optimized out dots */
 body.eink-optimized .out-dot {
-  background: var(--eink-optimized-out-dot-empty) !important;
+  background: var(--eink-optimized-light) !important;
 }
 
 body.eink-optimized .out-dot.filled {
-  background: var(--eink-optimized-out-dot-filled) !important;
+  background: var(--eink-optimized-dark) !important;
 }
 
 /* Inning arrow positioning */
