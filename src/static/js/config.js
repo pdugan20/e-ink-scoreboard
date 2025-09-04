@@ -6,11 +6,7 @@ export const FEATURE_FLAGS = {
 };
 
 // Favorite team configuration
-export const favoriteTeams = {
-  mlb: 'Mariners',
-  nfl: null,
-  cfb: null,
-};
+export const favoriteTeams = { mlb: 'Mariners', nfl: null, cfb: null };
 
 // Timezone constants
 export const TIMEZONES = {
