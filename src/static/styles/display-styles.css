@@ -110,19 +110,19 @@
   --eink-border-medium: var(--color-gray-300);
   --eink-border-dark: var(--color-gray-400);
 
-  /* E-ink Optimized Variables (much darker for e-ink clarity) */
+  /* E-ink Optimized Variables (blues that dither to gray for better e-ink visibility) */
   --eink-optimized-text-secondary: #333;
   --eink-optimized-text-muted: #444;
-  --eink-optimized-border-light: #aaa;
-  --eink-optimized-border-medium: #888;
-  --eink-optimized-border-dark: #666;
+  --eink-optimized-border-light: #B3D9FF;
+  --eink-optimized-border-medium: #7BB3F0;
+  --eink-optimized-border-dark: #4A90E2;
 
-  /* E-ink Optimized Baseball Diamond Colors */
-  --eink-optimized-diamond-base-filled: #888;
-  --eink-optimized-diamond-base-empty: #bbb;
-  --eink-optimized-diamond-arrow: #888;
-  --eink-optimized-out-dot-empty: #bbb;
-  --eink-optimized-out-dot-filled: #888;
+  /* E-ink Optimized Baseball Diamond Colors (blues that dither to gray) */
+  --eink-optimized-diamond-base-filled: #4A90E2;
+  --eink-optimized-diamond-base-empty: #87CEEB;
+  --eink-optimized-diamond-arrow: #4A90E2;
+  --eink-optimized-out-dot-empty: #87CEEB;
+  --eink-optimized-out-dot-filled: #4A90E2;
 
   /* Display Layout */
   --display-padding: 2.5%;
@@ -533,7 +533,7 @@ body {
 
 /* E-ink Optimized Contrast Theme */
 body.eink-optimized .header .current-time {
-  color: var(--eink-optimized-text-secondary) !important;
+  color: var(--eink-text) !important;
 }
 
 body.eink-optimized .game-pill:not(.dynamic-colors) .team-record {
@@ -558,17 +558,17 @@ body.eink-optimized .header {
 }
 
 body.eink-optimized .game-pill:not(.dynamic-colors) .score.losing-score {
-  opacity: 0.7 !important;
-  color: var(--eink-optimized-text-muted) !important;
+  opacity: 1 !important;
+  color: var(--eink-optimized-text-secondary) !important;
 }
 
 /* E-ink optimized out dots */
 body.eink-optimized .out-dot {
-  background: #bbb !important;
+  background: var(--eink-optimized-out-dot-empty) !important;
 }
 
 body.eink-optimized .out-dot.filled {
-  background: #888 !important;
+  background: var(--eink-optimized-out-dot-filled) !important;
 }
 
 /* Inning arrow positioning */
