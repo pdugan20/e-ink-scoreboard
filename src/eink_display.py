@@ -40,12 +40,23 @@ class EinkDisplayController:
         
         if self.is_pi:
             try:
-                from inky import Inky
-                self.inky = Inky()
-                logger.info(f"Initialized Inky display: {self.inky.width}x{self.inky.height}")
-            except ImportError:
-                logger.error("Inky library not found. Install with: pip install inky")
+                # Try auto-detection first
+                from inky.auto import auto
+                self.inky = auto()
+                logger.info(f"Auto-detected Inky display: {self.inky.width}x{self.inky.height}")
+            except ImportError as e:
+                logger.error(f"Inky library not found: {e}. Install with: pip install inky")
                 sys.exit(1)
+            except Exception as e:
+                # Fallback to Inky Impression 7.3" if auto-detection fails
+                logger.warning(f"Auto-detection failed ({e}), trying Inky Impression 7.3...")
+                try:
+                    from inky import Inky_Impressions_7
+                    self.inky = Inky_Impressions_7()
+                    logger.info(f"Initialized Inky Impression 7.3: {self.inky.width}x{self.inky.height}")
+                except Exception as e2:
+                    logger.error(f"Failed to initialize Inky display: {e2}")
+                    sys.exit(1)
         else:
             self.inky = None
             logger.info("Running in test mode (no physical eink display)")
