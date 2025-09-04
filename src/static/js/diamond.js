@@ -9,20 +9,25 @@ function getCSSVariable(variableName) {
 }
 
 function formatInningsStatus(status, isDynamicColors = false) {
+  const isEinkOptimized = FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST && document.body.classList.contains('eink-optimized');
   // Replace "Top" with upward arrow and "Bottom" with downward arrow
   if (status.startsWith('Top ')) {
     const inning = status.replace('Top ', '');
     const arrowColor = isDynamicColors 
-      ? getCSSVariable('--diamond-arrow-dynamic') 
-      : getCSSVariable('--diamond-arrow-regular');
+      ? getCSSVariable('--diamond-arrow-dynamic')
+      : isEinkOptimized
+        ? getCSSVariable('--eink-text')
+        : getCSSVariable('--diamond-arrow-regular');
     return `<svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; vertical-align: middle;"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg>${inning}`;
   }
   
   if (status.startsWith('Bottom ')) {
     const inning = status.replace('Bottom ', '');
     const arrowColor = isDynamicColors 
-      ? getCSSVariable('--diamond-arrow-dynamic') 
-      : getCSSVariable('--diamond-arrow-regular');
+      ? getCSSVariable('--diamond-arrow-dynamic')
+      : isEinkOptimized
+        ? getCSSVariable('--eink-text')
+        : getCSSVariable('--diamond-arrow-regular');
     return `<svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; margin-bottom: 1px; vertical-align: middle; transform: rotate(180deg);"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg>${inning}`;
   }
   
@@ -31,8 +36,10 @@ function formatInningsStatus(status, isDynamicColors = false) {
   if (status.startsWith('Bot ')) {
     const inning = status.replace('Bot ', '');
     const arrowColor = isDynamicColors 
-      ? getCSSVariable('--diamond-arrow-dynamic') 
-      : getCSSVariable('--diamond-arrow-regular');
+      ? getCSSVariable('--diamond-arrow-dynamic')
+      : isEinkOptimized
+        ? getCSSVariable('--eink-text')
+        : getCSSVariable('--diamond-arrow-regular');
     return `<svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; margin-bottom: 1px; vertical-align: middle; transform: rotate(180deg);"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg>${inning}`;
   }
   

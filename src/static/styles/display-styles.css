@@ -233,6 +233,7 @@ body {
 
 .header .current-time {
   font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
   color: var(--eink-text-secondary);
 }
 
@@ -289,6 +290,10 @@ body {
   color: var(--color-white-90);
 }
 
+.game-pill.dynamic-colors .game-status small {
+  color: var(--color-white-90);
+}
+
 .game-pill .matchup {
   flex: 1;
   display: flex;
@@ -302,19 +307,19 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--space-4);
+  gap: 5px;
 }
 
 .game-pill .team-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-8);
   min-height: 0;
 }
 
 .game-pill .team-info {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   flex: 1;
   gap: var(--space-6);
   min-width: 0;
@@ -329,8 +334,8 @@ body {
 }
 
 .game-pill .team-logo {
-  width: var(--space-16);
-  height: var(--space-16);
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   flex-shrink: 0;
   margin-top: var(--space-1);
@@ -382,7 +387,8 @@ body {
 
 .game-pill .game-status {
   text-align: center;
-  font-size: var(--font-size-9);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
   color: var(--eink-text-secondary);
   margin-top: var(--space-1);
   margin-bottom: var(--space-4);
@@ -392,8 +398,9 @@ body {
 }
 
 .game-status small {
-  font-size: var(--font-size-9);
-  color: var(--eink-text-tertiary);
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-medium);
+  color: var(--eink-text-muted);
   display: block;
   margin-top: var(--space-1);
   max-width: 90px;
@@ -420,6 +427,7 @@ body {
   gap: var(--space-6);
   flex-shrink: 0;
   min-width: var(--space-40);
+  margin-bottom: -4px;
 }
 
 .baseball-diamond-component:has(.final-diamond-png) {
@@ -536,10 +544,15 @@ body.eink-optimized .game-pill:not(.dynamic-colors) .team-record {
 }
 
 body.eink-optimized .game-pill:not(.dynamic-colors) .game-status {
-  color: var(--eink-optimized-text-secondary) !important;
+  color: var(--eink-text) !important;
 }
 
-body.eink-optimized .game-pill {
+body.eink-optimized .game-pill:not(.dynamic-colors) .game-status small {
+  color: var(--eink-text) !important;
+}
+
+body.eink-optimized .game-pill:not(.dynamic-colors) {
+  background: transparent !important;
   border-color: var(--eink-optimized-border-light) !important;
 }
 

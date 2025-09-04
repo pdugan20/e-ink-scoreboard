@@ -20,14 +20,16 @@ import requests
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configuration
+# Default configuration (will be overridden by config file)
 CONFIG = {
     "web_server_url": "http://localhost:5001/display",
     "screenshot_path": "/tmp/sports_display.png",
     "display_width": 800,
     "display_height": 480,
-    "screenshot_scale": 2,  # Take screenshot at 2x resolution for clarity
-    "refresh_interval": 120,  # 2 minutes
+    "screenshot_scale": 1,
+    "refresh_interval": 120,
+    "apply_dithering": True,
+    "dither_saturation": 0.8,
     "max_retries": 3,
     "retry_delay": 5
 }
@@ -109,7 +111,7 @@ class EinkDisplayController:
             browser = p.chromium.launch()
             
             # Get scale factor from config
-            scale_factor = self.config.get('screenshot_scale', 2)
+            scale_factor = self.config.get('screenshot_scale', 1)
             
             page = browser.new_page(
                 viewport={
@@ -119,7 +121,7 @@ class EinkDisplayController:
                 device_scale_factor=scale_factor  # High DPI rendering
             )
             
-            logger.info(f"Taking screenshot with Playwright (2x DPI for crisp rendering)...")
+            logger.info(f"Taking screenshot with Playwright ({scale_factor}x DPI rendering)...")
             page.goto(self.config['web_server_url'], wait_until="networkidle")
             
             # Wait for images to load
@@ -237,10 +239,68 @@ class EinkDisplayController:
             if img.mode != 'RGB':
                 img = img.convert('RGB')
             
+            # Apply dithering if enabled (for both dev and Pi modes)
+            if self.config.get('apply_dithering', False):
+                img = self._apply_eink_dithering(img)
+                logger.info("Applied e-ink dithering")
+            
             return img
         except Exception as e:
             logger.error(f"Image processing failed: {e}")
             return None
+    
+    def _apply_eink_dithering(self, img):
+        """Apply 7-color dithering to match e-ink display output"""
+        try:
+            # Try using Inky's own palette generation (if on Pi)
+            if self.is_pi and self.inky:
+                saturation = self.config.get('dither_saturation', 0.8)
+                palette = self.inky._palette_blend(saturation, dtype="uint24")
+                
+                # Try hitherdither if available (better quality)
+                try:
+                    import hitherdither
+                    
+                    # Create hitherdither palette from Inky palette
+                    hither_palette = hitherdither.palette.Palette(palette)
+                    
+                    # Apply Bayer dithering (Pimoroni's recommended method)
+                    dithered = hitherdither.ordered.bayer.bayer_dithering(
+                        img, hither_palette, thresholds=[64, 64, 64], order=8
+                    )
+                    logger.info(f"Applied Bayer dithering with {len(palette)} colors from Inky palette")
+                except ImportError:
+                    # Fallback to Pillow quantization
+                    dithered = img.quantize(colors=6, dither=Image.Dither.FLOYDSTEINBERG)
+                    logger.info("Applied Floyd-Steinberg dithering (Pillow fallback)")
+            else:
+                # Dev mode: use exact Inky 6-color palette
+                inky_palette = [
+                    (0, 0, 0),         # Black
+                    (255, 255, 255),   # White
+                    (255, 0, 0),       # Red  
+                    (0, 255, 0),       # Green
+                    (0, 0, 255),       # Blue
+                    (255, 255, 0),     # Yellow
+                ]
+                
+                # Create palette image for quantization
+                palette_img = Image.new('P', (1, 1))
+                palette_data = []
+                for color in inky_palette:
+                    palette_data.extend(color)
+                palette_data.extend([0] * (768 - len(palette_data)))  # Pad to 768
+                palette_img.putpalette(palette_data)
+                
+                dithered = img.quantize(palette=palette_img, dither=Image.Dither.FLOYDSTEINBERG)
+                logger.info("Applied Inky 6-color dithering (dev mode)")
+            
+            # Convert back to RGB for consistent handling
+            return dithered.convert('RGB')
+            
+        except Exception as e:
+            logger.warning(f"Dithering failed, using original image: {e}")
+            return img
     
     def update_display(self, img):
         """Update the eink display or save for testing"""

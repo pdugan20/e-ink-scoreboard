@@ -76,9 +76,18 @@
         import { loadTestData, loadMLBData, fetchLiveData } from './static/js/data.js';
         import { updateCurrentTime } from './static/js/renderer.js';
 
-        // Initialize with live data for the eink display
+        // Check URL parameters for test data
+        const urlParams = new URLSearchParams(window.location.search);
+        const useTestData = urlParams.get('test') === 'true';
+        
+        // Initialize with live or test data based on URL parameter
         async function initDisplay() {
-            await fetchLiveData();
+            if (useTestData) {
+                await loadTestData();
+                loadMLBData();
+            } else {
+                await fetchLiveData();
+            }
             updateCurrentTime();
 
             // Update time every minute

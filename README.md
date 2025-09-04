@@ -36,7 +36,9 @@ Display live sports scores on your e-ink display with professional quality and r
    # View result: test_display_output.png
    ```
 
-3. **View in browser**: http://localhost:5001/display
+3. **View in browser**: 
+   - Live data: http://localhost:5001/display
+   - Test data: http://localhost:5001/display?test=true
 
 ### Raspberry Pi Deployment
 
@@ -130,6 +132,9 @@ python src/eink_display.py --config src/my_config.json
 
 # Custom server URL
 python src/eink_display.py --url http://localhost:5002/display
+
+# Test with dummy data (16 games)
+python src/eink_display.py --url http://localhost:5001/display?test=true --once
 ```
 
 ## Development
