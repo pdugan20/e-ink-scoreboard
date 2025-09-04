@@ -528,6 +528,7 @@ body {
 /* E-ink Optimized Contrast Theme */
 body.eink-optimized .header .current-time {
   color: var(--eink-optimized-text-secondary) !important;
+  font-weight: var(--font-weight-semibold) !important;
 }
 
 body.eink-optimized .game-pill:not(.dynamic-colors) .team-record {
@@ -547,8 +548,8 @@ body.eink-optimized .game-pill:not(.dynamic-colors) .game-status small {
 }
 
 body.eink-optimized .game-pill:not(.dynamic-colors) {
-  background: transparent !important;
-  border-color: var(--eink-optimized-filled) !important;
+  background: var(--eink-optimized-light) !important;
+  border-color: var(--eink-optimized-light) !important;
 }
 
 body.eink-optimized .header {
