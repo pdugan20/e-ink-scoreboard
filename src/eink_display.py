@@ -187,7 +187,7 @@ class EinkDisplayController:
         """Take screenshot on Linux/Pi using chromium-browser"""
         try:
             cmd = [
-                "chromium",
+                "/usr/bin/chromium",
                 "--headless",
                 "--disable-gpu",
                 "--no-sandbox",
