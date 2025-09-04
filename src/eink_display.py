@@ -91,47 +91,49 @@ class EinkDisplayController:
     
     def take_screenshot(self):
         """Take screenshot using available method"""
-        if self.is_mac:
-            return self._screenshot_mac()
-        else:
-            return self._screenshot_linux()
-    
-    def _screenshot_mac(self):
-        """Take screenshot on Mac using Playwright for precise viewport control"""
+        # Try Playwright first (works on both Mac and Pi)
         try:
-            # Try Playwright first for better viewport control
-            try:
-                from playwright.sync_api import sync_playwright
-                
-                with sync_playwright() as p:
-                    browser = p.chromium.launch()
-                    
-                    # Get scale factor from config
-                    scale_factor = self.config.get('screenshot_scale', 2)
-                    
-                    page = browser.new_page(
-                        viewport={
-                            "width": self.config['display_width'], 
-                            "height": self.config['display_height']
-                        },
-                        device_scale_factor=scale_factor  # High DPI rendering
-                    )
-                    
-                    logger.info(f"Taking screenshot with Playwright (2x DPI for crisp rendering)...")
-                    page.goto(self.config['web_server_url'], wait_until="networkidle")
-                    
-                    # Wait for images to load
-                    page.wait_for_timeout(5000)
-                    
-                    page.screenshot(path=self.config['screenshot_path'], full_page=False)
-                    browser.close()
-                    
-                    logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
-                    return True
-                    
-            except ImportError:
-                logger.info("Playwright not available, falling back to Chrome...")
-                pass
+            return self._screenshot_playwright()
+        except ImportError:
+            logger.info("Playwright not available, falling back to system Chromium")
+            if self.is_mac:
+                return self._screenshot_mac_chromium()
+            else:
+                return self._screenshot_linux()
+    
+    def _screenshot_playwright(self):
+        """Take screenshot using Playwright (works on both Mac and Pi)"""
+        from playwright.sync_api import sync_playwright
+        
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            
+            # Get scale factor from config
+            scale_factor = self.config.get('screenshot_scale', 2)
+            
+            page = browser.new_page(
+                viewport={
+                    "width": self.config['display_width'], 
+                    "height": self.config['display_height']
+                },
+                device_scale_factor=scale_factor  # High DPI rendering
+            )
+            
+            logger.info(f"Taking screenshot with Playwright (2x DPI for crisp rendering)...")
+            page.goto(self.config['web_server_url'], wait_until="networkidle")
+            
+            # Wait for images to load
+            page.wait_for_timeout(5000)
+            
+            page.screenshot(path=self.config['screenshot_path'], full_page=False)
+            browser.close()
+            
+            logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
+            return True
+
+    def _screenshot_mac_chromium(self):
+        """Take screenshot on Mac using Chrome headless fallback"""
+        try:
             
             # Fallback to Chrome headless
             chrome_paths = [
