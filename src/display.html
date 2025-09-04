@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Scores Display</title>
+    <link rel="stylesheet" href="/static/styles/display-styles.css">
+    <style>
+        /* Clean display styles - remove dev UI elements */
+        body {
+            margin: 0;
+            padding: 0;
+            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Hide dev elements */
+        .dev-tray,
+        .device-frame,
+        .size-indicator {
+            display: none !important;
+        }
+
+        /* Make display full width/height */
+        .display {
+            width: 800px !important;
+            height: 480px !important;
+            margin: 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: white;
+            overflow: hidden;
+        }
+
+        /* Optimize layout for 800x480 eink display - 3x5 grid */
+        .games-grid {
+            gap: 8px !important;
+            height: calc(100% - 65px) !important;
+            grid-template-rows: repeat(5, 1fr) !important;
+        }
+
+        .game-pill {
+            padding: 10px 10px 10px 12px !important;
+            min-height: auto !important;
+        }
+
+        .header {
+            padding: 20px 15px !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="display" id="display">
+        <div class="header" id="header">
+            <div class="header-left">
+                <img src="/assets/logos/leagues/mlb.png" alt="MLB" class="league-logo" id="league-logo">
+                <h1 id="header-title">MLB Scores for Wednesday, September 3</h1>
+            </div>
+            <div class="current-time" id="current-time">2:15 PM</div>
+        </div>
+        <div class="games-grid" id="games">
+            <!-- Games will be inserted here -->
+        </div>
+    </div>
+
+    <script type="module">
+        // Display-specific initialization - use live data by default
+        import './static/js/constants/mlb-logos.js';
+        import './static/js/constants/mlb-secondary-logos.js';
+        import './static/js/constants/mlb-colors.js';
+        import './static/js/constants/mlb-gradient-colors.js';
+        import { loadTestData, loadMLBData, fetchLiveData } from './static/js/data.js';
+        import { updateCurrentTime } from './static/js/renderer.js';
+
+        // Initialize with live data for the eink display
+        async function initDisplay() {
+            await fetchLiveData();
+            updateCurrentTime();
+
+            // Update time every minute
+            setInterval(updateCurrentTime, 60000);
+        }
+
+        // Initialize when page loads
+        initDisplay();
+    </script>
+</body>
+
+</html>

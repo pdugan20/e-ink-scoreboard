@@ -1,0 +1,19 @@
+{
+  "web_server_url": "http://localhost:5009/display",
+  "screenshot_path": "/tmp/sports_display.png",
+  "display_width": 800,
+  "display_height": 480,
+  "screenshot_scale": 2,
+  "refresh_interval": 120,
+  "max_retries": 3,
+  "retry_delay": 5,
+  "_comment": "Configuration for eink display controller",
+  "_intervals": {
+    "_comment": "Common refresh intervals (in seconds)",
+    "1_minute": 60,
+    "5_minutes": 300,
+    "15_minutes": 900,
+    "30_minutes": 1800,
+    "1_hour": 3600
+  }
+}

@@ -1,0 +1,532 @@
+/* Display styles - for the e-ink sports scores display */
+
+/* San Francisco Font Family */
+@font-face {
+  font-family: 'SF Pro Text';
+  src: url('/static/fonts/SF-Pro-Text-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  src: url('/static/fonts/SF-Pro-Text-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  src: url('/static/fonts/SF-Pro-Text-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  src: url('/static/fonts/SF-Pro-Text-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Color Primitives */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-50: #f8f8f8;
+  --color-gray-200: #ddd;
+  --color-gray-300: #ccc;
+  --color-gray-400: #999;
+  --color-gray-500: #888;
+  --color-gray-600: #666;
+  --color-gray-700: #333;
+  --color-gray-800: #d9d9d9;
+  
+  /* MLB Scoreboard Theme Colors */
+  --mlb-scoreboard-bg: #00514A;
+  --mlb-scoreboard-pill-bg: #004843;
+  --mlb-scoreboard-border: #A4E6EF;
+  --mlb-scoreboard-border-40: rgba(164, 230, 239, 0.4);
+  --mlb-scoreboard-base-filled: #FFE28B;
+  --mlb-scoreboard-out-filled: #C33E5B;
+  --color-gray-900: #000;
+
+  /* Color Opacity Variants */
+  --color-white-90: rgba(255, 255, 255, 0.9);
+  --color-white-80: rgba(255, 255, 255, 0.8);
+  --color-white-30: rgba(255, 255, 255, 0.3);
+  --color-gray-500-80: rgba(136, 136, 136, 0.8);
+  --color-gray-600-40: rgba(128, 128, 128, 0.4);
+  --color-black-70: rgba(0, 0, 0, 0.7);
+  --color-black-30: rgba(0, 0, 0, 0.3);
+
+  /* Spacing Primitives */
+  --space-0: 0;
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-3: 3px;
+  --space-4: 4px;
+  --space-5: 5px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-15: 15px;
+  --space-16: 16px;
+  --space-17: 17px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-40: 40px;
+
+  /* Font Size Primitives */
+  --font-size-9: 9px;
+  --font-size-10: 10px;
+  --font-size-12: 12px;
+  --font-size-14: 14px;
+  --font-size-16: 16px;
+  --font-size-18: 18px;
+  --font-size-24: 24px;
+  --font-size-32: 32px;
+
+  /* Font Weight Primitives */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* E-ink Display Variables */
+  --eink-bg: var(--color-white);
+  --eink-pill-bg: var(--color-gray-50);
+  --eink-text: var(--color-black);
+  --eink-text-secondary: var(--color-gray-500);
+  --eink-text-muted: var(--color-gray-400);
+  --eink-border-light: var(--color-gray-200);
+  --eink-border-medium: var(--color-gray-300);
+  --eink-border-dark: var(--color-gray-400);
+
+  /* Display Layout */
+  --display-padding: 2.5%;
+  --display-border-width: var(--space-3);
+
+  /* Typography Scale */
+  --text-xs: clamp(var(--font-size-12), 2vw, var(--font-size-16));
+  --text-sm: clamp(var(--font-size-14), 2.25vw, var(--font-size-18));
+  --text-md: clamp(var(--font-size-18), 3vw, var(--font-size-24));
+  --text-lg: clamp(var(--font-size-24), 4vw, var(--font-size-32));
+  --text-xl: clamp(var(--font-size-24), 4vw, var(--font-size-32));
+
+  /* Baseball Diamond Colors */
+  --diamond-base-filled: var(--color-gray-400);
+  --diamond-base-empty: var(--color-gray-800);
+  --diamond-base-filled-dynamic: var(--color-white-90);
+  --diamond-base-empty-dynamic: var(--color-white-30);
+  --diamond-arrow-regular: var(--color-gray-500-80);
+  --diamond-arrow-dynamic: var(--color-white-80);
+  --out-dot-empty: var(--color-gray-600-40);
+  --out-dot-filled: var(--color-gray-400);
+  --out-dot-empty-dynamic: var(--color-white-30);
+  --out-dot-filled-dynamic: var(--color-white-80);
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+/* Device Frame */
+.device-frame {
+  background: var(--color-gray-700);
+  padding: var(--space-20);
+  border-radius: var(--space-10);
+  box-shadow: 0 var(--space-10) var(--space-40) var(--color-black-30);
+  width: 840px; /* 800px display + 40px padding */
+  max-width: 95vw;
+  transition: all 0.3s ease;
+  resize: both;
+  overflow: auto;
+}
+
+.device-frame.expanded {
+  width: 95vw;
+  max-width: 1640px;
+}
+
+/* E-ink Display */
+.display {
+  background: var(--eink-bg);
+  width: 100%;
+  height: 480px;
+  min-height: 480px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.display.expanded {
+  height: 80vh;
+}
+
+/* Display typography */
+.display * {
+  color: var(--eink-text);
+}
+
+/* Header */
+.header {
+  padding: var(--display-padding);
+  padding-left: var(--space-15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid var(--eink-border-light);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.league-logo {
+  height: 1.3rem;
+  width: auto;
+}
+
+.header h1 {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  text-align: left;
+}
+
+.header .current-time {
+  font-size: var(--text-sm);
+  color: var(--eink-text-secondary);
+}
+
+/* Games Grid */
+.games-grid {
+  padding: var(--space-15);
+  height: calc(100% - 65px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: var(--space-10);
+  box-sizing: border-box;
+}
+
+.game-pill {
+  border: var(--space-1) solid var(--eink-border-light);
+  border-radius: var(--space-8);
+  padding: var(--space-10) var(--space-10) var(--space-10) var(--space-12);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--eink-pill-bg);
+  min-height: 0;
+  width: 100%;
+  max-width: 260px;
+  box-sizing: border-box;
+}
+
+/* Dynamic color pills styling */
+.game-pill.dynamic-colors {
+  border: none;
+  color: var(--color-white);
+}
+
+.game-pill.dynamic-colors .team-name {
+  color: var(--color-white);
+  font-weight: var(--font-weight-medium);
+}
+
+.game-pill.dynamic-colors .team-record {
+  color: var(--color-white-80);
+}
+
+.game-pill.dynamic-colors .score {
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
+
+.game-pill.dynamic-colors .score.losing-score {
+  opacity: 0.6;
+}
+
+.game-pill.dynamic-colors .game-status {
+  color: var(--color-white-90);
+}
+
+.game-pill .matchup {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.game-pill .teams-and-scores {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.game-pill .team-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  min-height: 0;
+}
+
+.game-pill .team-info {
+  display: flex;
+  align-items: flex-start;
+  flex: 1;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.game-pill .team-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.game-pill .team-logo {
+  width: var(--space-16);
+  height: var(--space-16);
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-top: var(--space-1);
+  margin-right: var(--space-2);
+}
+
+.game-pill .team-name {
+  font-size: calc(var(--text-xs) - 1px);
+  font-weight: var(--font-weight-medium);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.game-pill .team-record {
+  font-size: var(--font-size-9);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-gray-400);
+  flex-shrink: 1;
+  vertical-align: middle;
+  opacity: 0.8;
+  display: inline-block;
+  margin-bottom: 2px;
+  margin-left: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.game-pill .score {
+  font-size: calc(var(--text-sm) - 1px);
+  font-weight: var(--font-weight-bold);
+  min-width: var(--space-20);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.game-pill .score.losing-score {
+  opacity: 0.4;
+}
+
+.game-pill .score-placeholder {
+  min-width: var(--space-20);
+  flex-shrink: 0;
+}
+
+.game-pill .game-status {
+  text-align: center;
+  font-size: var(--font-size-9);
+  color: var(--eink-text-secondary);
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-4);
+  flex-shrink: 0;
+  white-space: pre-line;
+  overflow: hidden;
+}
+
+.game-status small {
+  font-size: var(--font-size-9);
+  color: var(--eink-text-tertiary);
+  display: block;
+  margin-top: var(--space-1);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.baseball-diamond-component.scheduled-game {
+  text-align: right;
+  padding-right: var(--space-4);
+}
+
+.baseball-diamond-component.scheduled-game .game-status {
+  text-align: right;
+}
+
+/* Baseball Diamond Component */
+.baseball-diamond-component {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  flex-shrink: 0;
+  min-width: var(--space-40);
+}
+
+.baseball-diamond-component:has(.final-diamond-png) {
+  gap: var(--space-3);
+}
+
+.diamond-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.baseball-diamond-svg {
+  width: var(--space-24);
+  height: var(--space-17);
+  transform: translateY(var(--space-3));
+}
+
+.final-diamond-png {
+  height: var(--space-24);
+  width: auto;
+  margin-bottom: -5px;
+}
+
+.outs-indicator {
+  display: flex;
+  gap: 2.5px;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(var(--space-3));
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.out-dot {
+  width: var(--space-5);
+  height: var(--space-5);
+  border-radius: 50%;
+  border: none;
+  background: var(--out-dot-empty);
+}
+
+.out-dot.filled {
+  background: var(--out-dot-filled);
+}
+
+/* Dynamic colors for baseball diamond */
+.out-dot.dynamic {
+  background: var(--out-dot-empty-dynamic);
+}
+
+.out-dot.dynamic.filled {
+  background: var(--out-dot-filled-dynamic);
+}
+
+/* Size indicator */
+.size-indicator {
+  position: absolute;
+  bottom: var(--space-10);
+  right: var(--space-10);
+  background: var(--color-black-70);
+  color: var(--color-white);
+  padding: var(--space-5) var(--space-10);
+  border-radius: var(--space-4);
+  font-size: var(--font-size-12);
+  z-index: 100;
+}
+
+/* MLB Scoreboard Theme */
+.theme-mlb-scoreboard .display {
+  background: var(--mlb-scoreboard-bg) !important;
+}
+
+.theme-mlb-scoreboard .game-pill,
+.game-pill.mlb-scoreboard {
+  background: var(--mlb-scoreboard-pill-bg) !important;
+  border: 1px solid var(--mlb-scoreboard-border-40) !important;
+  color: var(--color-white);
+}
+
+.game-pill.mlb-scoreboard .team-name {
+  color: var(--color-white);
+  font-weight: var(--font-weight-medium);
+}
+
+.game-pill.mlb-scoreboard .team-record {
+  color: var(--color-white-80);
+  opacity: 0.8;
+}
+
+.game-pill.mlb-scoreboard .score {
+  color: var(--color-white);
+  font-weight: var(--font-weight-bold);
+}
+
+.game-pill.mlb-scoreboard .score.losing-score {
+  opacity: 0.6;
+}
+
+.game-pill.mlb-scoreboard .game-status {
+  color: var(--color-white-90);
+}
+
+.game-pill.mlb-scoreboard .game-status small {
+  color: var(--color-white-80);
+}
+
+.theme-mlb-scoreboard .header {
+  border-bottom: 1.5px solid var(--mlb-scoreboard-border-40) !important;
+}
+
+.theme-mlb-scoreboard .header h1,
+.theme-mlb-scoreboard .header .current-time {
+  color: var(--color-white) !important;
+}
+
+/* MLB Scoreboard outs styling */
+.out-dot.mlb-scoreboard {
+  background: var(--diamond-base-empty);
+  opacity: 0.3;
+}
+
+.out-dot.mlb-scoreboard.filled {
+  background: var(--mlb-scoreboard-out-filled);
+  border-color: var(--mlb-scoreboard-out-filled);
+  opacity: 1;
+}

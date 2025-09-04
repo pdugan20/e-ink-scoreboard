@@ -4,7 +4,7 @@ import { updateSizeIndicator, updateCurrentTime } from './renderer.js';
 
 // Track target dimensions - make them globally accessible
 export let targetWidth = 800;
-export let targetHeight = 400;
+export let targetHeight = 480;
 
 // Also make them available on window for other files
 window.targetWidth = targetWidth;
@@ -51,7 +51,7 @@ function initResizable() {
   // Add resize handle
   const resizeHandle = document.createElement('div');
   resizeHandle.style.cssText =
-    'position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, #666 50%);';
+    'position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, var(--color-gray-600) 50%);';
   frame.style.position = 'relative';
   frame.appendChild(resizeHandle);
 
@@ -100,4 +100,12 @@ export async function initApp() {
 // Initialize when page loads
 initApp();
 
+<<<<<<< HEAD:static/js/controls.js
 // Auto-refresh disabled - only refresh when button is clicked
+=======
+// Auto-refresh every 30 seconds (disabled - only manual fetch)
+// setInterval(() => {
+//   console.log('Auto-refreshing...');
+//   fetchLiveData();
+// }, 30000);
+>>>>>>> baseball-diamond-feature:src/static/js/controls.js
