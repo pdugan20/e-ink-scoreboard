@@ -205,7 +205,7 @@ class EinkDisplayController:
             ]
             
             logger.info("Taking screenshot with Chromium (waiting for all resources to load)...")
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
             
             if result.returncode != 0:
                 raise RuntimeError(f"Screenshot failed: {result.stderr}")
