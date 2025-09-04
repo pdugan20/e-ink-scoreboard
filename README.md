@@ -65,10 +65,10 @@ Edit `src/eink_config.json` to customize:
 
 **Refresh Intervals:**
 
-- **300 seconds (5 minutes)** - Default, good for active game times
-- **900 seconds (15 minutes)** - Balanced for general use
-- **1800 seconds (30 minutes)** - Conservative, preserves display life
-- **3600+ seconds (1+ hours)** - Minimal updates for overnight/off-season
+- **120 seconds (2m)** --- Live action
+- **300 seconds (5m)** --- Default, good for active games
+- **900 seconds (15m)** -- Balanced for general use
+- **1800 seconds (30m)** - Conservative, preserves display life
 
 ## Technical Details
 
@@ -80,7 +80,7 @@ Edit `src/eink_config.json` to customize:
 
 ```
 src/                       # Core application files
-├── assets/                # Images and logos  
+├── assets/                # Images and logos
 ├── static/                # CSS, JS, and static assets
 └── test-data/             # Test game data
 

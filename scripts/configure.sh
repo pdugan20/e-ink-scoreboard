@@ -225,18 +225,20 @@ update_js_config "src/static/js/config.js" "displayTimezone" "$timezone"
 echo ""
 echo "🕒 Choose refresh interval:"
 echo ""
-echo " 1) 120 seconds - Live action"
-echo " 2) 300 seconds - Semi-live updates" 
-echo " 3) 900 seconds - General use"
+echo " 1) 120 seconds (2 minutes) - Live action"
+echo " 2) 300 seconds (5 minutes) - Default, good for active game times" 
+echo " 3) 900 seconds (15 minutes) - Balanced for general use"
+echo " 4) 1800 seconds (30 minutes) - Conservative, preserves display life"
 echo ""
 
-read -p "Enter choice (1-5): " interval_choice
+read -p "Enter choice (1-4): " interval_choice
 
 case $interval_choice in
     1) interval=120 ;;
     2) interval=300 ;;
     3) interval=900 ;;
-    *) echo "Invalid choice, using 2 minutes"; interval=120 ;;
+    4) interval=1800 ;;
+    *) echo "Invalid choice, using 5 minutes"; interval=300 ;;
 esac
 
 echo "✅ Set refresh interval: $interval seconds"
