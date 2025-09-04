@@ -38,14 +38,26 @@ fi
 
 # Install Inky library
 echo "🖥️  Installing Inky display library..."
-if [ ! -d "~/inky" ]; then
+if [ ! -d "$HOME/inky" ]; then
     cd ~
     git clone https://github.com/pimoroni/inky.git
     cd inky
     echo "y" | ./install.sh
     echo "✅ Inky library installed"
 else
-    echo "✅ Inky library already present"
+    echo "✅ Inky library directory already exists"
+    # Check if virtual environment exists
+    if [ ! -d "$HOME/.virtualenvs/pimoroni" ]; then
+        echo "⚠️  Virtual environment missing, recreating..."
+        rm -rf ~/inky
+        cd ~
+        git clone https://github.com/pimoroni/inky.git
+        cd inky
+        echo "y" | ./install.sh
+        echo "✅ Inky library installed fresh"
+    else
+        echo "✅ Inky virtual environment already present"
+    fi
 fi
 
 # Go back to project directory

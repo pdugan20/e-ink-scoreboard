@@ -39,41 +39,31 @@ If you prefer to install manually, follow these detailed steps:
 ### 1. Raspberry Pi OS Setup
 
 1. Flash Raspberry Pi OS Lite (64-bit) to your SD card
-2. Enable SSH before first boot (add empty `ssh` file to boot partition)
-3. Boot the Pi and SSH in
+2. Enable SSH before first boot (add empty `ssh` file to boot partition)  
+3. Boot the Pi and SSH in:
+   ```bash
+   ssh username@raspberrypi.local
+   # Or using IP address: ssh username@<pi_ip_address>
+   ```
 
 ### 2. Clone Project and Install
 
 ```bash
 git clone https://github.com/pdugan20/e-ink-scoreboard.git
 cd e-ink-scoreboard
-./install.sh
+./scripts/install.sh
 ```
 
-## 6. Configuration
+## 6. Test the Setup
 
-Create/edit `eink_config.json`:
-
-```json
-{
-  "web_server_url": "http://localhost:5001/display",
-  "screenshot_path": "/tmp/sports_display.png",
-  "display_width": 800,
-  "display_height": 400,
-  "refresh_interval": 300,
-  "max_retries": 3,
-  "retry_delay": 5
-}
-```
-
-## 7. Test the Setup
+The installation script creates default configuration files. You can customize them later with `./scripts/configure.sh`.
 
 ```bash
 # Start the web server in background
-nohup python dev_server.py --port 5001 > server.log 2>&1 &
+nohup python src/dev_server.py --port 5001 > server.log 2>&1 &
 
 # Test single display update (uses high-quality Playwright screenshots)
-python eink_display.py --once
+python src/eink_display.py --once --config src/eink_config.json
 
 # If successful, you should see your eink display update with crisp, live MLB scores!
 ```
@@ -84,7 +74,9 @@ python eink_display.py --once
 - Takes 1600x960 screenshot, downsamples to 800x480 for crisp text/logos
 - Falls back to Chromium if Playwright unavailable
 
-## 8. Automatic Startup (Systemd Services)
+## 7. Automatic Startup (Systemd Services)
+
+Note: The `./scripts/setup_services.sh` script automates this entire section.
 
 ### Create Web Server Service
 
@@ -207,7 +199,7 @@ sudo systemctl status sports-display.service
 curl http://localhost:5001/display
 
 # Test display script manually
-python eink_display.py --once
+python src/eink_display.py --once --config src/eink_config.json
 ```
 
 ### Screenshot Issues
