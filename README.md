@@ -65,9 +65,9 @@ Edit `src/eink_config.json` to customize:
 
 **Refresh Intervals:**
 
-- **120 seconds (2m)** --- Live action
-- **300 seconds (5m)** --- Default, good for active games
-- **900 seconds (15m)** -- Balanced for general use
+- **120 seconds (2m)** - Live action
+- **300 seconds (5m)** - Default, good for active games
+- **900 seconds (15m)** - Balanced for general use
 - **1800 seconds (30m)** - Conservative, preserves display life
 
 ## Technical Details
