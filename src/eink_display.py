@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 CONFIG = {
-    "web_server_url": "http://localhost:5000/preview",
+    "web_server_url": "http://localhost:5001/display",
     "screenshot_path": "/tmp/sports_display.png",
     "display_width": 800,
     "display_height": 480,

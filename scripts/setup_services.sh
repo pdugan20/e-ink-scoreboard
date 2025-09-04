@@ -43,7 +43,7 @@ Type=simple
 User=$USER
 WorkingDirectory=$PROJECT_DIR
 Environment=PATH=$VENV_PATH/bin
-ExecStart=$VENV_PATH/bin/python src/eink_display.py
+ExecStart=$VENV_PATH/bin/python src/eink_display.py --config src/eink_config.json
 Restart=always
 RestartSec=30
 
