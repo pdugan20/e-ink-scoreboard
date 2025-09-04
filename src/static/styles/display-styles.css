@@ -111,12 +111,15 @@
   --eink-border-dark: var(--color-gray-400);
 
   /* E-ink Optimized Variables */
-  --eink-optimized-text-secondary: #333;  /* Keep existing for clock/losing scores */
-  --eink-optimized-text-muted: #444;      /* Keep existing for team records */
-  
+  --eink-optimized-text-secondary: #333; /* Keep existing for clock/losing scores */
+  --eink-optimized-text-muted: #444; /* Keep existing for team records */
+
   /* Simplified two-color system for UI elements */
-  --eink-optimized-light: #555;     /* Slightly lighter than text-secondary for empty elements */
-  --eink-optimized-filled: var(--eink-optimized-text-secondary);  /* Same as clock for filled elements and borders */
+  --eink-optimized-light: #c2c2c2; /* Pill backgrounds */
+  --eink-optimized-empty: #555; /* Empty bases/dots - darker than background */
+  --eink-optimized-filled: var(
+    --eink-optimized-text-secondary
+  ); /* Same as clock for filled elements and borders */
 
   /* Display Layout */
   --display-padding: 2.5%;
@@ -563,7 +566,7 @@ body.eink-optimized .game-pill:not(.dynamic-colors) .score.losing-score {
 
 /* E-ink optimized out dots */
 body.eink-optimized .out-dot {
-  background: var(--eink-optimized-light) !important;
+  background: var(--eink-optimized-empty) !important;
 }
 
 body.eink-optimized .out-dot.filled {

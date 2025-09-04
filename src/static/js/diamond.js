@@ -112,7 +112,7 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
     : isDynamicColors 
       ? getCSSVariable('--diamond-base-empty-dynamic')
       : isEinkOptimized
-        ? getCSSVariable('--eink-optimized-light')  
+        ? getCSSVariable('--eink-optimized-empty')  
         : getCSSVariable('--diamond-base-empty');
   
   // Generate SVG with dynamic base fills
