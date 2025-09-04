@@ -104,7 +104,7 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
     : isDynamicColors 
       ? getCSSVariable('--diamond-base-filled-dynamic')
       : isEinkOptimized 
-        ? getCSSVariable('--eink-optimized-dark')
+        ? getCSSVariable('--eink-optimized-filled')
         : getCSSVariable('--diamond-base-filled');
         
   const baseEmptyColor = isMLBScoreboard
