@@ -1,95 +1,53 @@
 # Raspberry Pi Setup Instructions
 
-## Prerequisites
+## Quick Install (Recommended)
 
-- Raspberry Pi 4 (recommended) or Pi 3B+
-- MicroSD card (16GB+)
-- Pimoroni Inky display (tested with Inky wHAT/pHAT)
-- Internet connection
-
-## 1. Raspberry Pi OS Setup
-
-1. Flash Raspberry Pi OS Lite (64-bit) to your SD card
-2. Enable SSH before first boot (add empty `ssh` file to boot partition)
-3. Boot the Pi and SSH in:
-   ```bash
-   ssh pi@raspberrypi.local
-   # Default password: raspberry (change this!)
-   ```
-
-## 2. System Updates & Dependencies
+For automatic setup, use the installation script:
 
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
+# Clone the project
+git clone https://github.com/pdugan20/e-ink-scoreboard.git
+cd e-ink-scoreboard
 
-# Install Python and development tools
-sudo apt install -y python3-pip python3-venv git
+# Run the installation script
+./scripts/install.sh
 
-# Install Chromium for screenshots
-sudo apt install -y chromium-browser
+# Configure your preferences (optional)
+./scripts/configure.sh
 
-# Install system libraries for PIL/graphics
-sudo apt install -y libjpeg-dev libopenjp2-7 libtiff5-dev
-```
+# Setup auto-startup services
+./scripts/setup_services.sh
 
-## 3. Enable SPI and I2C for Inky Display
-
-```bash
-# Enable SPI and I2C interfaces (required for Inky displays)
-sudo raspi-config nonint do_spi 0
-sudo raspi-config nonint do_i2c 0
-
-# Add SPI configuration to avoid chip-select conflicts
-echo 'dtoverlay=spi0-0cs' | sudo tee -a /boot/firmware/config.txt
-
-# Reboot to apply changes
+# Reboot to apply hardware changes
 sudo reboot
 ```
 
-## 4. Install Inky Library
+**What the install script does:**
+- Updates system packages
+- Installs all dependencies (Python, Chromium, graphics libraries)
+- Configures SPI/I2C for Inky display
+- Installs Pimoroni Inky library with virtual environment
+- Installs your project dependencies
+- Sets up Playwright for high-quality screenshots
 
-Choose one installation method:
+---
 
-### Option A: Full Pimoroni Install (Recommended)
+## Manual Installation (Alternative)
+
+If you prefer to install manually, follow these detailed steps:
+
+### 1. Raspberry Pi OS Setup
+
+1. Flash Raspberry Pi OS Lite (64-bit) to your SD card
+2. Enable SSH before first boot (add empty `ssh` file to boot partition)
+3. Boot the Pi and SSH in
+
+### 2. Clone Project and Install
+
 ```bash
-git clone https://github.com/pimoroni/inky
-cd inky
+git clone https://github.com/pdugan20/e-ink-scoreboard.git
+cd e-ink-scoreboard
 ./install.sh
-```
-
-### Option B: Pip Install Only
-```bash
-# Create Pimoroni virtual environment
-python3 -m venv --system-site-packages ~/.virtualenvs/pimoroni
-source ~/.virtualenvs/pimoroni/bin/activate
-pip install inky
-```
-
-### Test Installation
-```bash
-python3 -c "from inky import Inky; print('Inky library installed successfully')"
-```
-
-## 5. Project Setup
-
-```bash
-# Clone your project
-git clone [YOUR_REPO_URL]
-cd eink-sports-scores/sports-scores-plugin
-
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Install Playwright and browser (for high-quality screenshots)
-playwright install chromium
-
-# Make scripts executable
-chmod +x eink_display.py
 ```
 
 ## 6. Configuration
@@ -121,6 +79,7 @@ python eink_display.py --once
 ```
 
 **Screenshot Quality:**
+
 - Uses Playwright for precise viewport control and 2x DPI rendering
 - Takes 1600x960 screenshot, downsamples to 800x480 for crisp text/logos
 - Falls back to Chromium if Playwright unavailable
@@ -201,7 +160,7 @@ You can adjust the refresh rate by modifying `eink_config.json`:
 
 ```json
 {
-  "refresh_interval": 300,  // 5 minutes
+  "refresh_interval": 300, // 5 minutes
   "_intervals": {
     "1_minute": 60,
     "5_minutes": 300,
@@ -214,6 +173,7 @@ You can adjust the refresh rate by modifying `eink_config.json`:
 ```
 
 **Recommended intervals:**
+
 - **5-15 minutes** during active game times
 - **30-60 minutes** for general use
 - **2+ hours** to preserve eink display lifespan
@@ -237,6 +197,7 @@ python eink_display.py --url http://localhost:5002/display
 ## 11. Troubleshooting
 
 ### Display Not Updating
+
 ```bash
 # Check if services are running
 sudo systemctl status sports-server.service
@@ -250,6 +211,7 @@ python eink_display.py --once
 ```
 
 ### Screenshot Issues
+
 ```bash
 # Test Chromium manually
 chromium-browser --headless --screenshot=/tmp/test.png --window-size=800,480 http://localhost:5001/display
@@ -259,6 +221,7 @@ ls -la /tmp/test.png
 ```
 
 ### SPI/Display Issues
+
 ```bash
 # Check SPI and I2C are enabled
 lsmod | grep spi
@@ -272,6 +235,7 @@ python3 -c "from inky import Inky; inky = Inky(); print(f'Display: {inky.width}x
 ```
 
 ### Permission Issues
+
 ```bash
 # Fix ownership
 sudo chown -R pi:pi /home/pi/eink-sports-scores/
@@ -283,6 +247,7 @@ sudo chmod 777 /tmp
 ## 12. Performance Optimization
 
 ### Reduce Memory Usage
+
 ```bash
 # Edit /boot/config.txt
 sudo nano /boot/config.txt
@@ -293,6 +258,7 @@ disable_camera=1
 ```
 
 ### Faster Boot (Optional)
+
 ```bash
 # Disable unnecessary services
 sudo systemctl disable bluetooth

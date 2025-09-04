@@ -17,8 +17,8 @@ Display live sports scores on your e-ink display with professional quality and r
 
 1. **Clone and setup**:
    ```bash
-   git clone [YOUR_REPO_URL]
-   cd sports-scores-plugin
+   git clone https://github.com/pdugan20/e-ink-scoreboard.git
+   cd e-ink-scoreboard
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
@@ -28,11 +28,11 @@ Display live sports scores on your e-ink display with professional quality and r
 2. **Test the display**:
    ```bash
    # Start web server
-   python dev_server.py --port 5001
+   python src/dev_server.py --port 5001
    
    # Take screenshot (in another terminal)
    source venv/bin/activate
-   python eink_display.py --once
+   python src/eink_display.py --once
    
    # View result: test_display_output.png
    ```
@@ -41,11 +41,13 @@ Display live sports scores on your e-ink display with professional quality and r
 
 ### Raspberry Pi Deployment
 
-See **[RASPBERRY_PI_SETUP.md](RASPBERRY_PI_SETUP.md)** for complete installation instructions.
+See **[docs/RASPBERRY_PI_SETUP.md](docs/RASPBERRY_PI_SETUP.md)** for complete installation instructions.
+
+For additional Inky Impression setup guidance, see the official **[Getting Started with Inky Impression](https://learn.pimoroni.com/article/getting-started-with-inky-impression)** guide.
 
 ## Configuration
 
-Edit `eink_config.json` to customize:
+Edit `src/eink_config.json` to customize:
 
 ```json
 {
@@ -94,23 +96,46 @@ Edit `eink_config.json` to customize:
 - `RASPBERRY_PI_SETUP.md` - Complete Pi deployment guide
 - `static/` - CSS, JavaScript, fonts, logos
 
+## Project Structure
+
+```
+📁 scripts/          # Installation and setup scripts
+├── install.sh       # Complete Raspberry Pi installation
+├── configure.sh     # Interactive user configuration
+└── setup_services.sh # Systemd service setup
+
+📁 src/              # Source code and assets
+├── eink_display.py  # Main display controller
+├── dev_server.py    # Development web server
+├── display.html     # Clean display endpoint
+├── preview.html     # Development preview
+├── settings.html    # Configuration UI
+├── eink_config.json # Display configuration
+├── static/          # CSS, JavaScript, fonts
+├── assets/          # Images and logos
+└── test-data/       # Sample data for development
+
+📁 docs/             # Documentation
+└── RASPBERRY_PI_SETUP.md # Detailed setup guide
+```
+
 ## Commands
 
 ```bash
 # Single update
-python eink_display.py --once
+python src/eink_display.py --once
 
-# Continuous updates (default 5min interval)  
-python eink_display.py
+# Continuous updates (default 2min interval)  
+python src/eink_display.py
 
 # Custom interval (10 minutes)
-python eink_display.py --interval 600
+python src/eink_display.py --interval 600
 
 # Custom config file
-python eink_display.py --config my_config.json
+python src/eink_display.py --config src/my_config.json
 
 # Custom server URL
-python eink_display.py --url http://localhost:5002/display
+python src/eink_display.py --url http://localhost:5002/display
 ```
 
 ## Development
@@ -120,13 +145,21 @@ python eink_display.py --url http://localhost:5002/display
 - **Hot reload**: Auto-refresh on file changes
 - **Live data**: Fetch button to get current MLB scores
 
-## Requirements
+## Hardware Requirements
+
+- **[Raspberry Pi Zero 2 W](https://shop.pimoroni.com/products/raspberry-pi-zero-2-w)** - Recommended for compact, low-power operation
+- **[Inky Impression 7.3"](https://shop.pimoroni.com/products/inky-impression-7-3?variant=55186435244411)** - 7-color E Ink display (800x480)
+- MicroSD card (16GB+ recommended)
+- Micro USB power supply for Pi Zero 2 W
+
+## Software Requirements
 
 - Python 3.8+
+- Raspberry Pi OS Bookworm or later
 - Playwright (for high-quality screenshots)
 - Flask (web server)
 - Pillow (image processing)
-- Inky library (Raspberry Pi only)
+- Inky library (Raspberry Pi E Ink display driver)
 
 ## License
 
