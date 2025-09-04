@@ -18,6 +18,22 @@ import {
 import { generateBaseballDiamondComponent } from './diamond.js';
 import { themeManager } from './theme-manager.js';
 
+// Helper function to check if a team is in the favorite teams list
+function isFavoriteTeam(teamName, league) {
+  const favoriteTeamList = favoriteTeams[league];
+  
+  if (!favoriteTeamList) {
+    return false;
+  }
+  
+  // Handle both string and array formats
+  if (Array.isArray(favoriteTeamList)) {
+    return favoriteTeamList.includes(teamName);
+  } else {
+    return favoriteTeamList === teamName;
+  }
+}
+
 export function renderGames(games, league = LEAGUES.MLB) {
   const container = document.getElementById('games');
   container.innerHTML = '';
@@ -47,14 +63,12 @@ export function renderGames(games, league = LEAGUES.MLB) {
     const awayTeamMapped = mapApiTeamName(game.away_team, league);
     const homeTeamMapped = mapApiTeamName(game.home_team, league);
 
-    // Check if this game has the favorite team (check both API and mapped names)
-    const favoriteTeam = favoriteTeams[league];
+    // Check if this game has any favorite team (check both API and mapped names)
     const hasFavoriteTeam =
-      favoriteTeam &&
-      (game.away_team === favoriteTeam ||
-        game.home_team === favoriteTeam ||
-        awayTeamMapped === favoriteTeam ||
-        homeTeamMapped === favoriteTeam);
+      isFavoriteTeam(game.away_team, league) ||
+      isFavoriteTeam(game.home_team, league) ||
+      isFavoriteTeam(awayTeamMapped, league) ||
+      isFavoriteTeam(homeTeamMapped, league);
 
     // Apply dynamic colors based on theme
     const shouldApplyDynamicColors =
@@ -68,6 +82,10 @@ export function renderGames(games, league = LEAGUES.MLB) {
       );
       gameEl.style.background = gradientBg;
       gameEl.classList.add('dynamic-colors');
+      
+      // Update CSS variables for diamond colors when dynamic colors are applied
+      gameEl.style.setProperty('--diamond-base-filled-dynamic', 'var(--color-white-90)');
+      gameEl.style.setProperty('--diamond-base-empty-dynamic', 'var(--color-white-30)');
     }
 
     // Add theme class
@@ -126,20 +144,24 @@ export function renderGames(games, league = LEAGUES.MLB) {
 }
 
 export function sortGamesByFavorite(games, league) {
-  const favoriteTeam = favoriteTeams[league];
+  const favoriteTeamList = favoriteTeams[league];
 
-  if (!favoriteTeam) {
+  if (!favoriteTeamList) {
     return games; // No favorite team set for this league
   }
 
-  // Find games where favorite team is playing
+  // Find games where any favorite team is playing
   const favoriteGames = games.filter(
-    (game) => game.away_team === favoriteTeam || game.home_team === favoriteTeam
+    (game) => 
+      isFavoriteTeam(game.away_team, league) || 
+      isFavoriteTeam(game.home_team, league)
   );
 
   // Get all other games
   const otherGames = games.filter(
-    (game) => game.away_team !== favoriteTeam && game.home_team !== favoriteTeam
+    (game) => 
+      !isFavoriteTeam(game.away_team, league) && 
+      !isFavoriteTeam(game.home_team, league)
   );
 
   // Return favorite team games first, then other games

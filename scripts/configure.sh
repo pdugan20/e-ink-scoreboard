@@ -53,7 +53,7 @@ with open('src/eink_config.json', 'w') as f:
 "
 }
 
-echo "⚾️ Choose your favorite MLB team (will appear first when playing):"
+echo "⚾️ Choose your favorite MLB teams (will appear first when playing):"
 echo ""
 echo "American League:"
 echo " 1) None                          9) Mariners"
@@ -76,48 +76,119 @@ echo "23) Giants"
 echo "24) Brewers"
 echo ""
 
-read -p "Enter choice (1-30): " team_choice
+read -p "Enter choices separated by commas (e.g., 2,16,22 or 1 for none): " team_choices
 
-# Map choice to team name (use the short names from the config)
-case $team_choice in
-    1) favorite_team="null" ;;
-    2) favorite_team="'Angels'" ;;
-    3) favorite_team="'Astros'" ;;
-    4) favorite_team="'Athletics'" ;;
-    5) favorite_team="'Blue Jays'" ;;
-    6) favorite_team="'Guardians'" ;;
-    7) favorite_team="'White Sox'" ;;
-    8) favorite_team="'Twins'" ;;
-    9) favorite_team="'Mariners'" ;;
-    10) favorite_team="'Orioles'" ;;
-    11) favorite_team="'Rangers'" ;;
-    12) favorite_team="'Red Sox'" ;;
-    13) favorite_team="'Royals'" ;;
-    14) favorite_team="'Rays'" ;;
-    15) favorite_team="'Tigers'" ;;
-    16) favorite_team="'Yankees'" ;;
-    17) favorite_team="'D-backs'" ;;
-    18) favorite_team="'Braves'" ;;
-    19) favorite_team="'Cubs'" ;;
-    20) favorite_team="'Reds'" ;;
-    21) favorite_team="'Rockies'" ;;
-    22) favorite_team="'Dodgers'" ;;
-    23) favorite_team="'Giants'" ;;
-    24) favorite_team="'Brewers'" ;;
-    25) favorite_team="'Marlins'" ;;
-    26) favorite_team="'Mets'" ;;
-    27) favorite_team="'Phillies'" ;;
-    28) favorite_team="'Pirates'" ;;
-    29) favorite_team="'Cardinals'" ;;
-    30) favorite_team="'Nationals'" ;;
-    *) echo "Invalid choice, skipping favorite team"; favorite_team="null" ;;
-esac
+# Function to map number to team name (for JS config)
+get_team_name() {
+    case $1 in
+        1) echo "null" ;;
+        2) echo "'Angels'" ;;
+        3) echo "'Astros'" ;;
+        4) echo "'Athletics'" ;;
+        5) echo "'Blue Jays'" ;;
+        6) echo "'Guardians'" ;;
+        7) echo "'White Sox'" ;;
+        8) echo "'Twins'" ;;
+        9) echo "'Mariners'" ;;
+        10) echo "'Orioles'" ;;
+        11) echo "'Rangers'" ;;
+        12) echo "'Red Sox'" ;;
+        13) echo "'Royals'" ;;
+        14) echo "'Rays'" ;;
+        15) echo "'Tigers'" ;;
+        16) echo "'Yankees'" ;;
+        17) echo "'D-backs'" ;;
+        18) echo "'Braves'" ;;
+        19) echo "'Cubs'" ;;
+        20) echo "'Reds'" ;;
+        21) echo "'Rockies'" ;;
+        22) echo "'Dodgers'" ;;
+        23) echo "'Giants'" ;;
+        24) echo "'Brewers'" ;;
+        25) echo "'Marlins'" ;;
+        26) echo "'Mets'" ;;
+        27) echo "'Phillies'" ;;
+        28) echo "'Pirates'" ;;
+        29) echo "'Cardinals'" ;;
+        30) echo "'Nationals'" ;;
+        *) echo "null" ;;
+    esac
+}
 
-if [ "$favorite_team" != "null" ]; then
-    echo "✅ Set favorite team: $favorite_team"
-    update_js_config "src/static/js/config.js" "favoriteTeams" "{ mlb: $favorite_team, nfl: null, cfb: null }"
+# Function to map number to readable team name (for display)
+get_readable_team_name() {
+    case $1 in
+        1) echo "" ;;
+        2) echo "Angels" ;;
+        3) echo "Astros" ;;
+        4) echo "Athletics" ;;
+        5) echo "Blue Jays" ;;
+        6) echo "Guardians" ;;
+        7) echo "White Sox" ;;
+        8) echo "Twins" ;;
+        9) echo "Mariners" ;;
+        10) echo "Orioles" ;;
+        11) echo "Rangers" ;;
+        12) echo "Red Sox" ;;
+        13) echo "Royals" ;;
+        14) echo "Rays" ;;
+        15) echo "Tigers" ;;
+        16) echo "Yankees" ;;
+        17) echo "D-backs" ;;
+        18) echo "Braves" ;;
+        19) echo "Cubs" ;;
+        20) echo "Reds" ;;
+        21) echo "Rockies" ;;
+        22) echo "Dodgers" ;;
+        23) echo "Giants" ;;
+        24) echo "Brewers" ;;
+        25) echo "Marlins" ;;
+        26) echo "Mets" ;;
+        27) echo "Phillies" ;;
+        28) echo "Pirates" ;;
+        29) echo "Cardinals" ;;
+        30) echo "Nationals" ;;
+        *) echo "" ;;
+    esac
+}
+
+# Process multiple team selections
+favorite_teams_array=()
+readable_teams_array=()
+IFS=',' read -ra CHOICES <<< "$team_choices"
+
+for choice in "${CHOICES[@]}"; do
+    # Trim whitespace
+    choice=$(echo "$choice" | xargs)
+    team_name=$(get_team_name "$choice")
+    readable_name=$(get_readable_team_name "$choice")
+    if [ "$team_name" != "null" ] && [ "$readable_name" != "" ]; then
+        favorite_teams_array+=("$team_name")
+        readable_teams_array+=("$readable_name")
+    fi
+done
+
+if [ ${#favorite_teams_array[@]} -gt 0 ]; then
+    # Join array elements with commas for JS config
+    favorite_teams_str=$(printf "%s," "${favorite_teams_array[@]}")
+    favorite_teams_str="[${favorite_teams_str%,}]"  # Remove trailing comma and wrap in brackets
+    
+    # Create readable display text
+    if [ ${#readable_teams_array[@]} -eq 1 ]; then
+        readable_display="${readable_teams_array[0]}"
+    elif [ ${#readable_teams_array[@]} -eq 2 ]; then
+        readable_display="${readable_teams_array[0]} and ${readable_teams_array[1]}"
+    else
+        # Join all but last with commas, then add "and" before the last
+        readable_display=$(printf "%s, " "${readable_teams_array[@]:0:$((${#readable_teams_array[@]}-1))}")
+        readable_display="${readable_display%, } and ${readable_teams_array[-1]}"
+    fi
+    
+    echo "✅ Set favorite teams: $readable_display"
+    update_js_config "src/static/js/config.js" "favoriteTeams" "{ mlb: $favorite_teams_str, nfl: null, cfb: null }"
 else
-    echo "✅ No favorite team selected"
+    echo "✅ No favorite teams selected"
+    update_js_config "src/static/js/config.js" "favoriteTeams" "{ mlb: null, nfl: null, cfb: null }"
 fi
 
 echo ""

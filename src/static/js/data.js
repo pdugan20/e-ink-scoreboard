@@ -49,23 +49,9 @@ export async function fetchLiveData() {
     if (response.ok) {
       const data = await response.json();
 
-      // Apply favorite team prioritization (Seattle Mariners)
-      const favoriteTeam = 'Seattle Mariners';
-      const prioritizedData = [...data];
-
-      // Find favorite team game and move to front (check both API and mapped names)
-      const favoriteGameIndex = prioritizedData.findIndex(
-        (game) =>
-          game.home_team === favoriteTeam ||
-          game.away_team === favoriteTeam ||
-          mapApiTeamName(game.home_team) === 'Mariners' ||
-          mapApiTeamName(game.away_team) === 'Mariners'
-      );
-
-      if (favoriteGameIndex > 0) {
-        const favoriteGame = prioritizedData.splice(favoriteGameIndex, 1)[0];
-        prioritizedData.unshift(favoriteGame);
-      }
+      // Apply favorite team prioritization using the configured favorites
+      const { sortGamesByFavorite } = await import('./renderer.js');
+      const prioritizedData = sortGamesByFavorite(data, league);
 
       updateHeaderTitle(league);
       renderGames(prioritizedData);

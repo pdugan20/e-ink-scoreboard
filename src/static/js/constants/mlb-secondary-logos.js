@@ -14,6 +14,9 @@ export const mlbUseWhiteLogos = [
   'Tigers',
   'Yankees',
   'Rays',
+  'Padres',
+  'Pirates',
+  'Phillies',
 ];
 
 // Special filename mappings for teams that don't follow the standard naming

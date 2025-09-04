@@ -7,7 +7,11 @@ export const FEATURE_FLAGS = {
 };
 
 // Favorite team configuration
-export const favoriteTeams = { mlb: 'Mariners', nfl: null, cfb: null };
+export const favoriteTeams = {
+  mlb: ['Mariners'],
+  nfl: null,
+  cfb: null,
+};
 
 // Timezone constants
 export const TIMEZONES = {
@@ -31,7 +35,7 @@ export const THEMES = {
 };
 
 // Theme configuration
-export const currentTheme = THEMES.MLB_SCOREBOARD;
+export const currentTheme = THEMES.DEFAULT;
 
 // League constants
 export const LEAGUES = {

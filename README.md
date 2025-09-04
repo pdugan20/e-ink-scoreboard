@@ -4,18 +4,18 @@ Display live sports scores on your e-ink display with professional quality and r
 
 ## Features
 
-- **Live MLB Scores**: Real-time baseball game scores with inning information
-- **Professional Quality**: 2x DPI rendering for crisp text and team logos
-- **Clean Layout**: Optimized 800x480 display showing up to 15 games in a 3x5 grid
-- **Auto-refresh**: Configurable refresh interval (5 minutes to 2+ hours)
+- **Live MLB Scores**: Real-time MLB scores with on-base and out displays
+- **Clean Layout**: Optimized for 800x480 e-ink displays showing up to 16 games in a 4x4 grid
+- **Auto-refresh**: Configurable refresh interval
 - **Mac Testing**: Full development environment with live preview
-- **Raspberry Pi Ready**: Complete deployment guide with systemd services
+- **Raspberry Pi Ready**: Complete deployment guide
 
 ## Quick Start
 
 ### Mac Development/Testing
 
 1. **Clone and setup**:
+
    ```bash
    git clone https://github.com/pdugan20/e-ink-scoreboard.git
    cd e-ink-scoreboard
@@ -26,17 +26,18 @@ Display live sports scores on your e-ink display with professional quality and r
    ```
 
 2. **Test the display**:
+
    ```bash
    # Start web server (from project root)
    ./venv/bin/python src/dev_server.py --port 5001
-   
+
    # Take screenshot (in another terminal, from project root)
    ./venv/bin/python src/eink_display.py --once
-   
+
    # View result: test_display_output.png
    ```
 
-3. **View in browser**: 
+3. **View in browser**:
    - Live data: http://localhost:5001/display
    - Test data: http://localhost:5001/display?test=true
 
@@ -63,55 +64,27 @@ Edit `src/eink_config.json` to customize:
 ```
 
 **Refresh Intervals:**
+
 - **300 seconds (5 minutes)** - Default, good for active game times
-- **900 seconds (15 minutes)** - Balanced for general use  
+- **900 seconds (15 minutes)** - Balanced for general use
 - **1800 seconds (30 minutes)** - Conservative, preserves display life
 - **3600+ seconds (1+ hours)** - Minimal updates for overnight/off-season
 
 ## Technical Details
 
-### Screenshot Quality
-- **Playwright rendering**: Precise 800x480 viewport with 2x DPI
-- **High-res capture**: 1600x960 screenshot for crisp text/logos
-- **Smart downsampling**: LANCZOS filtering to 800x480 final image
-- **Fallback support**: Chrome/Chromium headless if Playwright unavailable
-
 ### Data Sources
+
 - **Live MLB data**: ESPN API with real-time scores and game status
-- **Team logos**: High-resolution SVG assets
-- **Game information**: Scores, innings, times, venues, game status
-
-### Display Layout
-- **Header**: League logo, current date, timestamp
-- **Games grid**: 3x4 layout showing 12 current games
-- **Game cards**: Team logos, scores, game status, venue/time info
-- **Status indicators**: Final, live innings, scheduled start times
-
-## Files Structure
-
-- `eink_display.py` - Main display controller (Mac + Pi compatible)
-- `dev_server.py` - Development web server with hot reload
-- `display.html` - Clean display endpoint (no dev UI)
-- `preview.html` - Development preview with controls
-- `eink_config.json` - Display configuration
-- `RASPBERRY_PI_SETUP.md` - Complete Pi deployment guide
-- `static/` - CSS, JavaScript, fonts, logos
 
 ## Project Structure
 
 ```
-📁 scripts/
-├── install.sh
-├── configure.sh
-└── setup_services.sh
+src/                       # Core application files
+├── assets/                # Images and logos  
+├── static/                # CSS, JS, and static assets
+└── test-data/             # Test game data
 
-📁 src/
-├── assets/
-├── static/
-├── test-data/
-└── [source files]
-
-📁 docs/
+docs/                      # Documentation
 └── RASPBERRY_PI_SETUP.md
 ```
 
@@ -120,15 +93,6 @@ Edit `src/eink_config.json` to customize:
 ```bash
 # Single update
 python src/eink_display.py --once
-
-# Continuous updates (default 2min interval)  
-python src/eink_display.py
-
-# Custom interval (10 minutes)
-python src/eink_display.py --interval 600
-
-# Custom config file
-python src/eink_display.py --config src/my_config.json
 
 # Custom server URL
 python src/eink_display.py --url http://localhost:5002/display
@@ -162,4 +126,4 @@ python src/eink_display.py --url http://localhost:5001/display?test=true --once
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License - see [LICENSE](LICENSE) file for details

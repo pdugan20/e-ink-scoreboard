@@ -5,10 +5,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint static/js/**/*.js",
-    "lint:fix": "eslint static/js/**/*.js --fix",
-    "format": "prettier --write static/js/**/*.js",
-    "format:check": "prettier --check static/js/**/*.js"
+    "lint": "eslint src/static/js/**/*.js",
+    "lint:fix": "eslint src/static/js/**/*.js --fix",
+    "format": "prettier --write src/static/js/**/*.js",
+    "format:check": "prettier --check src/static/js/**/*.js"
   },
   "devDependencies": {
     "eslint": "^8.0.0",

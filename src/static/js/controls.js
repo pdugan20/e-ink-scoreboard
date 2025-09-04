@@ -1,5 +1,11 @@
 // UI controls and interaction logic
-import { loadTestData, loadMLBData, loadNFLData, loadCFBData, fetchLiveData } from './data.js';
+import {
+  loadTestData,
+  loadMLBData,
+  loadNFLData,
+  loadCFBData,
+  fetchLiveData,
+} from './data.js';
 import { updateSizeIndicator, updateCurrentTime } from './renderer.js';
 
 // Track target dimensions - make them globally accessible
@@ -17,7 +23,7 @@ window.toggleDevTray = function toggleDevTray() {
 
   controls.classList.toggle('show');
   toggle.classList.toggle('expanded');
-}
+};
 
 // Close tray when clicking outside
 document.addEventListener('click', (e) => {
@@ -82,7 +88,7 @@ function initResizable() {
 
 // Make data loading functions globally accessible for HTML onclick handlers
 window.loadMLBData = loadMLBData;
-window.loadNFLData = loadNFLData;  
+window.loadNFLData = loadNFLData;
 window.loadCFBData = loadCFBData;
 window.fetchLiveData = fetchLiveData;
 
@@ -99,9 +105,3 @@ export async function initApp() {
 
 // Initialize when page loads
 initApp();
-
-// Auto-refresh every 30 seconds (disabled - only manual fetch)
-// setInterval(() => {
-//   console.log('Auto-refreshing...');
-//   fetchLiveData();
-// }, 30000);

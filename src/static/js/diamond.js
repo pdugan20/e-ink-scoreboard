@@ -69,7 +69,9 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
         <img src="assets/icons/${diamondIcon}" alt="Diamond" class="final-diamond-png">
       `;
       // Add theme-specific class for spacing
-      const themeClass = themeManager.currentTheme === 'mlb_scoreboard' ? ' mlb-scoreboard-spacing' : ' default-spacing';
+      const themeClass = (themeManager.currentTheme === 'mlb_scoreboard' || themeManager.currentTheme === 'team_colors') 
+        ? ' mlb-scoreboard-spacing' 
+        : ' default-spacing';
       
       return `
         <div class="baseball-diamond-component${themeClass}">

@@ -111,12 +111,12 @@
   --eink-border-dark: var(--color-gray-400);
 
   /* E-ink Optimized Variables */
-  --eink-optimized-text-secondary: #333; /* Keep existing for clock/losing scores */
-  --eink-optimized-text-muted: #444; /* Keep existing for team records */
+  --eink-optimized-text-secondary: #333;
+  --eink-optimized-text-muted: #444;
 
   /* Simplified two-color system for UI elements */
-  --eink-optimized-light: #c2c2c2; /* Pill backgrounds */
-  --eink-optimized-empty: #555; /* Empty bases/dots - darker than background */
+  --eink-optimized-light: #c2c2c2;
+  --eink-optimized-empty: #555;
   --eink-optimized-filled: var(
     --eink-optimized-text-secondary
   ); /* Same as clock for filled elements and borders */
@@ -301,7 +301,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 5px;
+  gap: var(--space-5);
 }
 
 .game-pill .team-row {
@@ -474,11 +474,11 @@ body {
 
 /* Dynamic colors for baseball diamond */
 .out-dot.dynamic {
-  background: var(--out-dot-empty-dynamic);
+  background: var(--diamond-base-empty-dynamic);
 }
 
 .out-dot.dynamic.filled {
-  background: var(--out-dot-filled-dynamic);
+  background: var(--diamond-base-filled-dynamic);
 }
 
 /* Size indicator */
@@ -576,6 +576,15 @@ body.eink-optimized .out-dot {
 
 body.eink-optimized .out-dot.filled {
   background: var(--eink-optimized-filled) !important;
+}
+
+/* Dynamic colors override e-ink optimization */
+body.eink-optimized .game-pill.dynamic-colors .out-dot.dynamic {
+  background: var(--diamond-base-empty-dynamic) !important;
+}
+
+body.eink-optimized .game-pill.dynamic-colors .out-dot.dynamic.filled {
+  background: var(--diamond-base-filled-dynamic) !important;
 }
 
 /* Inning arrow positioning */
