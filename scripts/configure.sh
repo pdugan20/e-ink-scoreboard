@@ -132,30 +132,31 @@ echo ""
 read -p "Enter choice (1-8): " tz_choice
 
 case $tz_choice in
-    1) timezone="TIMEZONES.EASTERN" ;;
-    2) timezone="TIMEZONES.CENTRAL" ;;
-    3) timezone="TIMEZONES.ARIZONA" ;;
-    4) timezone="TIMEZONES.HAWAII" ;;
-    5) timezone="TIMEZONES.MOUNTAIN" ;;
-    6) timezone="TIMEZONES.PACIFIC" ;;
-    7) timezone="'America/Toronto'" ;;
+    1) timezone="TIMEZONES.EASTERN"; timezone_display="US/Eastern" ;;
+    2) timezone="TIMEZONES.CENTRAL"; timezone_display="US/Central" ;;
+    3) timezone="TIMEZONES.ARIZONA"; timezone_display="US/Arizona" ;;
+    4) timezone="TIMEZONES.HAWAII"; timezone_display="US/Hawaii" ;;
+    5) timezone="TIMEZONES.MOUNTAIN"; timezone_display="US/Mountain" ;;
+    6) timezone="TIMEZONES.PACIFIC"; timezone_display="US/Pacific" ;;
+    7) timezone="'America/Toronto'"; timezone_display="Canada/Eastern" ;;
     8) 
         echo ""
         read -p "Enter timezone (e.g., Europe/London): " custom_tz
         timezone="'$custom_tz'"
+        timezone_display="$custom_tz"
         ;;
-    *) echo "Invalid choice, using US/Eastern"; timezone="TIMEZONES.EASTERN" ;;
+    *) echo "Invalid choice, using US/Eastern"; timezone="TIMEZONES.EASTERN"; timezone_display="US/Eastern" ;;
 esac
 
-echo "✅ Set timezone: $timezone"
+echo "✅ Set timezone: $timezone_display"
 update_js_config "src/static/js/config.js" "displayTimezone" "$timezone"
 
 echo ""
 echo "🕒 Choose refresh interval:"
 echo ""
-echo " 1) 2 minutes (120s) -- Live action"
-echo " 2) 5 minutes (300s) -- Semi-live updates" 
-echo " 3) 15 minutes (900s) - General use"
+echo " 1) 120 seconds - Live action"
+echo " 2) 300 seconds - Semi-live updates" 
+echo " 3) 900 seconds - General use"
 echo ""
 
 read -p "Enter choice (1-5): " interval_choice
@@ -181,13 +182,13 @@ echo ""
 read -p "Enter choice (1-3): " theme_choice
 
 case $theme_choice in
-    1) theme="THEMES.DEFAULT" ;;
-    2) theme="THEMES.TEAM_COLORS" ;;
-    3) theme="THEMES.MLB_SCOREBOARD" ;;
-    *) echo "Invalid choice, using default"; theme="THEMES.DEFAULT" ;;
+    1) theme="THEMES.DEFAULT"; theme_display="Default" ;;
+    2) theme="THEMES.TEAM_COLORS"; theme_display="Team Colors" ;;
+    3) theme="THEMES.MLB_SCOREBOARD"; theme_display="MLB Scoreboard" ;;
+    *) echo "Invalid choice, using default"; theme="THEMES.DEFAULT"; theme_display="Default" ;;
 esac
 
-echo "✅ Set theme: $theme"
+echo "✅ Set theme: $theme_display"
 update_js_config "src/static/js/config.js" "currentTheme" "$theme"
 
 echo ""

@@ -4,7 +4,7 @@
   "display_width": 800,
   "display_height": 480,
   "screenshot_scale": 2,
-  "refresh_interval": "300",
+  "refresh_interval": "120",
   "max_retries": 3,
   "retry_delay": 5,
   "_comment": "Configuration for eink display controller",
