@@ -110,9 +110,9 @@
   --eink-border-medium: var(--color-gray-300);
   --eink-border-dark: var(--color-gray-400);
 
-  /* E-ink Optimized Variables (darker for better contrast) */
-  --eink-optimized-text-secondary: #555;
-  --eink-optimized-text-muted: #666;
+  /* E-ink Optimized Variables (much darker for e-ink clarity) */
+  --eink-optimized-text-secondary: #333;
+  --eink-optimized-text-muted: #444;
   --eink-optimized-border-light: #aaa;
   --eink-optimized-border-medium: #888;
   --eink-optimized-border-dark: #666;
@@ -156,13 +156,10 @@
 }
 
 body {
-  font-family:
-    'SF Pro Text',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: 'SF Pro Text';
+  -webkit-font-smoothing: subpixel-antialiased;
+  text-rendering: optimizeLegibility;
+  font-variant-ligatures: none;
 }
 
 /* Device Frame */
@@ -572,6 +569,12 @@ body.eink-optimized .out-dot {
 
 body.eink-optimized .out-dot.filled {
   background: #888 !important;
+}
+
+/* Inning arrow positioning */
+.inning-arrow {
+  position: relative;
+  top: -1px;
 }
 
 .theme-mlb-scoreboard .header {
