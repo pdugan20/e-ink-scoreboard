@@ -1,5 +1,5 @@
 {
-  "web_server_url": "http://localhost:5001/display",
+  "web_server_url": "http://localhost:5009/display",
   "screenshot_path": "/tmp/sports_display.png",
   "display_width": 800,
   "display_height": 480,

@@ -37,10 +37,10 @@ def get_files_to_watch():
     import glob
     
     patterns = [
-        'preview.html',
-        'static/styles/*.css',
-        'static/js/*.js',
-        'static/js/constants/*.js'
+        'src/preview.html',
+        'src/static/styles/*.css',
+        'src/static/js/*.js',
+        'src/static/js/constants/*.js'
     ]
     
     files = []
@@ -70,7 +70,7 @@ def check_files_changed():
 def index():
     """Serve the preview HTML with hot reload script injected"""
     try:
-        with open('preview.html', 'r') as f:
+        with open('src/preview.html', 'r') as f:
             html_content = f.read()
         
         # Inject hot reload script
@@ -121,13 +121,13 @@ def index():
         
         return html_content
     except FileNotFoundError:
-        return "preview.html not found", 404
+        return "src/preview.html not found", 404
 
 @app.route('/display')
 def display():
     """Serve clean display HTML for screenshots (no dev UI)"""
     try:
-        with open('display.html', 'r') as f:
+        with open('src/display.html', 'r') as f:
             return f.read()
     except FileNotFoundError:
         return "Display template not found", 404
@@ -141,17 +141,27 @@ def check_updates():
 @app.route('/static/<path:filename>')
 def static_files(filename):
     """Serve static files"""
-    return send_from_directory('static', filename)
+    import os
+    # Get absolute path relative to this file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    static_path = os.path.join(script_dir, 'static')
+    return send_from_directory(static_path, filename)
 
 @app.route('/static/test-data/<filename>')
 def test_data_files(filename):
     """Serve test data files"""
-    return send_from_directory('test-data', filename)
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    test_data_path = os.path.join(script_dir, 'test-data')
+    return send_from_directory(test_data_path, filename)
 
 @app.route('/assets/<path:filename>')
 def asset_files(filename):
     """Serve asset files (logos, etc.)"""
-    return send_from_directory('assets', filename)
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    asset_path = os.path.join(script_dir, 'assets')
+    return send_from_directory(asset_path, filename)
 
 @app.route('/api/scores/<league>')
 def get_scores(league):
@@ -329,19 +339,25 @@ def fetch_nfl_games():
         return []
 
 if __name__ == '__main__':
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Sports Scores Development Server")
+    parser.add_argument('--port', type=int, default=5001, help='Port to run the server on')
+    args = parser.parse_args()
+    
     # Initialize file timestamps
     for filepath in get_files_to_watch():
         if os.path.exists(filepath):
             file_timestamps[filepath] = get_file_timestamp(filepath)
     
-    print("\n🏈 Sports Scores Dev Server (Hot Reload)")
+    print(f"\n🏈 Sports Scores Dev Server (Hot Reload)")
     print("=" * 50)
-    print("Open in browser: http://localhost:5001")
+    print(f"Open in browser: http://localhost:{args.port}")
     print("API endpoints:")
-    print("  - http://localhost:5001/api/scores/MLB")
-    print("  - http://localhost:5001/api/scores/NFL")
+    print(f"  - http://localhost:{args.port}/api/scores/MLB")
+    print(f"  - http://localhost:{args.port}/api/scores/NFL")
     print("\n✨ Hot reload enabled:")
-    print("  - Edit preview.html, CSS in static/styles/, or JS in static/js/")
+    print("  - Edit src/preview.html, CSS in src/static/styles/, or JS in src/static/js/")
     print("  - Browser will auto-refresh on save")
     print("=" * 50)
     print("\nPress Ctrl+C to stop\n")
@@ -356,4 +372,4 @@ if __name__ == '__main__':
     
     werkzeug_logger.addFilter(SuppressCheckUpdates())
     
-    app.run(debug=True, port=5001, use_reloader=False)  # Disable Flask's reloader since we have our own
+    app.run(debug=True, port=args.port, use_reloader=False)  # Disable Flask's reloader since we have our own

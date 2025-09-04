@@ -27,12 +27,11 @@ Display live sports scores on your e-ink display with professional quality and r
 
 2. **Test the display**:
    ```bash
-   # Start web server
-   python src/dev_server.py --port 5001
+   # Start web server (from project root)
+   ./venv/bin/python src/dev_server.py --port 5001
    
-   # Take screenshot (in another terminal)
-   source venv/bin/activate
-   python src/eink_display.py --once
+   # Take screenshot (in another terminal, from project root)
+   ./venv/bin/python src/eink_display.py --once
    
    # View result: test_display_output.png
    ```
@@ -99,24 +98,19 @@ Edit `src/eink_config.json` to customize:
 ## Project Structure
 
 ```
-📁 scripts/          # Installation and setup scripts
-├── install.sh       # Complete Raspberry Pi installation
-├── configure.sh     # Interactive user configuration
-└── setup_services.sh # Systemd service setup
+📁 scripts/
+├── install.sh
+├── configure.sh
+└── setup_services.sh
 
-📁 src/              # Source code and assets
-├── eink_display.py  # Main display controller
-├── dev_server.py    # Development web server
-├── display.html     # Clean display endpoint
-├── preview.html     # Development preview
-├── settings.html    # Configuration UI
-├── eink_config.json # Display configuration
-├── static/          # CSS, JavaScript, fonts
-├── assets/          # Images and logos
-└── test-data/       # Sample data for development
+📁 src/
+├── assets/
+├── static/
+├── test-data/
+└── [source files]
 
-📁 docs/             # Documentation
-└── RASPBERRY_PI_SETUP.md # Detailed setup guide
+📁 docs/
+└── RASPBERRY_PI_SETUP.md
 ```
 
 ## Commands
