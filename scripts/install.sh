@@ -3,7 +3,7 @@
 
 set -e  # Exit on any error
 
-echo "🏀 Sports Scores E-ink Display Setup"
+echo "E-Ink Scoreboard Installation"
 echo "===================================="
 
 # Check if running on Raspberry Pi
