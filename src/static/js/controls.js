@@ -100,12 +100,8 @@ export async function initApp() {
 // Initialize when page loads
 initApp();
 
-<<<<<<< HEAD:static/js/controls.js
-// Auto-refresh disabled - only refresh when button is clicked
-=======
 // Auto-refresh every 30 seconds (disabled - only manual fetch)
 // setInterval(() => {
 //   console.log('Auto-refreshing...');
 //   fetchLiveData();
 // }, 30000);
->>>>>>> baseball-diamond-feature:src/static/js/controls.js

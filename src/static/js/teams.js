@@ -10,48 +10,9 @@ import { mlbTeamColors } from './constants/mlb-colors.js';
 import { mlbGradientColors } from './constants/mlb-gradient-colors.js';
 
 // Map API team names to our internal team names
-<<<<<<< HEAD:static/js/teams.js
-export function mapApiTeamName(apiTeamName, league = 'mlb') {
-  if (league === 'mlb') {
-    const mlbNameMap = {
-      'Arizona Diamondbacks': 'D-backs',
-      'Atlanta Braves': 'Braves',
-      'Baltimore Orioles': 'Orioles',
-      'Boston Red Sox': 'Red Sox',
-      'Chicago Cubs': 'Cubs',
-      'Chicago White Sox': 'White Sox',
-      'Cincinnati Reds': 'Reds',
-      'Cleveland Guardians': 'Guardians',
-      'Colorado Rockies': 'Rockies',
-      'Detroit Tigers': 'Tigers',
-      'Houston Astros': 'Astros',
-      'Kansas City Royals': 'Royals',
-      'Los Angeles Angels': 'Angels',
-      'Los Angeles Dodgers': 'Dodgers',
-      'Miami Marlins': 'Marlins',
-      'Milwaukee Brewers': 'Brewers',
-      'Minnesota Twins': 'Twins',
-      'New York Mets': 'Mets',
-      'New York Yankees': 'Yankees',
-      'Oakland Athletics': 'Athletics',
-      'Philadelphia Phillies': 'Phillies',
-      'Pittsburgh Pirates': 'Pirates',
-      'San Diego Padres': 'Padres',
-      'San Francisco Giants': 'Giants',
-      'Seattle Mariners': 'Mariners',
-      'St. Louis Cardinals': 'Cardinals',
-      'Tampa Bay Rays': 'Rays',
-      'Texas Rangers': 'Rangers',
-      'Toronto Blue Jays': 'Blue Jays',
-      'Washington Nationals': 'Nationals',
-    };
-
-    return mlbNameMap[apiTeamName] || apiTeamName;
-=======
 export function mapApiTeamName(apiTeamName, league = LEAGUES.MLB) {
   if (league === LEAGUES.MLB) {
     return MLB_TEAM_NAME_MAP[apiTeamName] || apiTeamName;
->>>>>>> baseball-diamond-feature:src/static/js/teams.js
   }
   return apiTeamName;
 }
@@ -107,24 +68,6 @@ export function generateGradientBackground(awayTeam, homeTeam, league = LEAGUES.
   // Away team on left, home team on right (matching the display order)
   // Adding 90% opacity to lighten the colors slightly
   return `linear-gradient(105deg, ${awayColor}E6 0%, ${awayColor}E6 25%, ${homeColor}E6 75%, ${homeColor}E6 100%)`;
-}
-
-export function formatGameStatus(statusString, gameData = null) {
-  let formattedStatus = statusString;
-  
-  // Convert "Bottom" to "Bot" for brevity
-  if (statusString.includes('Bottom ')) {
-    formattedStatus = statusString.replace('Bottom ', 'Bot ');
-  }
-  
-  // Add middot and outs for active games
-  if (gameData && (statusString.includes('Top ') || statusString.includes('Bottom ') || statusString.includes('Bot ')) && gameData.outs !== undefined) {
-    const outs = gameData.outs || 0;
-    formattedStatus += ` · ${outs} out${outs === 1 ? '' : 's'}`;
-  }
-  
-  // Convert ET times to configured timezone, or return as-is
-  return convertTimeToTimezone(formattedStatus);
 }
 
 export function convertTimeToTimezone(timeString) {
