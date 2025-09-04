@@ -22,6 +22,13 @@ export function renderGames(games, league = LEAGUES.MLB) {
   const container = document.getElementById('games');
   container.innerHTML = '';
 
+  // Apply e-ink optimized contrast only for default theme
+  if (FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST && currentTheme === 'default') {
+    document.body.classList.add('eink-optimized');
+  } else {
+    document.body.classList.remove('eink-optimized');
+  }
+
   // Initialize theme manager
   themeManager.setTheme(currentTheme);
 

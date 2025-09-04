@@ -1,6 +1,7 @@
 // Baseball Diamond Component
 // Renders a baseball diamond showing base runners and outs
 import { themeManager } from './theme-manager.js';
+import { FEATURE_FLAGS } from './config.js';
 
 // Helper function to get CSS variable values
 function getCSSVariable(variableName) {
@@ -50,8 +51,15 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
     // For final games, show diamond with F in center
     const isFinal = gameStatus === 'Final';
     if (isFinal) {
+      const isEinkOptimized = FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST && themeManager.currentTheme === 'default';
+      const diamondIcon = isDynamicColors 
+        ? 'final-transparent.png'
+        : isEinkOptimized 
+          ? 'final-legible.png'
+          : 'final.png';
+          
       const finalDiamond = `
-        <img src="assets/icons/${isDynamicColors ? 'diamond-alt-white.png' : 'diamond-alt.png'}" alt="Diamond" class="final-diamond-png">
+        <img src="assets/icons/${diamondIcon}" alt="Diamond" class="final-diamond-png">
       `;
       return `
         <div class="baseball-diamond-component">
@@ -82,14 +90,23 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
   
   // Get base colors from CSS variables
   const isMLBScoreboard = themeManager.isMLBScoreboard();
+  const isEinkOptimized = FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST && themeManager.currentTheme === 'default';
+  
   const baseFilledColor = isMLBScoreboard 
     ? getCSSVariable('--mlb-scoreboard-base-filled')
     : isDynamicColors 
       ? getCSSVariable('--diamond-base-filled-dynamic')
-      : getCSSVariable('--diamond-base-filled');
-  const baseEmptyColor = isDynamicColors 
-    ? getCSSVariable('--diamond-base-empty-dynamic')
-    : getCSSVariable('--diamond-base-empty');
+      : isEinkOptimized 
+        ? getCSSVariable('--eink-optimized-diamond-base-filled')
+        : getCSSVariable('--diamond-base-filled');
+        
+  const baseEmptyColor = isMLBScoreboard
+    ? getCSSVariable('--mlb-scoreboard-base-empty')
+    : isDynamicColors 
+      ? getCSSVariable('--diamond-base-empty-dynamic')
+      : isEinkOptimized
+        ? getCSSVariable('--eink-optimized-diamond-base-empty')  
+        : getCSSVariable('--diamond-base-empty');
   
   // Generate SVG with dynamic base fills
   const diamondSvg = `

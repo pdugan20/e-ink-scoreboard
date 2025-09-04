@@ -3,6 +3,7 @@
 // Feature flags
 export const FEATURE_FLAGS = {
   SHOW_STANDINGS: false,
+  EINK_OPTIMIZED_CONTRAST: true,
 };
 
 // Favorite team configuration

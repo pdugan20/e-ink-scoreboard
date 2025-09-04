@@ -45,14 +45,16 @@
   --color-gray-600: #666;
   --color-gray-700: #333;
   --color-gray-800: #d9d9d9;
-  
+
   /* MLB Scoreboard Theme Colors */
-  --mlb-scoreboard-bg: #00514A;
+  --mlb-scoreboard-bg: #00514a;
   --mlb-scoreboard-pill-bg: #004843;
-  --mlb-scoreboard-border: #A4E6EF;
+  --mlb-scoreboard-border: #a4e6ef;
   --mlb-scoreboard-border-40: rgba(164, 230, 239, 0.4);
-  --mlb-scoreboard-base-filled: #FFE28B;
-  --mlb-scoreboard-out-filled: #C33E5B;
+  --mlb-scoreboard-base-filled: #ffe28b;
+  --mlb-scoreboard-base-empty: rgba(255, 255, 255, 0.6);
+  --mlb-scoreboard-out-filled: #c33e5b;
+  --mlb-scoreboard-out-empty: rgba(255, 255, 255, 0.6);
   --color-gray-900: #000;
 
   /* Color Opacity Variants */
@@ -107,6 +109,20 @@
   --eink-border-light: var(--color-gray-200);
   --eink-border-medium: var(--color-gray-300);
   --eink-border-dark: var(--color-gray-400);
+
+  /* E-ink Optimized Variables (darker for better contrast) */
+  --eink-optimized-text-secondary: #555;
+  --eink-optimized-text-muted: #666;
+  --eink-optimized-border-light: #aaa;
+  --eink-optimized-border-medium: #888;
+  --eink-optimized-border-dark: #666;
+
+  /* E-ink Optimized Baseball Diamond Colors */
+  --eink-optimized-diamond-base-filled: #888;
+  --eink-optimized-diamond-base-empty: #bbb;
+  --eink-optimized-diamond-arrow: #888;
+  --eink-optimized-out-dot-empty: #bbb;
+  --eink-optimized-out-dot-filled: #888;
 
   /* Display Layout */
   --display-padding: 2.5%;
@@ -510,6 +526,41 @@ body {
   color: var(--color-white-80);
 }
 
+/* E-ink Optimized Contrast Theme */
+body.eink-optimized .header .current-time {
+  color: var(--eink-optimized-text-secondary) !important;
+}
+
+body.eink-optimized .game-pill:not(.dynamic-colors) .team-record {
+  color: var(--eink-optimized-text-muted) !important;
+}
+
+body.eink-optimized .game-pill:not(.dynamic-colors) .game-status {
+  color: var(--eink-optimized-text-secondary) !important;
+}
+
+body.eink-optimized .game-pill {
+  border-color: var(--eink-optimized-border-light) !important;
+}
+
+body.eink-optimized .header {
+  border-bottom-color: var(--eink-optimized-border-light) !important;
+}
+
+body.eink-optimized .game-pill:not(.dynamic-colors) .score.losing-score {
+  opacity: 0.7 !important;
+  color: var(--eink-optimized-text-muted) !important;
+}
+
+/* E-ink optimized out dots */
+body.eink-optimized .out-dot {
+  background: #bbb !important;
+}
+
+body.eink-optimized .out-dot.filled {
+  background: #888 !important;
+}
+
 .theme-mlb-scoreboard .header {
   border-bottom: 1.5px solid var(--mlb-scoreboard-border-40) !important;
 }
@@ -521,8 +572,8 @@ body {
 
 /* MLB Scoreboard outs styling */
 .out-dot.mlb-scoreboard {
-  background: var(--diamond-base-empty);
-  opacity: 0.3;
+  background: var(--mlb-scoreboard-out-empty);
+  opacity: 1;
 }
 
 .out-dot.mlb-scoreboard.filled {
