@@ -4,10 +4,13 @@
     "bottom ",
     "bot ",
     "mid ",
+    "middle ",
+    "end ",
     "in progress",
     "delay",
     "warmup",
-    "pre-game"
+    "pre-game",
+    "suspended"
   ],
   "scheduledGameStatuses": [
     "pm et",
@@ -16,6 +19,9 @@
   ],
   "finalGameStatuses": [
     "final",
-    "game over"
+    "game over",
+    "completed",
+    "postponed",
+    "cancelled"
   ]
 }
