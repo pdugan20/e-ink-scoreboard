@@ -43,28 +43,24 @@ export const MLB_STATUS_PATTERNS = {
 // Load active game statuses from shared JSON config
 let gameStatusConfig = null;
 
-export async function getMLBActiveGameStatuses() {
-  if (!gameStatusConfig) {
-    try {
-      const response = await fetch('/src/config/game-status-config.json');
-      gameStatusConfig = await response.json();
-    } catch (error) {
-      logger.error('Could not load game status config:', error);
-      throw error;
-    }
+// Initialize config on module load
+async function initGameStatusConfig() {
+  try {
+    const response = await fetch('/src/config/game-status-config.json');
+    gameStatusConfig = await response.json();
+    console.log('Game status config loaded:', gameStatusConfig.activeGameStatuses);
+  } catch (error) {
+    console.error('Could not load game status config:', error);
+    // Keep the hardcoded fallback
+    gameStatusConfig = {
+      activeGameStatuses: ['top ', 'bottom ', 'bot ', 'mid ', 'in progress', 'delay', 'warmup', 'pre-game']
+    };
   }
-  return gameStatusConfig.activeGameStatuses;
 }
 
-// For backwards compatibility, export the constant synchronously
-// This will need to be updated to use the async function above
-export const MLB_ACTIVE_GAME_STATUSES = [
-  'top ',
-  'bottom ',
-  'bot ',
-  'mid ',
-  'in progress',
-  'delay',
-  'warmup',
-  'pre-game'
-];
+// Initialize immediately when module loads
+initGameStatusConfig();
+
+export function getMLBActiveGameStatuses() {
+  return gameStatusConfig?.activeGameStatuses || ['top ', 'bottom ', 'bot ', 'mid ', 'in progress', 'delay', 'warmup', 'pre-game'];
+}

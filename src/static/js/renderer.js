@@ -8,7 +8,7 @@ import {
   MONTHS,
   FEATURE_FLAGS,
 } from './config.js';
-import { MLB_STATUS_PATTERNS, MLB_ACTIVE_GAME_STATUSES } from './constants/mlb-constants.js';
+import { MLB_STATUS_PATTERNS, getMLBActiveGameStatuses } from './constants/mlb-constants.js';
 import {
   mapApiTeamName,
   getTeamLogo,
@@ -69,14 +69,20 @@ export function renderGames(games, league = LEAGUES.MLB) {
   // Check if we should show "Games start at" message
   const hasActiveGames = displayGames.some(game => {
     const status = game.status?.toLowerCase() || '';
-    return MLB_ACTIVE_GAME_STATUSES.some(activeStatus => status.includes(activeStatus));
+    return getMLBActiveGameStatuses().some(activeStatus => status.includes(activeStatus));
   });
 
-  if (!hasActiveGames) {
-    // No active games, check if we have scheduled games and show "Games start at"
+  // Check if any games have already finished (indicating the day's games have begun)
+  const hasFinishedGames = displayGames.some(game => {
+    const status = game.status?.toLowerCase() || '';
+    return status.includes('final') || status.includes('game over');
+  });
+
+  if (!hasActiveGames && !hasFinishedGames) {
+    // No active games and no finished games - show "Games start at" for first game
     updateTimeForGameStart(displayGames);
   } else {
-    // Active games, use regular "Last update at"
+    // Either active games or games have already started today - use "Last update at"
     updateCurrentTime();
   }
 
