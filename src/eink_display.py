@@ -16,6 +16,18 @@ from pathlib import Path
 from PIL import Image
 import requests
 
+
+# Load game status configuration
+def load_game_status_config():
+    """Load game status patterns from JSON config"""
+    try:
+        config_path = os.path.join(os.path.dirname(__file__), 'config', 'game-status-config.json')
+        with open(config_path, 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Could not load game status config: {e}")
+        raise
+
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -94,6 +106,9 @@ class EinkDisplayController:
     def check_active_games(self):
         """Check if there are any active games by fetching game data"""
         try:
+            # Load game status config
+            status_config = load_game_status_config()
+            
             # Extract the base URL and get game data via API
             base_url = self.config['web_server_url'].replace('/display', '')
             api_url = f"{base_url}/api/scores/MLB"
@@ -116,14 +131,14 @@ class EinkDisplayController:
             for game in games:
                 status = game.get('status', '').lower()
                 
-                # Active game conditions
-                if any(keyword in status for keyword in ['top ', 'bottom ', 'bot ', 'mid ', 'in progress', 'delay']):
+                # Active game conditions (using config)
+                if any(keyword in status for keyword in status_config['activeGameStatuses']):
                     active_games.append(game)
-                # Scheduled game conditions  
-                elif any(keyword in status for keyword in ['pm et', 'am et', 'scheduled']):
+                # Scheduled game conditions (using config)
+                elif any(keyword in status for keyword in status_config['scheduledGameStatuses']):
                     scheduled_games.append(game)
-                # Final game conditions
-                elif 'final' in status or 'game over' in status:
+                # Final game conditions (using config)
+                elif any(keyword in status for keyword in status_config['finalGameStatuses']):
                     final_games.append(game)
                 else:
                     # Unknown status, treat as active to be safe

@@ -8,7 +8,7 @@ import {
   MONTHS,
   FEATURE_FLAGS,
 } from './config.js';
-import { MLB_STATUS_PATTERNS } from './constants/mlb-constants.js';
+import { MLB_STATUS_PATTERNS, MLB_ACTIVE_GAME_STATUSES } from './constants/mlb-constants.js';
 import {
   mapApiTeamName,
   getTeamLogo,
@@ -69,8 +69,7 @@ export function renderGames(games, league = LEAGUES.MLB) {
   // Check if we should show "Games start at" message
   const hasActiveGames = displayGames.some(game => {
     const status = game.status?.toLowerCase() || '';
-    return status.includes('top ') || status.includes('bottom ') || status.includes('bot ') || 
-           status.includes('mid ') || status.includes('in progress') || status.includes('delay');
+    return MLB_ACTIVE_GAME_STATUSES.some(activeStatus => status.includes(activeStatus));
   });
 
   if (!hasActiveGames) {

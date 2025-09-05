@@ -1,0 +1,21 @@
+{
+  "activeGameStatuses": [
+    "top ",
+    "bottom ",
+    "bot ",
+    "mid ",
+    "in progress",
+    "delay",
+    "warmup",
+    "pre-game"
+  ],
+  "scheduledGameStatuses": [
+    "pm et",
+    "am et", 
+    "scheduled"
+  ],
+  "finalGameStatuses": [
+    "final",
+    "game over"
+  ]
+}
