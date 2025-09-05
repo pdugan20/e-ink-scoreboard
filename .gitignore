@@ -47,6 +47,7 @@ yarn-error.log*
 
 # Development
 test_*.py
+test_display_output.png
 
 # Logs
 *.log

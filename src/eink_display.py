@@ -510,6 +510,7 @@ def main():
     parser.add_argument("--config", default="eink_config.json", help="Configuration file path")
     parser.add_argument("--interval", type=int, help="Refresh interval in seconds")
     parser.add_argument("--url", help="Web server URL")
+    parser.add_argument("--dithering", action="store_true", help="Apply e-ink dithering for testing")
     
     args = parser.parse_args()
     
@@ -521,6 +522,9 @@ def main():
         config['refresh_interval'] = args.interval
     if args.url:
         config['web_server_url'] = args.url
+    if args.dithering:
+        config['apply_dithering'] = True
+        logger.info("Dithering enabled via command line flag")
     
     # Create controller
     controller = EinkDisplayController(config)

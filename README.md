@@ -102,16 +102,19 @@ docs/                      # Documentation
 
 ```bash
 # Single update (respects active game logic)
-python src/eink_display.py --once
+./venv/bin/python src/eink_display.py --once
 
 # Force update (bypasses active game check)
-python src/eink_display.py --once
+./venv/bin/python src/eink_display.py --once
 
 # Custom server URL
-python src/eink_display.py --url http://localhost:5002/display
+./venv/bin/python src/eink_display.py --url http://localhost:5002/display
 
 # Test with dummy data (16 games)
-python src/eink_display.py --url http://localhost:5001/display?test=true --once
+./venv/bin/python src/eink_display.py --url http://localhost:5001/display?test=true --once
+
+# Generate dithered preview (shows how it looks on actual e-ink display)
+./venv/bin/python src/eink_display.py --url http://localhost:5001/display --once --dithering
 ```
 
 ## Display Update Logic
