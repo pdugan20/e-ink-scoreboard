@@ -137,6 +137,24 @@ The system uses intelligent update logic to minimize e-ink wear:
 - Pillow (image processing)
 - Inky library (Raspberry Pi E Ink display driver)
 
+## Roadmap
+
+### Planned Features
+
+- **Dark Mode Theme** - High-contrast dark theme optimized for e-ink displays
+- **NFL Support** - Full NFL game scores and schedules during football season
+- **College Football (CFB) Support** - Major college football games and conferences
+- **Additional E-ink Display Support** - Support for different display sizes and manufacturers
+- **Web Configuration** - Browser-based setup instead of command-line configuration
+
+### Contributions Welcome
+
+This project is open to contributions! Areas where help is especially appreciated:
+
+- **API Integration** - Integration with additional data sources
+- **Hardware Support** - Testing on different e-ink displays and dimensions
+- **Documentation** - Setup guides and troubleshooting
+
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -79,7 +79,7 @@
         // Check URL parameters for test data
         const urlParams = new URLSearchParams(window.location.search);
         const useTestData = urlParams.get('test') === 'true';
-        
+
         // Initialize with live or test data based on URL parameter
         async function initDisplay() {
             if (useTestData) {
@@ -88,12 +88,6 @@
             } else {
                 await fetchLiveData();
             }
-            // Note: fetchLiveData() handles setting the correct time display
-            // Don't call updateCurrentTime() here as it overrides "Games start at" logic
-
-            // Note: Auto-refresh disabled to prevent race conditions on Raspberry Pi
-            // The Pi controller handles timing, not the browser
-            // setInterval(updateCurrentTime, 60000);
         }
 
         // Initialize when page loads

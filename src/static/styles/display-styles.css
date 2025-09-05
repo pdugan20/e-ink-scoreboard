@@ -620,6 +620,10 @@ body.eink-optimized .game-pill.dynamic-colors .out-dot.dynamic.filled {
   color: var(--color-white) !important;
 }
 
+.theme-mlb-scoreboard .no-games-message {
+  color: var(--color-white) !important;
+}
+
 /* MLB Scoreboard outs styling */
 .out-dot.mlb-scoreboard {
   background: var(--mlb-scoreboard-out-empty);
