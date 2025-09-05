@@ -43,17 +43,33 @@ export const MLB_STATUS_PATTERNS = {
 // Load active game statuses from shared JSON config
 let gameStatusConfig = null;
 
+// Hardcoded fallback (MUST match src/config/game-status-config.json!)
+const FALLBACK_ACTIVE_STATUSES = ['top ', 'bottom ', 'bot ', 'mid ', 'middle ', 'end ', 'in progress', 'delay', 'warmup', 'pre-game', 'suspended'];
+
 // Initialize config on module load
 async function initGameStatusConfig() {
   try {
     const response = await fetch('/src/config/game-status-config.json');
     gameStatusConfig = await response.json();
     console.log('Game status config loaded:', gameStatusConfig.activeGameStatuses);
+    
+    // Validate that JSON and fallback are in sync
+    const jsonStatuses = [...gameStatusConfig.activeGameStatuses].sort();
+    const fallbackStatuses = [...FALLBACK_ACTIVE_STATUSES].sort();
+    
+    if (JSON.stringify(jsonStatuses) !== JSON.stringify(fallbackStatuses)) {
+      console.error('⚠️ WARNING: JSON config and JavaScript fallback are out of sync!');
+      console.error('JSON config:', jsonStatuses);
+      console.error('JS fallback:', fallbackStatuses);
+      console.error('Please update both src/config/game-status-config.json and mlb-constants.js FALLBACK_ACTIVE_STATUSES');
+    } else {
+      console.log('✅ JSON config and JavaScript fallback are in sync');
+    }
   } catch (error) {
     console.error('Could not load game status config:', error);
     // Keep the hardcoded fallback
     gameStatusConfig = {
-      activeGameStatuses: ['top ', 'bottom ', 'bot ', 'mid ', 'in progress', 'delay', 'warmup', 'pre-game']
+      activeGameStatuses: FALLBACK_ACTIVE_STATUSES
     };
   }
 }
@@ -62,5 +78,5 @@ async function initGameStatusConfig() {
 initGameStatusConfig();
 
 export function getMLBActiveGameStatuses() {
-  return gameStatusConfig?.activeGameStatuses || ['top ', 'bottom ', 'bot ', 'mid ', 'in progress', 'delay', 'warmup', 'pre-game'];
+  return gameStatusConfig?.activeGameStatuses || FALLBACK_ACTIVE_STATUSES;
 }

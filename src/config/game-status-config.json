@@ -12,11 +12,7 @@
     "pre-game",
     "suspended"
   ],
-  "scheduledGameStatuses": [
-    "pm et",
-    "am et", 
-    "scheduled"
-  ],
+  "scheduledGameStatuses": ["pm et", "am et", "scheduled"],
   "finalGameStatuses": [
     "final",
     "game over",
