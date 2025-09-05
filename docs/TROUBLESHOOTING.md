@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide covers common issues and their solutions for the Sports Scores E-ink Display.
+This guide covers common issues and their solutions for the E-Ink Scoreboard.
 
 ## Display Not Updating
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Development server with hot reloading for testing sports scores display
+Development server with hot reloading for testing E-Ink Scoreboard
 Run with: python dev_server_hot.py
 Then open: http://localhost:5000
 """
@@ -341,7 +341,7 @@ def fetch_nfl_games():
 if __name__ == '__main__':
     import argparse
     
-    parser = argparse.ArgumentParser(description="Sports Scores Development Server")
+    parser = argparse.ArgumentParser(description="E-Ink Scoreboard Development Server")
     parser.add_argument('--port', type=int, default=5001, help='Port to run the server on')
     args = parser.parse_args()
     
@@ -350,7 +350,7 @@ if __name__ == '__main__':
         if os.path.exists(filepath):
             file_timestamps[filepath] = get_file_timestamp(filepath)
     
-    print(f"\n🏈 Sports Scores Dev Server (Hot Reload)")
+    print(f"\nE-Ink Scoreboard Dev Server (Hot Reload)")
     print("=" * 50)
     print(f"Open in browser: http://localhost:{args.port}")
     print("API endpoints:")

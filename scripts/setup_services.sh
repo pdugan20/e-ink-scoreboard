@@ -1,5 +1,5 @@
 #!/bin/bash
-# Setup systemd services for sports scores display
+# Setup systemd services for E-Ink Scoreboard
 
 set -e
 
@@ -14,7 +14,7 @@ VENV_PATH="$HOME/.virtualenvs/pimoroni"
 echo "📝 Creating web server service..."
 sudo tee /etc/systemd/system/sports-server.service > /dev/null <<EOF
 [Unit]
-Description=Sports Scores Web Server
+Description=E-Ink Scoreboard Web Server
 After=network.target
 
 [Service]
@@ -34,7 +34,7 @@ EOF
 echo "📝 Creating display update service..."
 sudo tee /etc/systemd/system/sports-display.service > /dev/null <<EOF
 [Unit]
-Description=Sports Scores Eink Display
+Description=E-Ink Scoreboard Display
 After=network.target sports-server.service
 Requires=sports-server.service
 

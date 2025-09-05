@@ -1,5 +1,5 @@
 #!/bin/bash
-# Interactive configuration for Sports Scores E-ink Display
+# Interactive configuration for E-Ink Scoreboard
 
 set -e
 

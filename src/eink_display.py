@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Direct eink display controller for sports scores
+Direct eink display controller for E-Ink Scoreboard
 Works on both Mac (for testing) and Raspberry Pi (with actual eink display)
 """
 
@@ -490,7 +490,7 @@ def main():
     """Main entry point"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Sports Scores Eink Display Controller")
+    parser = argparse.ArgumentParser(description="E-Ink Scoreboard Display Controller")
     parser.add_argument("--once", action="store_true", help="Update display once and exit")
     parser.add_argument("--config", default="eink_config.json", help="Configuration file path")
     parser.add_argument("--interval", type=int, help="Refresh interval in seconds")

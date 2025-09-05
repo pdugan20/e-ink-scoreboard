@@ -1,4 +1,4 @@
-# Sports Scores E-ink Display
+# E-Ink Scoreboard
 
 Display live sports scores on your e-ink display with professional quality and real-time updates!
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Sports Scores E-ink Display - Raspberry Pi Installation Script
+# E-Ink Scoreboard - Raspberry Pi Installation Script
 
 set -e  # Exit on any error
 
