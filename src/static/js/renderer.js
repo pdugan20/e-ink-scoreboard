@@ -189,7 +189,7 @@ export function updateCurrentTime() {
   hours = hours ? hours : 12; // 0 should be 12
 
   document.getElementById('current-time').textContent =
-    `${hours}:${minutes} ${ampm}`;
+    `Last updated at ${hours}:${minutes} ${ampm}`;
 }
 
 export function updateSizeIndicator() {

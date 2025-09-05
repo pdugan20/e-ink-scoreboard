@@ -91,6 +91,53 @@ class EinkDisplayController:
         logger.error(f"Server not available after {timeout} seconds")
         return False
     
+    def check_active_games(self):
+        """Check if there are any active games by fetching game data"""
+        try:
+            # Extract the base URL and get game data via API
+            base_url = self.config['web_server_url'].replace('/display', '')
+            api_url = f"{base_url}/api/scores/MLB"
+            
+            response = requests.get(api_url, timeout=10)
+            if response.status_code != 200:
+                logger.warning(f"Could not fetch game data: {response.status_code}")
+                return True  # Default to updating if we can't check
+            
+            games = response.json()
+            if not games:
+                logger.info("No games found")
+                return False
+            
+            # Check for active games (not scheduled, not final)
+            active_games = []
+            scheduled_games = []
+            final_games = []
+            
+            for game in games:
+                status = game.get('status', '').lower()
+                
+                # Active game conditions
+                if any(keyword in status for keyword in ['top ', 'bottom ', 'bot ', 'mid ', 'in progress', 'delay']):
+                    active_games.append(game)
+                # Scheduled game conditions  
+                elif any(keyword in status for keyword in ['pm et', 'am et', 'scheduled']):
+                    scheduled_games.append(game)
+                # Final game conditions
+                elif 'final' in status or 'game over' in status:
+                    final_games.append(game)
+                else:
+                    # Unknown status, treat as active to be safe
+                    active_games.append(game)
+            
+            logger.info(f"Games status: {len(active_games)} active, {len(scheduled_games)} scheduled, {len(final_games)} final")
+            
+            # Return True if there are active games OR if there are new scheduled games for the day
+            return len(active_games) > 0
+            
+        except Exception as e:
+            logger.error(f"Error checking active games: {e}")
+            return True  # Default to updating if there's an error
+    
     def take_screenshot(self):
         """Take screenshot using available method"""
         # Try Playwright first (works on both Mac and Pi)
@@ -321,9 +368,16 @@ class EinkDisplayController:
             logger.info(f"Test mode: saved display image to {test_path}")
             return True
     
-    def refresh_display(self):
+    def refresh_display(self, force_update=False):
         """Complete refresh cycle: screenshot -> process -> display"""
         logger.info("Starting display refresh...")
+        
+        # Check for active games unless forced
+        if not force_update:
+            has_active_games = self.check_active_games()
+            if not has_active_games:
+                logger.info("No active games found - skipping display update")
+                return True  # Return success but skip display update
         
         # Take screenshot with retries
         screenshot_success = False
@@ -349,21 +403,57 @@ class EinkDisplayController:
         return self.update_display(img)
     
     def run_continuous(self):
-        """Run continuous refresh loop"""
+        """Run continuous refresh loop with smart game detection"""
         logger.info(f"Starting continuous refresh every {self.config['refresh_interval']} seconds")
         
         if not self.wait_for_server():
             return False
         
+        last_game_date = None
+        new_games_detected = False
+        
         while True:
             try:
-                success = self.refresh_display()
-                if success:
-                    logger.info(f"Display updated successfully at {datetime.now()}")
-                else:
-                    logger.error("Display update failed")
+                # Check current game date
+                current_date = datetime.now().strftime('%Y-%m-%d')
                 
-                logger.info(f"Next refresh in {self.config['refresh_interval']} seconds")
+                # Force update if it's a new day or if new games were detected
+                force_update = False
+                if last_game_date != current_date:
+                    logger.info(f"New game day detected: {current_date}")
+                    last_game_date = current_date
+                    new_games_detected = False
+                    force_update = True
+                
+                # Check for scheduled games that might have started
+                if not force_update:
+                    try:
+                        base_url = self.config['web_server_url'].replace('/display', '')
+                        api_url = f"{base_url}/api/scores/MLB"
+                        response = requests.get(api_url, timeout=10)
+                        
+                        if response.status_code == 200:
+                            games = response.json()
+                            scheduled_games = [g for g in games if any(kw in g.get('status', '').lower() for kw in ['pm et', 'am et', 'scheduled'])]
+                            
+                            # If we have scheduled games and haven't detected new games yet, check if we should update once
+                            if scheduled_games and not new_games_detected:
+                                logger.info(f"Found {len(scheduled_games)} scheduled games - updating display once for new day")
+                                new_games_detected = True
+                                force_update = True
+                    except Exception as e:
+                        logger.warning(f"Error checking for new games: {e}")
+                
+                success = self.refresh_display(force_update=force_update)
+                
+                if success and not force_update:
+                    logger.info(f"Checked for active games at {datetime.now()}")
+                elif success and force_update:
+                    logger.info(f"Display updated at {datetime.now()}")
+                else:
+                    logger.error("Display refresh failed")
+                
+                logger.info(f"Next check in {self.config['refresh_interval']} seconds")
                 time.sleep(int(self.config['refresh_interval']))
                 
             except KeyboardInterrupt:
@@ -413,11 +503,11 @@ def main():
     controller = EinkDisplayController(config)
     
     if args.once:
-        # Single update
+        # Single update (always force when using --once)
         if not controller.wait_for_server():
             sys.exit(1)
         
-        success = controller.refresh_display()
+        success = controller.refresh_display(force_update=True)
         sys.exit(0 if success else 1)
     else:
         # Continuous mode

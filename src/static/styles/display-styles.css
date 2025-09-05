@@ -226,7 +226,7 @@ body {
 }
 
 .header .current-time {
-  font-size: var(--text-sm);
+  font-size: calc(var(--text-sm) - 1px);
   font-weight: var(--font-weight-medium);
   color: var(--eink-text-secondary);
 }
