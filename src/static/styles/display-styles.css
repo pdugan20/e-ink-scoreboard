@@ -391,6 +391,12 @@ body {
   overflow: hidden;
 }
 
+/* Fixed width for active games to prevent layout shift */
+.game-pill:has(.baseball-diamond-component:not(.scheduled-game)) .game-status {
+  width: 50px;
+  text-overflow: ellipsis;
+}
+
 .game-status small {
   font-size: var(--font-size-12);
   font-weight: var(--font-weight-medium);
