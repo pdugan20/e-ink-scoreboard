@@ -81,11 +81,21 @@ Edit `src/eink_config.json` to customize:
 ```
 src/                       # Core application files
 ├── assets/                # Images and logos
+│   └── logos/             # Team and league logos
 ├── static/                # CSS, JS, and static assets
+│   ├── js/                # JavaScript modules
+│   │   └── constants/     # Team data and constants
+│   └── styles/            # CSS stylesheets
 └── test-data/             # Test game data
 
+scripts/                   # Installation and setup scripts
+├── install.sh             # Raspberry Pi installation
+├── configure.sh           # Interactive configuration
+└── setup_services.sh      # Systemd service setup
+
 docs/                      # Documentation
-└── RASPBERRY_PI_SETUP.md
+├── RASPBERRY_PI_SETUP.md  # Pi setup guide
+└── TROUBLESHOOTING.md     # Common issues and fixes
 ```
 
 ## Commands
