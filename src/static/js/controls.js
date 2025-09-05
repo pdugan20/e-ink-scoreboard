@@ -103,8 +103,13 @@ export async function initApp() {
   updateSizeIndicator();
   initResizable();
 
-  // Update time every minute
-  setInterval(updateCurrentTime, 60000);
+  // Update time every minute, but don't override "Games start at" messages
+  setInterval(() => {
+    const currentTimeEl = document.getElementById('current-time');
+    if (currentTimeEl && !currentTimeEl.textContent.includes('Games start at')) {
+      updateCurrentTime();
+    }
+  }, 60000);
 }
 
 // Initialize when page loads

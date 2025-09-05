@@ -17,6 +17,7 @@ export const mlbUseWhiteLogos = [
   'Padres',
   'Pirates',
   'Phillies',
+  'Braves',
 ];
 
 // Special filename mappings for teams that don't follow the standard naming

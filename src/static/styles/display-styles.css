@@ -539,6 +539,11 @@ body.eink-optimized .header .current-time {
   font-weight: var(--font-weight-semibold) !important;
 }
 
+body.eink-optimized .no-games-message {
+  color: var(--eink-optimized-text-secondary) !important;
+  font-weight: var(--font-weight-semibold) !important;
+}
+
 body.eink-optimized .game-pill:not(.dynamic-colors) .team-record {
   color: var(--eink-optimized-text-muted) !important;
 }

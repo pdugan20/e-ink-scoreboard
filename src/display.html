@@ -88,7 +88,8 @@
             } else {
                 await fetchLiveData();
             }
-            updateCurrentTime();
+            // Note: fetchLiveData() handles setting the correct time display
+            // Don't call updateCurrentTime() here as it overrides "Games start at" logic
 
             // Note: Auto-refresh disabled to prevent race conditions on Raspberry Pi
             // The Pi controller handles timing, not the browser
