@@ -1,22 +1,33 @@
 // Data loading and management
-import { mapApiTeamName } from './teams.js';
 import { renderGames, updateHeaderTitle } from './renderer.js';
 
 // Test data will be loaded from files
 let mlbTestData = [];
+let mlbScheduledData = [];
+let mlbEmptyData = [];
 let nflTestData = [];
 let cfbTestData = [];
 
 // Load test data from files
 export async function loadTestData() {
   try {
-    const [mlbResponse, nflResponse, cfbResponse] = await Promise.all([
+    const [
+      mlbResponse,
+      mlbScheduledResponse,
+      mlbEmptyResponse,
+      nflResponse,
+      cfbResponse,
+    ] = await Promise.all([
       fetch('/static/test-data/mlb.json'),
+      fetch('/static/test-data/mlb-scheduled.json'),
+      fetch('/static/test-data/mlb-empty.json'),
       fetch('/static/test-data/nfl.json'),
       fetch('/static/test-data/cfb.json'),
     ]);
 
     mlbTestData = await mlbResponse.json();
+    mlbScheduledData = await mlbScheduledResponse.json();
+    mlbEmptyData = await mlbEmptyResponse.json();
     nflTestData = await nflResponse.json();
     cfbTestData = await cfbResponse.json();
   } catch (error) {
@@ -27,6 +38,16 @@ export async function loadTestData() {
 export function loadMLBData() {
   updateHeaderTitle('MLB');
   renderGames(mlbTestData);
+}
+
+export function loadMLBScheduledData() {
+  updateHeaderTitle('MLB');
+  renderGames(mlbScheduledData);
+}
+
+export function loadMLBEmptyData() {
+  updateHeaderTitle('MLB');
+  renderGames(mlbEmptyData);
 }
 
 export function loadNFLData() {

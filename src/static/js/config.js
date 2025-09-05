@@ -8,7 +8,7 @@ export const FEATURE_FLAGS = {
 
 // Favorite team configuration
 export const favoriteTeams = {
-  mlb: ['Mariners'],
+  mlb: ['Seattle Mariners'],
   nfl: null,
   cfb: null,
 };

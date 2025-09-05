@@ -48,6 +48,17 @@ export function renderGames(games, league = LEAGUES.MLB) {
   // Initialize theme manager
   themeManager.setTheme(currentTheme);
 
+  // Check for empty games array
+  if (!games || games.length === 0) {
+    // Show "There are no games scheduled for today" message
+    const noGamesEl = document.createElement('div');
+    noGamesEl.className = 'no-games-message';
+    noGamesEl.textContent = 'There are no games scheduled for today';
+    container.appendChild(noGamesEl);
+    updateCurrentTime(''); // Empty string to hide the time text entirely
+    return;
+  }
+
   // Sort games to show favorite team first if playing
   const sortedGames = sortGamesByFavorite(games, league);
 
@@ -55,20 +66,33 @@ export function renderGames(games, league = LEAGUES.MLB) {
   const maxGames = 15;
   const displayGames = sortedGames.slice(0, maxGames);
 
+  // Check if we should show "Games start at" message
+  const hasActiveGames = displayGames.some(game => {
+    const status = game.status?.toLowerCase() || '';
+    return status.includes('top ') || status.includes('bottom ') || status.includes('bot ') || 
+           status.includes('mid ') || status.includes('in progress') || status.includes('delay');
+  });
+
+  if (!hasActiveGames) {
+    // No active games, check if we have scheduled games and show "Games start at"
+    updateTimeForGameStart(displayGames);
+  } else {
+    // Active games, use regular "Last update at"
+    updateCurrentTime();
+  }
+
   displayGames.forEach((game) => {
     const gameEl = document.createElement('div');
     gameEl.className = 'game-pill';
 
-    // Map API team names to our internal names for lookups
+    // Map API team names to short names for logos/colors
     const awayTeamMapped = mapApiTeamName(game.away_team, league);
     const homeTeamMapped = mapApiTeamName(game.home_team, league);
 
-    // Check if this game has any favorite team (check both API and mapped names)
+    // Check if this game has any favorite team
     const hasFavoriteTeam =
       isFavoriteTeam(game.away_team, league) ||
-      isFavoriteTeam(game.home_team, league) ||
-      isFavoriteTeam(awayTeamMapped, league) ||
-      isFavoriteTeam(homeTeamMapped, league);
+      isFavoriteTeam(game.home_team, league);
 
     // Apply dynamic colors based on theme
     const shouldApplyDynamicColors =
@@ -180,7 +204,7 @@ export function updateHeaderTitle(league) {
   updateCurrentTime();
 }
 
-export function updateCurrentTime() {
+export function updateCurrentTime(customText = null) {
   const now = new Date();
   let hours = now.getHours();
   const minutes = now.getMinutes().toString().padStart(2, '0');
@@ -188,8 +212,64 @@ export function updateCurrentTime() {
   hours = hours % 12;
   hours = hours ? hours : 12; // 0 should be 12
 
-  document.getElementById('current-time').textContent =
-    `Last update - ${hours}:${minutes} ${ampm}`;
+  const timeString = `${hours}:${minutes} ${ampm}`;
+  const displayText = customText !== null ? customText : `Last update at ${timeString}`;
+  
+  document.getElementById('current-time').textContent = displayText;
+}
+
+export function updateTimeForGameStart(games) {
+  // Find the earliest scheduled game
+  const scheduledGames = games.filter(game => {
+    const status = game.status?.toLowerCase() || '';
+    return status.includes('pm et') || status.includes('am et') || status.includes('scheduled');
+  });
+
+  if (scheduledGames.length === 0) {
+    updateCurrentTime(); // Default to regular update time
+    return;
+  }
+
+  // Find the earliest game time
+  let earliestTime = null;
+  let earliestGame = null;
+
+  scheduledGames.forEach(game => {
+    const status = game.status || '';
+    // Extract time from status like "7:30 PM ET"
+    const timeMatch = status.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (timeMatch) {
+      const [, hourStr, minuteStr, ampm] = timeMatch;
+      let hour24 = parseInt(hourStr);
+      const minute = parseInt(minuteStr);
+      
+      if (ampm.toUpperCase() === 'PM' && hour24 !== 12) {
+        hour24 += 12;
+      } else if (ampm.toUpperCase() === 'AM' && hour24 === 12) {
+        hour24 = 0;
+      }
+      
+      const gameTime = hour24 * 60 + minute; // Convert to minutes for comparison
+      
+      if (earliestTime === null || gameTime < earliestTime) {
+        earliestTime = gameTime;
+        earliestGame = game;
+      }
+    }
+  });
+
+  if (earliestGame) {
+    // Extract the time string from the earliest game's status
+    const timeMatch = earliestGame.status.match(/(\d{1,2}:\d{2}\s*(?:AM|PM))/i);
+    if (timeMatch) {
+      const gameTimeStr = timeMatch[1];
+      updateCurrentTime(`Games start at ${gameTimeStr}`);
+      return;
+    }
+  }
+
+  // Fallback to regular update time
+  updateCurrentTime();
 }
 
 export function updateSizeIndicator() {

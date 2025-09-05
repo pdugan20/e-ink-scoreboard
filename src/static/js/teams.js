@@ -71,20 +71,28 @@ export function generateGradientBackground(awayTeam, homeTeam, league = LEAGUES.
 }
 
 export function convertTimeToTimezone(timeString) {
-  // Convert ET times to the configured timezone
-  // Input format: "10:40 PM ET" or "11:35 PM ET"
+  // Convert ET times to the configured timezone and strip timezone markers
+  // Input format: "10:40 PM ET"
+  
+  // Strip timezone markers for display in pills
+  const timeMatch = timeString.match(/(\d{1,2}:\d{2}\s+[AP]M)\s+ET/i);
+  if (timeMatch) {
+    return timeMatch[1]; // Return just the time part without timezone
+  }
+  
+  // If no timezone marker found, return as-is
   if (!timeString.includes(TIME_PERIODS.ET)) {
-    return timeString; // Return as-is if not an ET time
+    return timeString;
   }
 
   try {
-    // Extract the time part and remove ET
-    const timeMatch = timeString.match(/(\d{1,2}:\d{2}\s+[AP]M)\s+ET/);
-    if (!timeMatch) {
+    // Legacy ET conversion logic (keeping for compatibility)
+    const etMatch = timeString.match(/(\d{1,2}:\d{2}\s+[AP]M)\s+ET/);
+    if (!etMatch) {
       return timeString; // Return original if can't parse
     }
 
-    const timeStr = timeMatch[1];
+    const timeStr = etMatch[1];
 
     // Parse the ET time
     const [time, period] = timeStr.split(' ');

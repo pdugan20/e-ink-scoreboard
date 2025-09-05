@@ -1,0 +1,52 @@
+[
+  {
+    "away_record": "82-58",
+    "away_score": 0,
+    "away_team": "New York Yankees",
+    "home_record": "70-70",
+    "home_score": 0,
+    "home_team": "Boston Red Sox",
+    "status": "11:50 PM ET",
+    "venue": "Fenway Park"
+  },
+  {
+    "away_record": "89-51",
+    "away_score": 0,
+    "away_team": "Los Angeles Dodgers", 
+    "home_record": "74-66",
+    "home_score": 0,
+    "home_team": "San Francisco Giants",
+    "status": "11:50 PM ET",
+    "venue": "Oracle Park"
+  },
+  {
+    "away_record": "78-62",
+    "away_score": 0,
+    "away_team": "Houston Astros",
+    "home_record": "68-72", 
+    "home_score": 0,
+    "home_team": "Texas Rangers",
+    "status": "11:50 PM ET",
+    "venue": "Globe Life Field"
+  },
+  {
+    "away_record": "81-59",
+    "away_score": 0,
+    "away_team": "Atlanta Braves",
+    "home_record": "85-55",
+    "home_score": 0,
+    "home_team": "Philadelphia Phillies", 
+    "status": "11:50 PM ET",
+    "venue": "Citizens Bank Park"
+  },
+  {
+    "away_record": "74-66",
+    "away_score": 0,
+    "away_team": "Chicago Cubs",
+    "home_record": "82-58",
+    "home_score": 0,
+    "home_team": "Milwaukee Brewers",
+    "status": "11:50 PM ET",
+    "venue": "American Family Field"
+  }
+]

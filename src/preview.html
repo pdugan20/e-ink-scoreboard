@@ -17,12 +17,24 @@
                 <button class="dismiss-btn" onclick="toggleDevTray()">Close</button>
             </div>
             <div class="control-section">
-                <label>Data Source</label>
+                <label>MLB</label>
                 <div class="control-buttons">
-                    <button onclick="loadMLBData()">MLB</button>
-                    <button onclick="loadNFLData()">NFL</button>
-                    <button onclick="loadCFBData()">CFB</button>
-                    <button onclick="fetchLiveData()">Fetch Live</button>
+                    <button onclick="loadMLBData()">Mixed</button>
+                    <button onclick="loadMLBScheduledData()">Scheduled</button>
+                    <button onclick="loadMLBEmptyData()">Empty</button>
+                    <button onclick="fetchLiveData()">Live</button>
+                </div>
+            </div>
+            <div class="control-section">
+                <label>NFL</label>
+                <div class="control-buttons">
+                    <button onclick="loadNFLData()">Mixed</button>
+                </div>
+            </div>
+            <div class="control-section">
+                <label>CFB</label>
+                <div class="control-buttons">
+                    <button onclick="loadCFBData()">Mixed</button>
                 </div>
             </div>
             <div class="control-section">

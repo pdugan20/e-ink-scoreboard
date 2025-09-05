@@ -2,6 +2,8 @@
 import {
   loadTestData,
   loadMLBData,
+  loadMLBScheduledData,
+  loadMLBEmptyData,
   loadNFLData,
   loadCFBData,
   fetchLiveData,
@@ -88,6 +90,8 @@ function initResizable() {
 
 // Make data loading functions globally accessible for HTML onclick handlers
 window.loadMLBData = loadMLBData;
+window.loadMLBScheduledData = loadMLBScheduledData;
+window.loadMLBEmptyData = loadMLBEmptyData;
 window.loadNFLData = loadNFLData;
 window.loadCFBData = loadCFBData;
 window.fetchLiveData = fetchLiveData;
