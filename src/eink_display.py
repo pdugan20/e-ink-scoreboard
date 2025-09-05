@@ -369,7 +369,15 @@ class EinkDisplayController:
             return True
     
     def refresh_display(self, force_update=False):
-        """Complete refresh cycle: screenshot -> process -> display"""
+        """Complete refresh cycle: screenshot -> process -> display
+        
+        Display Update Logic:
+        - force_update=True: Always updates display (used for new game days)
+        - force_update=False: Only updates if there are active games running
+        
+        This prevents unnecessary e-ink refreshes when games are only scheduled
+        but preserves the ability to update the display when games start.
+        """
         logger.info("Starting display refresh...")
         
         # Check for active games unless forced

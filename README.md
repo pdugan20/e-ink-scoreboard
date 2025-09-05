@@ -91,7 +91,10 @@ docs/                      # Documentation
 ## Commands
 
 ```bash
-# Single update
+# Single update (respects active game logic)
+python src/eink_display.py --once
+
+# Force update (bypasses active game check)
 python src/eink_display.py --once
 
 # Custom server URL
@@ -100,6 +103,16 @@ python src/eink_display.py --url http://localhost:5002/display
 # Test with dummy data (16 games)
 python src/eink_display.py --url http://localhost:5001/display?test=true --once
 ```
+
+## Display Update Logic
+
+The system uses intelligent update logic to minimize e-ink wear:
+
+- **New game day**: Updates once to show upcoming games
+- **During games**: Regular updates every 2-5 minutes while games are active
+- **Games scheduled only**: Skips updates to preserve display longevity
+
+**Force an update**: Use `--once` flag or restart the display service on Raspberry Pi.
 
 ## Development
 

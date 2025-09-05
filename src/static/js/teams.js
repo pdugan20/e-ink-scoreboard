@@ -74,14 +74,8 @@ export function convertTimeToTimezone(timeString) {
   // Convert ET times to the configured timezone and strip timezone markers
   // Input format: "10:40 PM ET"
   
-  // Strip timezone markers for display in pills
-  const timeMatch = timeString.match(/(\d{1,2}:\d{2}\s+[AP]M)\s+ET/i);
-  if (timeMatch) {
-    return timeMatch[1]; // Return just the time part without timezone
-  }
-  
   // If no timezone marker found, return as-is
-  if (!timeString.includes(TIME_PERIODS.ET)) {
+  if (!timeString.includes('ET')) {
     return timeString;
   }
 

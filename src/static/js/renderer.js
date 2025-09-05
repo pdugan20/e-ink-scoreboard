@@ -259,8 +259,10 @@ export function updateTimeForGameStart(games) {
   });
 
   if (earliestGame) {
-    // Extract the time string from the earliest game's status
-    const timeMatch = earliestGame.status.match(/(\d{1,2}:\d{2}\s*(?:AM|PM))/i);
+    // Convert the time to user's timezone before displaying
+    const convertedTime = convertTimeToTimezone(earliestGame.status);
+    // Extract just the time part from the converted result
+    const timeMatch = convertedTime.match(/(\d{1,2}:\d{2}\s*(?:AM|PM))/i);
     if (timeMatch) {
       const gameTimeStr = timeMatch[1];
       updateCurrentTime(`Games start at ${gameTimeStr}`);

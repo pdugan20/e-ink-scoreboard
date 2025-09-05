@@ -4,6 +4,32 @@ This guide covers common issues and their solutions for the Sports Scores E-ink 
 
 ## Display Not Updating
 
+### Understanding Display Update Logic
+
+The display uses smart update logic to minimize e-ink wear:
+
+**Automatic Updates:**
+- ✅ **New game day**: Updates once to show "Games start at X:XX"
+- ✅ **Games active**: Regular updates while games are in progress  
+- ❌ **Games scheduled only**: Skips updates to preserve e-ink display
+
+**Update Schedule:**
+1. **Daily**: One update when new games are detected for the day
+2. **During games**: Updates every 2-5 minutes (configurable) while games are active
+3. **Between games**: No updates until next active game
+
+### Force a Display Update
+
+If you need to manually update the display:
+
+```bash
+# Force immediate update (bypasses active game check)
+python src/eink_display.py --once --config src/eink_config.json
+
+# Or restart the display service to trigger new day detection
+sudo systemctl restart sports-display.service
+```
+
 ### Check Services Status
 ```bash
 # Check if services are running
@@ -13,7 +39,7 @@ sudo systemctl status sports-display.service
 # Test server manually
 curl http://localhost:5001/display
 
-# Test display script manually
+# Test display script manually (will respect active game logic)
 python src/eink_display.py --once --config src/eink_config.json
 ```
 

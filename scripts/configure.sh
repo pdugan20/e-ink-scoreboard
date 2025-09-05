@@ -78,39 +78,39 @@ echo ""
 
 read -p "Enter choices separated by commas (e.g., 2,16,22 or 1 for none): " team_choices
 
-# Function to map number to team name (for JS config)
+# Function to map number to team name (for JS config) - using full MLB API names
 get_team_name() {
     case $1 in
         1) echo "null" ;;
-        2) echo "'Angels'" ;;
-        3) echo "'Astros'" ;;
-        4) echo "'Athletics'" ;;
-        5) echo "'Blue Jays'" ;;
-        6) echo "'Guardians'" ;;
-        7) echo "'White Sox'" ;;
-        8) echo "'Twins'" ;;
-        9) echo "'Mariners'" ;;
-        10) echo "'Orioles'" ;;
-        11) echo "'Rangers'" ;;
-        12) echo "'Red Sox'" ;;
-        13) echo "'Royals'" ;;
-        14) echo "'Rays'" ;;
-        15) echo "'Tigers'" ;;
-        16) echo "'Yankees'" ;;
-        17) echo "'D-backs'" ;;
-        18) echo "'Braves'" ;;
-        19) echo "'Cubs'" ;;
-        20) echo "'Reds'" ;;
-        21) echo "'Rockies'" ;;
-        22) echo "'Dodgers'" ;;
-        23) echo "'Giants'" ;;
-        24) echo "'Brewers'" ;;
-        25) echo "'Marlins'" ;;
-        26) echo "'Mets'" ;;
-        27) echo "'Phillies'" ;;
-        28) echo "'Pirates'" ;;
-        29) echo "'Cardinals'" ;;
-        30) echo "'Nationals'" ;;
+        2) echo "'Los Angeles Angels'" ;;
+        3) echo "'Houston Astros'" ;;
+        4) echo "'Oakland Athletics'" ;;
+        5) echo "'Toronto Blue Jays'" ;;
+        6) echo "'Cleveland Guardians'" ;;
+        7) echo "'Chicago White Sox'" ;;
+        8) echo "'Minnesota Twins'" ;;
+        9) echo "'Seattle Mariners'" ;;
+        10) echo "'Baltimore Orioles'" ;;
+        11) echo "'Texas Rangers'" ;;
+        12) echo "'Boston Red Sox'" ;;
+        13) echo "'Kansas City Royals'" ;;
+        14) echo "'Tampa Bay Rays'" ;;
+        15) echo "'Detroit Tigers'" ;;
+        16) echo "'New York Yankees'" ;;
+        17) echo "'Arizona Diamondbacks'" ;;
+        18) echo "'Atlanta Braves'" ;;
+        19) echo "'Chicago Cubs'" ;;
+        20) echo "'Cincinnati Reds'" ;;
+        21) echo "'Colorado Rockies'" ;;
+        22) echo "'Los Angeles Dodgers'" ;;
+        23) echo "'San Francisco Giants'" ;;
+        24) echo "'Milwaukee Brewers'" ;;
+        25) echo "'Miami Marlins'" ;;
+        26) echo "'New York Mets'" ;;
+        27) echo "'Philadelphia Phillies'" ;;
+        28) echo "'Pittsburgh Pirates'" ;;
+        29) echo "'St. Louis Cardinals'" ;;
+        30) echo "'Washington Nationals'" ;;
         *) echo "null" ;;
     esac
 }
@@ -119,35 +119,35 @@ get_team_name() {
 get_readable_team_name() {
     case $1 in
         1) echo "" ;;
-        2) echo "Angels" ;;
-        3) echo "Astros" ;;
-        4) echo "Athletics" ;;
-        5) echo "Blue Jays" ;;
-        6) echo "Guardians" ;;
-        7) echo "White Sox" ;;
-        8) echo "Twins" ;;
-        9) echo "Mariners" ;;
-        10) echo "Orioles" ;;
-        11) echo "Rangers" ;;
-        12) echo "Red Sox" ;;
-        13) echo "Royals" ;;
-        14) echo "Rays" ;;
-        15) echo "Tigers" ;;
-        16) echo "Yankees" ;;
-        17) echo "D-backs" ;;
-        18) echo "Braves" ;;
-        19) echo "Cubs" ;;
-        20) echo "Reds" ;;
-        21) echo "Rockies" ;;
-        22) echo "Dodgers" ;;
-        23) echo "Giants" ;;
-        24) echo "Brewers" ;;
-        25) echo "Marlins" ;;
-        26) echo "Mets" ;;
-        27) echo "Phillies" ;;
-        28) echo "Pirates" ;;
-        29) echo "Cardinals" ;;
-        30) echo "Nationals" ;;
+        2) echo "Los Angeles Angels" ;;
+        3) echo "Houston Astros" ;;
+        4) echo "Oakland Athletics" ;;
+        5) echo "Toronto Blue Jays" ;;
+        6) echo "Cleveland Guardians" ;;
+        7) echo "Chicago White Sox" ;;
+        8) echo "Minnesota Twins" ;;
+        9) echo "Seattle Mariners" ;;
+        10) echo "Baltimore Orioles" ;;
+        11) echo "Texas Rangers" ;;
+        12) echo "Boston Red Sox" ;;
+        13) echo "Kansas City Royals" ;;
+        14) echo "Tampa Bay Rays" ;;
+        15) echo "Detroit Tigers" ;;
+        16) echo "New York Yankees" ;;
+        17) echo "Arizona Diamondbacks" ;;
+        18) echo "Atlanta Braves" ;;
+        19) echo "Chicago Cubs" ;;
+        20) echo "Cincinnati Reds" ;;
+        21) echo "Colorado Rockies" ;;
+        22) echo "Los Angeles Dodgers" ;;
+        23) echo "San Francisco Giants" ;;
+        24) echo "Milwaukee Brewers" ;;
+        25) echo "Miami Marlins" ;;
+        26) echo "New York Mets" ;;
+        27) echo "Philadelphia Phillies" ;;
+        28) echo "Pittsburgh Pirates" ;;
+        29) echo "St. Louis Cardinals" ;;
+        30) echo "Washington Nationals" ;;
         *) echo "" ;;
     esac
 }

@@ -90,8 +90,9 @@
             }
             updateCurrentTime();
 
-            // Update time every minute
-            setInterval(updateCurrentTime, 60000);
+            // Note: Auto-refresh disabled to prevent race conditions on Raspberry Pi
+            // The Pi controller handles timing, not the browser
+            // setInterval(updateCurrentTime, 60000);
         }
 
         // Initialize when page loads
