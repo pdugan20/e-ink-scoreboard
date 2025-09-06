@@ -507,6 +507,7 @@ def main():
     
     parser = argparse.ArgumentParser(description="E-Ink Scoreboard Display Controller")
     parser.add_argument("--once", action="store_true", help="Update display once and exit")
+    parser.add_argument("--force", action="store_true", help="Force update (bypass active game check)")
     parser.add_argument("--config", default="eink_config.json", help="Configuration file path")
     parser.add_argument("--interval", type=int, help="Refresh interval in seconds")
     parser.add_argument("--url", help="Web server URL")
@@ -530,11 +531,12 @@ def main():
     controller = EinkDisplayController(config)
     
     if args.once:
-        # Single update (always force when using --once)
+        # Single update - respect active game logic unless --force is specified
         if not controller.wait_for_server():
             sys.exit(1)
         
-        success = controller.refresh_display(force_update=True)
+        force_update = args.force
+        success = controller.refresh_display(force_update=force_update)
         sys.exit(0 if success else 1)
     else:
         # Continuous mode
