@@ -35,7 +35,7 @@ export const THEMES = {
 };
 
 // Theme configuration
-export const currentTheme = THEMES.TEAM_COLORS;
+export const currentTheme = THEMES.DEFAULT;
 
 // League constants
 export const LEAGUES = {
