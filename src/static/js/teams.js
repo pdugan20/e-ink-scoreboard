@@ -7,7 +7,7 @@ import {
   mlbWhiteLogoOverrides,
 } from './constants/mlb-secondary-logos.js';
 import { mlbTeamColors } from './constants/mlb-colors.js';
-import { mlbGradientColors } from './constants/mlb-gradient-colors.js';
+import { getBestGradientColors } from './constants/gradient-color-optimizer.js';
 
 // Map API team names to our internal team names
 export function mapApiTeamName(apiTeamName, league = LEAGUES.MLB) {
@@ -50,24 +50,32 @@ export function getTeamColor(teamName, league = LEAGUES.MLB, colorType = COLOR_T
   return 'var(--color-gray-600)'; // Default gray fallback
 }
 
-export function getGradientColor(teamName, league = LEAGUES.MLB) {
-  // Check if there's an override for this team's gradient color
-  if (league === LEAGUES.MLB && mlbGradientColors && mlbGradientColors[teamName]) {
-    return getTeamColor(teamName, league, mlbGradientColors[teamName]);
-  }
-  // Default to primary color
-  return getTeamColor(teamName, league, COLOR_TYPES.PRIMARY);
-}
-
 export function generateGradientBackground(awayTeam, homeTeam, league = LEAGUES.MLB) {
-  // Get the appropriate color for each team (with overrides)
-  const awayColor = getGradientColor(awayTeam, league);
-  const homeColor = getGradientColor(homeTeam, league);
-
+  if (league !== LEAGUES.MLB) {
+    // For non-MLB leagues, fall back to primary colors
+    const awayColor = getTeamColor(awayTeam, league, COLOR_TYPES.PRIMARY);
+    const homeColor = getTeamColor(homeTeam, league, COLOR_TYPES.PRIMARY);
+    return `linear-gradient(105deg, ${awayColor}E6 0%, ${awayColor}E6 25%, ${homeColor}E6 75%, ${homeColor}E6 100%)`;
+  }
+  
+  // Get team color objects
+  const awayTeamColors = mlbTeamColors[awayTeam];
+  const homeTeamColors = mlbTeamColors[homeTeam];
+  
+  if (!awayTeamColors || !homeTeamColors) {
+    // Fallback if team colors not found
+    const awayColor = getTeamColor(awayTeam, league, COLOR_TYPES.PRIMARY);
+    const homeColor = getTeamColor(homeTeam, league, COLOR_TYPES.PRIMARY);
+    return `linear-gradient(105deg, ${awayColor}E6 0%, ${awayColor}E6 25%, ${homeColor}E6 75%, ${homeColor}E6 100%)`;
+  }
+  
+  // Use dynamic optimization to get best colors
+  const optimizedColors = getBestGradientColors(awayTeamColors, homeTeamColors);
+  
   // Diagonal gradient with 15 degree angle, colors blend in the center
   // Away team on left, home team on right (matching the display order)
   // Adding 90% opacity to lighten the colors slightly
-  return `linear-gradient(105deg, ${awayColor}E6 0%, ${awayColor}E6 25%, ${homeColor}E6 75%, ${homeColor}E6 100%)`;
+  return `linear-gradient(105deg, ${optimizedColors.team1Color}E6 0%, ${optimizedColors.team1Color}E6 25%, ${optimizedColors.team2Color}E6 75%, ${optimizedColors.team2Color}E6 100%)`;
 }
 
 export function convertTimeToTimezone(timeString) {
