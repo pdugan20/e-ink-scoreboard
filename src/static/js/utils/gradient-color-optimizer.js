@@ -2,6 +2,28 @@
 // Automatically selects the best color combination for team vs team gradients
 // Prioritizes preferred color harmonies: greens+blues, blue+blue, red+blue, black+blue, green+red
 
+// Colors to never use in gradients
+const BANNED_COLOR_FAMILIES = ['white', 'orange', 'yellow'];
+
+const BANNED_COLORS = [
+  '#EFD19F', // Giants tertiary
+  '#E8291C', // Blue Jays tertiary
+];
+
+const COLOR_CLASSIFICATIONS = {
+  '#005C5C': 'green', // Mariners primary
+  '#003831': 'green', // Athletics primary
+  '#13274F': 'blue', // Braves secondary
+  '#134A8E': 'blue', // Blue Jays primary
+  '#1D2D5C': 'blue', // Blue Jays secondary
+  '#003087': 'blue', // Yankees primary
+  '#0C2C56': 'blue', // Mariners secondary
+  '#005A9C': 'blue', // Dodgers primary
+  '#EF3E42': 'red', // Dodgers secondary
+  '#27251F': 'black', // Giants secondary
+  '#000000': 'black', // D-backs tertiary
+};
+
 // Convert hex color to RGB object
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -33,23 +55,8 @@ function getColorDistance(color1, color2) {
 
 // Classify color into basic color families
 function getColorFamily(hex) {
-  // Special case overrides for specific team colors
-  const specialCases = {
-    '#005C5C': 'green', // Mariners primary
-    '#003831': 'green', // Athletics primary
-    '#13274F': 'blue', // Braves secondary
-    '#134A8E': 'blue', // Blue Jays primary
-    '#1D2D5C': 'blue', // Blue Jays secondary
-    '#003087': 'blue', // Yankees primary
-    '#0C2C56': 'blue', // Mariners secondary
-    '#005A9C': 'blue', // Dodgers primary
-    '#EF3E42': 'red', // Dodgers secondary
-    '#27251F': 'black', // Giants secondary
-    '#000000': 'black', // D-backs tertiary
-  };
-
-  if (specialCases[hex]) {
-    return specialCases[hex];
+  if (COLOR_CLASSIFICATIONS[hex]) {
+    return COLOR_CLASSIFICATIONS[hex];
   }
 
   const rgb = hexToRgb(hex);
@@ -93,6 +100,14 @@ function getHarmonyScore(color1, color2) {
   const family1 = getColorFamily(color1);
   const family2 = getColorFamily(color2);
 
+  // NEVER use banned color families - eliminate immediately
+  if (
+    BANNED_COLOR_FAMILIES.includes(family1) ||
+    BANNED_COLOR_FAMILIES.includes(family2)
+  ) {
+    return 0;
+  }
+
   const combination = [family1, family2].sort().join('+');
 
   // Preferred harmonies (high score)
@@ -107,22 +122,17 @@ function getHarmonyScore(color1, color2) {
 
   // Good contrasts but not preferred
   const decentHarmonies = {
-    'blue+white': 50,
-    'red+white': 50,
-    'green+white': 50,
-    'black+white': 45,
     'gray+blue': 40,
     'gray+red': 40,
+    'gray+green': 35,
+    'black+gray': 30,
   };
 
-  // Poor combinations (low score) - remove green+red penalty since you want green+blue
+  // Poor combinations (low score) - white/orange/yellow handled by BANNED_COLOR_FAMILIES
   const poorHarmonies = {
     'red+red': 10,
     'green+green': 10,
-    'orange+orange': 10,
-    'yellow+yellow': 5,
     'gray+gray': 5,
-    'white+white': 0,
   };
 
   return (
@@ -145,24 +155,12 @@ function scoreColorCombination(color1, color2) {
   const family1 = getColorFamily(color1);
   const family2 = getColorFamily(color2);
 
-  const bannedColors = [
-    '#FFFFFF',
-    '#FFC425',
-    '#EFB21E',
-    '#B6922E',
-    '#F5D130',
-    '#FEDB00',
-    '#EFD19F',
-    '#C4CED4',
-    '#E8291C',
-  ];
-  const bannedFamilies = ['white', 'orange', 'yellow'];
-
+  // Check banned families and specific banned colors
   if (
-    bannedColors.includes(color1) ||
-    bannedColors.includes(color2) ||
-    bannedFamilies.includes(family1) ||
-    bannedFamilies.includes(family2)
+    BANNED_COLOR_FAMILIES.includes(family1) ||
+    BANNED_COLOR_FAMILIES.includes(family2) ||
+    BANNED_COLORS.includes(color1) ||
+    BANNED_COLORS.includes(color2)
   ) {
     return 0; // Completely eliminate these colors
   }

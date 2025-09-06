@@ -63,8 +63,10 @@ export function renderGames(games, league = LEAGUES.MLB) {
   // Sort games to show favorite team first if playing
   const sortedGames = sortGamesByFavorite(games, league);
 
-  // Limit to maximum 15 games (3x5 grid)
-  const maxGames = 15;
+  // Dynamic game limit based on display size
+  const display = document.getElementById('display');
+  const isExpanded = display?.classList.contains('expanded');
+  const maxGames = isExpanded ? 30 : 15; // 5x6 for expanded, 3x5 for normal
   const displayGames = sortedGames.slice(0, maxGames);
 
   // Check if we should show "Games start at" message

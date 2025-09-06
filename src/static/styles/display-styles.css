@@ -242,6 +242,17 @@ body {
   box-sizing: border-box;
 }
 
+/* Large display configuration (1600x1200) */
+.display.expanded .games-grid {
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(6, auto);
+  gap: var(--space-6);
+  padding: var(--space-12);
+  max-width: 1400px;
+  margin: 0 auto;
+  align-content: start;
+}
+
 .game-pill {
   border: var(--space-1) solid var(--eink-border-light);
   border-radius: var(--space-8);
@@ -254,6 +265,12 @@ body {
   width: 100%;
   max-width: 260px;
   box-sizing: border-box;
+}
+
+/* Override max-width for expanded display */
+.display.expanded .game-pill {
+  max-width: none !important;
+  max-height: 100px;
 }
 
 /* Dynamic color pills styling */

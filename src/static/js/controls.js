@@ -44,6 +44,14 @@ window.setSize = function setSize(width, height) {
   const display = document.getElementById('display');
   frame.style.width = width + 40 + 'px'; // Add padding
   display.style.height = height + 'px';
+  
+  // Add expanded class for 1600x1200 layout
+  if (width >= 1400 && height >= 900) {
+    display.classList.add('expanded');
+  } else {
+    display.classList.remove('expanded');
+  }
+  
   targetWidth = width;
   targetHeight = height;
   updateSizeIndicator();
