@@ -9,4 +9,5 @@ export const mlbGradientColors = {
   Pirates: 'secondary',
   Rangers: 'secondary',
   Marlins: 'secondary',
+  Braves: 'secondary',
 };
