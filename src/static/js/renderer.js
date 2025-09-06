@@ -15,7 +15,7 @@ import {
   generateGradientBackground,
   convertTimeToTimezone,
   formatGameStatus,
-} from './teams.js';
+} from './utils/teams.js';
 import { generateBaseballDiamondComponent } from './diamond.js';
 import { themeManager } from './theme-manager.js';
 

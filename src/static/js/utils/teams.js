@@ -1,13 +1,13 @@
 // Team helper functions
-import { displayTimezone, LEAGUES, TIME_PERIODS, COLOR_TYPES, TIMEZONE_ABBREVIATIONS } from './config.js';
-import { MLB_TEAM_NAME_MAP } from './constants/mlb-constants.js';
-import { mlbTeamLogos } from './constants/mlb-logos.js';
+import { displayTimezone, LEAGUES, TIME_PERIODS, COLOR_TYPES, TIMEZONE_ABBREVIATIONS } from '../config.js';
+import { MLB_TEAM_NAME_MAP } from '../constants/mlb-constants.js';
+import { mlbTeamLogos } from '../constants/mlb-logos.js';
 import {
   mlbUseWhiteLogos,
   mlbWhiteLogoOverrides,
-} from './constants/mlb-secondary-logos.js';
-import { mlbTeamColors } from './constants/mlb-colors.js';
-import { getBestGradientColors } from './constants/gradient-color-optimizer.js';
+} from '../constants/mlb-secondary-logos.js';
+import { mlbTeamColors } from '../constants/mlb-colors.js';
+import { getBestGradientColors } from './gradient-color-optimizer.js';
 
 // Map API team names to our internal team names
 export function mapApiTeamName(apiTeamName, league = LEAGUES.MLB) {
