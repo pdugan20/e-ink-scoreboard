@@ -44,7 +44,7 @@ export const MLB_STATUS_PATTERNS = {
 let gameStatusConfig = null;
 
 // Hardcoded fallback (MUST match src/config/game-status-config.json!)
-const FALLBACK_ACTIVE_STATUSES = ['top ', 'bottom ', 'bot ', 'mid ', 'middle ', 'end ', 'in progress', 'delay', 'warmup', 'pre-game', 'suspended'];
+const FALLBACK_ACTIVE_STATUSES = ['top ', 'bottom ', 'bot ', 'mid ', 'middle ', 'end ', 'in progress', 'delay', 'warmup', 'pre-game', 'suspended', 'challenge'];
 
 // Initialize config on module load
 async function initGameStatusConfig() {

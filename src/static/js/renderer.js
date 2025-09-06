@@ -14,6 +14,7 @@ import {
   getTeamLogo,
   generateGradientBackground,
   convertTimeToTimezone,
+  formatGameStatus,
 } from './teams.js';
 import { generateBaseballDiamondComponent } from './diamond.js';
 import { themeManager } from './theme-manager.js';
@@ -165,7 +166,7 @@ export function renderGames(games, league = LEAGUES.MLB) {
                         ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
                     </div>
                 </div>
-                ${generateBaseballDiamondComponent(game, themeManager.shouldUseDynamicDiamond(shouldApplyDynamicColors), convertTimeToTimezone(game.status))}
+                ${generateBaseballDiamondComponent(game, themeManager.shouldUseDynamicDiamond(shouldApplyDynamicColors), convertTimeToTimezone(formatGameStatus(game.status)))}
             </div>
         `;
     container.appendChild(gameEl);

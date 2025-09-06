@@ -10,7 +10,8 @@
     "delay",
     "warmup",
     "pre-game",
-    "suspended"
+    "suspended",
+    "challenge"
   ],
   "scheduledGameStatuses": ["pm et", "am et", "scheduled"],
   "finalGameStatuses": [

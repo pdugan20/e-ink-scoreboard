@@ -152,3 +152,31 @@ export function convertTimeToTimezone(timeString) {
 export function getTimezoneAbbreviation(timezone) {
   return TIMEZONE_ABBREVIATIONS[timezone] || timezone.split('/').pop();
 }
+
+export function formatGameStatus(status) {
+  // Clean up long status messages for better display
+  const lowerStatus = status.toLowerCase();
+  
+  if (lowerStatus.includes('manager challenge')) {
+    return 'Challenge';
+  }
+  
+  if (lowerStatus.includes('instant replay')) {
+    return 'Replay';
+  }
+  
+  if (lowerStatus.includes('rain delay') || lowerStatus.includes('weather delay')) {
+    return 'Delay';
+  }
+  
+  if (lowerStatus.includes('commercial break')) {
+    return 'Break';
+  }
+  
+  if (lowerStatus.includes('pitching change')) {
+    return 'Sub';
+  }
+  
+  // Add other status cleanups as needed
+  return status;
+}
