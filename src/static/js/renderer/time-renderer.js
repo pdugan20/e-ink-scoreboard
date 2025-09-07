@@ -38,9 +38,8 @@ export function updateCurrentTime(customText = null) {
   };
   
   const timeString = now.toLocaleTimeString('en-US', timeOptions);
-  const timezoneAbbr = TIMEZONE_ABBREVIATIONS[displayTimezone] || 'PT';
   
-  const displayText = customText !== null ? customText : `Last update at ${timeString} ${timezoneAbbr}`;
+  const displayText = customText !== null ? customText : `Last update at ${timeString}`;
   currentTimeEl.textContent = displayText;
 }
 
