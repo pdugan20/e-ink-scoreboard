@@ -7,6 +7,7 @@ import {
   loadNFLData,
   loadCFBData,
   fetchLiveData,
+  loadScreensaverData,
 } from './data.js';
 import { updateSizeIndicator, updateCurrentTime } from './renderer.js';
 
@@ -103,6 +104,7 @@ window.loadMLBEmptyData = loadMLBEmptyData;
 window.loadNFLData = loadNFLData;
 window.loadCFBData = loadCFBData;
 window.fetchLiveData = fetchLiveData;
+window.loadScreensaverData = loadScreensaverData;
 
 // Initialize the app
 export async function initApp() {

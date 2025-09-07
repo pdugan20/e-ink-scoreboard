@@ -88,3 +88,24 @@ export async function fetchLiveData() {
     loadMLBData();
   }
 }
+
+export async function loadScreensaverData() {
+  try {
+    // Try to fetch screensaver data from dev server for MLB (could be made configurable later)
+    const league = 'mlb';
+    const response = await fetch(`/api/screensaver/${league}`);
+    if (response.ok) {
+      const data = await response.json();
+      // Update header title based on the team or use a generic title
+      const headerTitle = data.team ? `${data.team} News` : 'Team News';
+      updateHeaderTitle(headerTitle);
+      const { renderScreensaver } = await import('./renderer.js');
+      renderScreensaver(data);
+      console.log('Loaded screensaver data:', data);
+    } else {
+      console.log('Dev server not running, cannot load screensaver');
+    }
+  } catch (error) {
+    console.log('Dev server not available, cannot load screensaver');
+  }
+}

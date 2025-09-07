@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Ink Scoreboard Display</title>
-    <link rel="stylesheet" href="/static/styles/display-styles.css">
+    <link rel="stylesheet" href="/static/styles/variables.css">
+    <link rel="stylesheet" href="/static/styles/mlb-scores-styles.css">
+    <link rel="stylesheet" href="/static/styles/screensaver-styles.css">
     <style>
         /* Clean display styles - remove dev UI elements */
         body {
@@ -72,16 +74,19 @@
         import './static/js/constants/mlb-logos.js';
         import './static/js/constants/mlb-secondary-logos.js';
         import './static/js/constants/mlb-colors.js';
-        import { loadTestData, loadMLBData, fetchLiveData } from './static/js/data.js';
+        import { loadTestData, loadMLBData, fetchLiveData, loadScreensaverData } from './static/js/data.js';
         import { updateCurrentTime } from './static/js/renderer.js';
 
-        // Check URL parameters for test data
+        // Check URL parameters for test data or screensaver mode
         const urlParams = new URLSearchParams(window.location.search);
         const useTestData = urlParams.get('test') === 'true';
+        const useScreensaver = urlParams.get('screensaver') === 'true';
 
         // Initialize with live or test data based on URL parameter
         async function initDisplay() {
-            if (useTestData) {
+            if (useScreensaver) {
+                await loadScreensaverData();
+            } else if (useTestData) {
                 await loadTestData();
                 loadMLBData();
             } else {

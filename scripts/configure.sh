@@ -265,10 +265,31 @@ echo "✅ Set theme: $theme_display"
 update_js_config "src/static/js/config.js" "currentTheme" "$theme"
 
 echo ""
+echo "📰 Enable team news screensaver?"
+echo ""
+echo "When no games are scheduled, the display can show news articles"
+echo "from your favorite team instead of a blank 'no games' message."
+echo ""
+echo " 1) Yes - Show team news when no games (recommended)"
+echo " 2) No - Show standard 'no games scheduled' message"
+echo ""
+
+read -p "Enter choice (1-2): " screensaver_choice
+
+case $screensaver_choice in
+    1) screensaver_enabled="true"; screensaver_display="Enabled" ;;
+    2) screensaver_enabled="false"; screensaver_display="Disabled" ;;
+    *) echo "Invalid choice, enabling screensaver"; screensaver_enabled="true"; screensaver_display="Enabled" ;;
+esac
+
+echo "✅ Set screensaver: $screensaver_display"
+update_js_config "src/static/js/config.js" "FEATURE_FLAGS" "{ SHOW_STANDINGS: false, EINK_OPTIMIZED_CONTRAST: true, SHOW_SCREENSAVER: $screensaver_enabled }"
+
+echo ""
 echo "🎉 Configuration complete!"
 echo ""
 echo "Your settings have been applied to:"
-echo "- src/static/js/config.js (theme, timezone, favorite team)"
+echo "- src/static/js/config.js (theme, timezone, favorite team, screensaver)"
 echo "- src/eink_config.json (refresh interval)"
 echo ""
 echo "Next steps:"

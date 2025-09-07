@@ -5,8 +5,9 @@ Display live sports scores on your e-ink display with professional quality and r
 ## Features
 
 - **Live MLB Scores**: Real-time MLB scores with on-base and out displays
-- **Clean Layout**: Optimized for 800x480 e-ink displays showing up to 16 games in a 4x4 grid
-- **Auto-refresh**: Configurable refresh interval
+- **Team News Screensaver**: Automatically displays team news when no games are scheduled
+- **Clean Layout**: Optimized for 800x480 e-ink displays showing up to 16 games in a 3x5 grid
+- **Auto-refresh**: Configurable refresh interval with power-saving logic
 - **Mac Testing**: Full development environment with live preview
 - **Raspberry Pi Ready**: Complete deployment guide
 
@@ -154,6 +155,7 @@ The system uses intelligent update logic to minimize e-ink wear:
 
 ### Planned Features
 
+- **Expanded Team RSS Feeds** - News screensaver support for all 30 MLB teams
 - **Dark Mode Theme** - High-contrast dark theme optimized for e-ink displays
 - **NFL Support** - Full NFL game scores and schedules during football season
 - **College Football (CFB) Support** - Major college football games and conferences

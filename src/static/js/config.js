@@ -4,6 +4,7 @@
 export const FEATURE_FLAGS = {
   SHOW_STANDINGS: false,
   EINK_OPTIMIZED_CONTRAST: true,
+  SHOW_SCREENSAVER: true,
 };
 
 // Favorite team configuration
