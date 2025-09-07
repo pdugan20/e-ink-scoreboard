@@ -87,6 +87,7 @@ class RefreshController:
                 
                 # Check if we have active games
                 has_active_games = self.game_checker.check_active_games()
+                screensaver_eligible = False  # Initialize here to avoid scope issues
                 
                 if has_active_games:
                     # There are active games - update normally (preserves original functionality)
