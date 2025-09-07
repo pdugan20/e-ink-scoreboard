@@ -88,10 +88,19 @@ class ScreenshotController:
             )
             
             logger.info(f"Taking screenshot with Playwright ({scale_factor}x DPI rendering)...")
-            page.goto(self.config['web_server_url'], wait_until="networkidle")
             
-            # Wait for images to load
-            page.wait_for_timeout(5000)
+            # Increase timeout for slower Pi and RSS feed loading
+            page.set_default_timeout(90000)  # 90 seconds
+            
+            try:
+                page.goto(self.config['web_server_url'], wait_until="networkidle", timeout=90000)
+            except Exception as e:
+                # Fallback to domcontentloaded if networkidle times out
+                logger.warning(f"Network idle timeout, trying domcontentloaded: {e}")
+                page.goto(self.config['web_server_url'], wait_until="domcontentloaded", timeout=60000)
+            
+            # Wait for images to load (especially screensaver images)
+            page.wait_for_timeout(8000)
             
             page.screenshot(path=self.config['screenshot_path'], full_page=False)
             browser.close()
