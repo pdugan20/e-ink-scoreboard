@@ -29,11 +29,15 @@ Display live sports scores on your e-ink display with professional quality and r
 2. **Test the display**:
 
    ```bash
+   # Activate virtual environment first
+   source venv/bin/activate
+
    # Start web server (from project root)
-   ./venv/bin/python src/dev_server.py --port 5001
+   python src/dev_server.py --port 5001
 
    # Take screenshot (in another terminal, from project root)
-   ./venv/bin/python src/eink_display.py --once
+   source venv/bin/activate
+   python src/eink_display.py --once
 
    # View result: test_display_output.png
    ```
@@ -102,23 +106,26 @@ docs/                      # Documentation
 ## Commands
 
 ```bash
+# Activate virtual environment first
+source venv/bin/activate
+
 # Single update (looks if there are live games)
-./venv/bin/python src/eink_display.py --once
+python src/eink_display.py --once
 
 # Force update (bypasses check for live games)
-./venv/bin/python src/eink_display.py --once --force
+python src/eink_display.py --once --force
 
 # Custom server URL
-./venv/bin/python src/eink_display.py --url "http://localhost:5001/display"
+python src/eink_display.py --url "http://localhost:5001/display"
 
 # Custom server with dummy data
-./venv/bin/python src/eink_display.py --url "http://localhost:5001/display?test=true" --once
+python src/eink_display.py --url "http://localhost:5001/display?test=true" --once
 
 # Generate dithered preview
-./venv/bin/python src/eink_display.py --url "http://localhost:5001/display" --once --dithering
+python src/eink_display.py --url "http://localhost:5001/display" --once --dithering
 
 # Test screensaver on e-ink display
-./venv/bin/python src/eink_display.py --url "http://localhost:5001/display?screensaver=true" --once
+python src/eink_display.py --url "http://localhost:5001/display?screensaver=true" --once
 ```
 
 ## Display Update Logic
@@ -139,6 +146,29 @@ The system uses intelligent update logic to minimize e-ink wear:
 - **Test screensaver**: http://localhost:5001/display?screensaver=true (force screensaver mode)
 - **Hot reload**: Auto-refresh on file changes
 - **Live data**: Fetch button to get current MLB scores
+
+### Code Quality Tools
+
+This project uses Black for code formatting and Ruff for linting to maintain consistent code quality.
+
+```bash
+# Activate virtual environment first
+source venv/bin/activate
+
+# Format all Python code
+black src/
+
+# Check for linting issues
+ruff check src/
+
+# Auto-fix linting issues where possible
+ruff check --fix src/
+
+# Format with Ruff (alternative to Black)
+ruff format src/
+```
+
+**Configuration**: Code quality settings are defined in `pyproject.toml`
 
 ## Hardware Requirements
 

@@ -7,3 +7,5 @@ feedparser>=6.0.0
 inky>=1.5.0
 playwright>=1.40.0
 git+https://github.com/hbldh/hitherdither.git
+black>=23.0.0
+ruff>=0.1.0
