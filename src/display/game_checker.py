@@ -77,6 +77,25 @@ class GameChecker:
             logger.error(f"Error checking active games: {e}")
             return True  # Default to updating if there's an error
     
+    def check_any_games_today(self):
+        """Check if there are ANY games today (active, final, or scheduled)"""
+        try:
+            # Get game data via API
+            api_url = f"{self.base_url}/api/scores/MLB"
+            
+            response = requests.get(api_url, timeout=10)
+            if response.status_code != 200:
+                logger.warning(f"Could not fetch game data: {response.status_code}")
+                return True  # Default to showing games if we can't check
+            
+            games = response.json()
+            # Return True if there are any games at all (empty array means no games today)
+            return bool(games and len(games) > 0)
+            
+        except Exception as e:
+            logger.error(f"Error checking for any games today: {e}")
+            return True  # Default to showing games if there's an error
+    
     def check_screensaver_eligible(self):
         """Check if screensaver should be shown (no games available and RSS feed configured)"""
         try:

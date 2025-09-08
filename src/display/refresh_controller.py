@@ -85,21 +85,27 @@ class RefreshController:
                     last_screensaver_hour = None  # Reset screensaver hour tracking
                     force_update = True
                 
-                # Check if we have active games
+                # Check if we have active games and if there are any games at all for the day
                 has_active_games = self.game_checker.check_active_games()
+                has_any_games = self.game_checker.check_any_games_today()
                 screensaver_eligible = False  # Initialize here to avoid scope issues
                 
-                if has_active_games:
-                    # There are active games - update normally (preserves original functionality)
-                    success = self.refresh_display(force_update=force_update)
-                    last_screensaver_hour = None  # Reset since we're not in screensaver mode
-                    
-                    if success and not force_update:
-                        logger.info(f"Checked for active games at {datetime.now()}")
-                    elif success and force_update:
-                        logger.info(f"Display updated at {datetime.now()}")
+                if has_any_games:
+                    # There are games today (active, final, or scheduled) - show game scoreboard
+                    # Only update if there are active games OR it's a forced update (new day)
+                    if has_active_games or force_update:
+                        success = self.refresh_display(force_update=force_update)
+                        last_screensaver_hour = None  # Reset since we're not in screensaver mode
+                        
+                        if success and not force_update:
+                            logger.info(f"Checked for active games at {datetime.now()}")
+                        elif success and force_update:
+                            logger.info(f"Display updated at {datetime.now()}")
+                        else:
+                            logger.error("Display refresh failed")
                     else:
-                        logger.error("Display refresh failed")
+                        # Games exist but none active - just log, don't update display
+                        logger.info(f"Games finished for today, display staying static until next day")
                 
                 else:
                     # No active games - check if screensaver is eligible

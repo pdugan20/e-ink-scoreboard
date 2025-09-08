@@ -6,7 +6,7 @@ Display live sports scores on your e-ink display with professional quality and r
 
 - **Live MLB Scores**: Real-time MLB scores with on-base and out displays
 - **Team News Screensaver**: Automatically displays team news when no games are scheduled
-- **Clean Layout**: Optimized for 800x480 e-ink displays showing up to 16 games in a 3x5 grid
+- **Clean Layout**: Optimized for 800x480 e-ink displays showing up to 15 games in a 3x5 grid
 - **Auto-refresh**: Configurable refresh interval with power-saving logic
 - **Mac Testing**: Full development environment with live preview
 - **Raspberry Pi Ready**: Complete deployment guide
@@ -116,6 +116,9 @@ docs/                      # Documentation
 
 # Generate dithered preview
 ./venv/bin/python src/eink_display.py --url http://localhost:5001/display --once --dithering
+
+# Test screensaver on e-ink display
+./venv/bin/python src/eink_display.py --url http://localhost:5001/display?screensaver=true --once
 ```
 
 ## Display Update Logic
@@ -132,6 +135,8 @@ The system uses intelligent update logic to minimize e-ink wear:
 
 - **Preview**: http://localhost:5001/ (dev controls)
 - **Clean display**: http://localhost:5001/display (screenshot target)
+- **Test data**: http://localhost:5001/display?test=true (sample data)
+- **Test screensaver**: http://localhost:5001/display?screensaver=true (force screensaver mode)
 - **Hot reload**: Auto-refresh on file changes
 - **Live data**: Fetch button to get current MLB scores
 
