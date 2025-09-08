@@ -36,7 +36,6 @@ Display live sports scores on your e-ink display with professional quality and r
    python src/dev_server.py --port 5001
 
    # Take screenshot (in another terminal, from project root)
-   source venv/bin/activate
    python src/eink_display.py --once
 
    # View result: test_display_output.png
