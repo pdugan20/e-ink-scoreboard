@@ -52,6 +52,19 @@ See **[docs/RASPBERRY_PI_SETUP.md](docs/RASPBERRY_PI_SETUP.md)** for complete in
 
 For additional Inky Impression setup guidance, see the official **[Getting Started with Inky Impression](https://learn.pimoroni.com/article/getting-started-with-inky-impression)** guide.
 
+## API Documentation
+
+The project provides REST API endpoints for sports scores and team news:
+
+- **[API Reference](docs/API.md)** - Complete API documentation with endpoint specifications and response formats
+- **[API Examples](docs/API_EXAMPLES.md)** - Testing examples, sample responses, and troubleshooting guides
+
+**Key Endpoints:**
+
+- `/api/scores/MLB` - Live MLB game scores and standings
+- `/api/screensaver/MLB` - Team news articles for screensaver mode
+- `/display` - E-ink optimized display page
+
 ## Configuration
 
 Edit `src/eink_config.json` to customize:
@@ -75,12 +88,6 @@ Edit `src/eink_config.json` to customize:
 - **900 seconds (15m)** - Balanced for general use
 - **1800 seconds (30m)** - Conservative, preserves display life
 
-## Technical Details
-
-### Data Sources
-
-- **Live MLB data**: ESPN API with real-time scores and game status
-
 ## Project Structure
 
 ```
@@ -99,6 +106,8 @@ scripts/                   # Installation and setup scripts
 └── setup_services.sh      # Systemd service setup
 
 docs/                      # Documentation
+├── API.md                 # API endpoints and responses
+├── API_EXAMPLES.md        # API testing examples and guides
 ├── RASPBERRY_PI_SETUP.md  # Pi setup guide
 └── TROUBLESHOOTING.md     # Common issues and fixes
 ```
