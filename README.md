@@ -109,16 +109,16 @@ docs/                      # Documentation
 ./venv/bin/python src/eink_display.py --once --force
 
 # Custom server URL
-./venv/bin/python src/eink_display.py --url http://localhost:5001/display
+./venv/bin/python src/eink_display.py --url "http://localhost:5001/display"
 
 # Custom server with dummy data
-./venv/bin/python src/eink_display.py --url http://localhost:5001/display?test=true --once
+./venv/bin/python src/eink_display.py --url "http://localhost:5001/display?test=true" --once
 
 # Generate dithered preview
-./venv/bin/python src/eink_display.py --url http://localhost:5001/display --once --dithering
+./venv/bin/python src/eink_display.py --url "http://localhost:5001/display" --once --dithering
 
 # Test screensaver on e-ink display
-./venv/bin/python src/eink_display.py --url http://localhost:5001/display?screensaver=true --once
+./venv/bin/python src/eink_display.py --url "http://localhost:5001/display?screensaver=true" --once
 ```
 
 ## Display Update Logic

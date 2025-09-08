@@ -29,7 +29,7 @@ CONFIG = {
     "display_height": 480,
     "screenshot_scale": 1,
     "refresh_interval": 120,
-    "apply_dithering": True,
+    "apply_dithering": False,
     "dither_saturation": 0.8,
     "max_retries": 3,
     "retry_delay": 5
