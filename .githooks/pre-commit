@@ -1,5 +1,18 @@
 #!/bin/sh
 
+# Activate virtual environment for Python tools
+if [ -f "venv/bin/activate" ]; then
+    . venv/bin/activate
+fi
+
+# Add common Node.js paths
+export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
+
+# Also source user's shell profile for nvm/node if available
+if [ -f "$HOME/.nvm/nvm.sh" ]; then
+    . "$HOME/.nvm/nvm.sh"
+fi
+
 echo "Running black check..."
 black --check . || { echo "Black check failed. Run 'black .' to fix formatting."; exit 1; }
 

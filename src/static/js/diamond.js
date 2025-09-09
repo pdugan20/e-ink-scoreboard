@@ -5,79 +5,90 @@ import { FEATURE_FLAGS } from './config.js';
 
 // Helper function to get CSS variable values
 function getCSSVariable(variableName) {
-  return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(variableName)
+    .trim();
 }
 
 function formatInningsStatus(status, isDynamicColors = false) {
-  const isEinkOptimized = FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST && document.body.classList.contains('eink-optimized');
+  const isEinkOptimized =
+    FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST &&
+    document.body.classList.contains('eink-optimized');
   // Replace "Top" with upward arrow and "Bottom" with downward arrow
   if (status.startsWith('Top ')) {
     const inning = status.replace('Top ', '');
-    const arrowColor = isDynamicColors 
+    const arrowColor = isDynamicColors
       ? getCSSVariable('--diamond-arrow-dynamic')
       : isEinkOptimized
         ? getCSSVariable('--eink-text')
         : getCSSVariable('--diamond-arrow-regular');
     return `<span class="inning-arrow"><svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; vertical-align: middle;"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg></span>${inning}`;
   }
-  
+
   if (status.startsWith('Bottom ')) {
     const inning = status.replace('Bottom ', '');
-    const arrowColor = isDynamicColors 
+    const arrowColor = isDynamicColors
       ? getCSSVariable('--diamond-arrow-dynamic')
       : isEinkOptimized
         ? getCSSVariable('--eink-text')
         : getCSSVariable('--diamond-arrow-regular');
     return `<span class="inning-arrow"><svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; margin-bottom: 1px; vertical-align: middle; transform: rotate(180deg);"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg></span>${inning}`;
   }
-  
-  
+
   // Handle "Bot " format (test data)
   if (status.startsWith('Bot ')) {
     const inning = status.replace('Bot ', '');
-    const arrowColor = isDynamicColors 
+    const arrowColor = isDynamicColors
       ? getCSSVariable('--diamond-arrow-dynamic')
       : isEinkOptimized
         ? getCSSVariable('--eink-text')
         : getCSSVariable('--diamond-arrow-regular');
     return `<span class="inning-arrow"><svg width="6" height="5" viewBox="0 0 7 6" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; margin-right: 2px; margin-bottom: 1px; vertical-align: middle; transform: rotate(180deg);"><path d="M2.63398 0.499999C3.01888 -0.166668 3.98113 -0.166667 4.36603 0.5L6.53109 4.25C6.91599 4.91667 6.43486 5.75 5.66506 5.75H1.33493C0.565135 5.75 0.084011 4.91667 0.468911 4.25L2.63398 0.499999Z" fill="${arrowColor}"/></svg></span>${inning}`;
   }
-  
+
   // If status contains "Delay", replace with just "Delay"
   if (status.includes('Delay')) {
     return 'Delay';
   }
-  
+
   // Replace "Middle" with "Mid" for shorter display
   return status.replace('Middle ', 'Mid ');
 }
 
-export function generateBaseballDiamondComponent(game, isDynamicColors = false, gameStatus = '') {
+export function generateBaseballDiamondComponent(
+  game,
+  isDynamicColors = false,
+  gameStatus = ''
+) {
   // Treat "Game Over" as "Final"
   if (gameStatus === 'Game Over') {
     gameStatus = 'Final';
   }
-  
+
   // Only show diamond for live games with bases/outs data
   if (!game.bases || game.outs === undefined) {
     // For final games, show diamond with F in center
     const isFinal = gameStatus === 'Final';
     if (isFinal) {
-      const isEinkOptimized = FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST && themeManager.currentTheme === 'default';
-      const diamondIcon = isDynamicColors 
+      const isEinkOptimized =
+        FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST &&
+        themeManager.currentTheme === 'default';
+      const diamondIcon = isDynamicColors
         ? 'final-transparent.png'
-        : isEinkOptimized 
+        : isEinkOptimized
           ? 'final-legible.png'
           : 'final.png';
-          
+
       const finalDiamond = `
         <img src="assets/icons/${diamondIcon}" alt="Diamond" class="final-diamond-png">
       `;
       // Add theme-specific class for spacing
-      const themeClass = (themeManager.currentTheme === 'mlb_scoreboard' || themeManager.currentTheme === 'team_colors') 
-        ? ' mlb-scoreboard-spacing' 
-        : ' default-spacing';
-      
+      const themeClass =
+        themeManager.currentTheme === 'mlb_scoreboard' ||
+        themeManager.currentTheme === 'team_colors'
+          ? ' mlb-scoreboard-spacing'
+          : ' default-spacing';
+
       return `
         <div class="baseball-diamond-component${themeClass}">
           <div class="diamond-wrapper">${finalDiamond}</div>
@@ -85,46 +96,51 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
         </div>
       `;
     }
-    
+
     // For scheduled games, show venue if available, otherwise show status
     const isScheduled = gameStatus.includes('PM') || gameStatus.includes('AM');
-    
+
     // Debug: Check if venue exists
     if (isScheduled && !game.venue) {
       console.log('Missing venue for scheduled game:', game);
     }
-    
+
     const formattedStatus = formatInningsStatus(gameStatus, isDynamicColors);
-    const displayText = game.venue && isScheduled 
-      ? `${formattedStatus}<br><small>${game.venue}</small>` 
-      : formattedStatus;
+    const displayText =
+      game.venue && isScheduled
+        ? `${formattedStatus}<br><small>${game.venue}</small>`
+        : formattedStatus;
     const alignmentClass = isScheduled ? 'scheduled-game' : '';
-    return displayText ? `<div class="baseball-diamond-component ${alignmentClass}"><div class="game-status">${displayText}</div></div>` : '';
+    return displayText
+      ? `<div class="baseball-diamond-component ${alignmentClass}"><div class="game-status">${displayText}</div></div>`
+      : '';
   }
 
   const { first, second, third } = game.bases;
   const outs = game.outs;
-  
+
   // Get base colors from CSS variables
   const isMLBScoreboard = themeManager.isMLBScoreboard();
-  const isEinkOptimized = FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST && themeManager.currentTheme === 'default';
-  
-  const baseFilledColor = isMLBScoreboard 
+  const isEinkOptimized =
+    FEATURE_FLAGS.EINK_OPTIMIZED_CONTRAST &&
+    themeManager.currentTheme === 'default';
+
+  const baseFilledColor = isMLBScoreboard
     ? getCSSVariable('--mlb-scoreboard-base-filled')
-    : isDynamicColors 
+    : isDynamicColors
       ? getCSSVariable('--diamond-base-filled-dynamic')
-      : isEinkOptimized 
+      : isEinkOptimized
         ? getCSSVariable('--eink-optimized-filled')
         : getCSSVariable('--diamond-base-filled');
-        
+
   const baseEmptyColor = isMLBScoreboard
     ? getCSSVariable('--mlb-scoreboard-base-empty')
-    : isDynamicColors 
+    : isDynamicColors
       ? getCSSVariable('--diamond-base-empty-dynamic')
       : isEinkOptimized
-        ? getCSSVariable('--eink-optimized-empty')  
+        ? getCSSVariable('--eink-optimized-empty')
         : getCSSVariable('--diamond-base-empty');
-  
+
   // Generate SVG with dynamic base fills
   const diamondSvg = `
     <svg width="24" height="17" viewBox="0 0 35 25" fill="none" xmlns="http://www.w3.org/2000/svg" class="baseball-diamond-svg">
@@ -142,7 +158,11 @@ export function generateBaseballDiamondComponent(game, isDynamicColors = false, 
   // Generate outs indicators
   const outDots = Array.from({ length: 3 }, (_, i) => {
     const isFilled = i < outs;
-    const themeClass = isMLBScoreboard ? ' mlb-scoreboard' : isDynamicColors ? ' dynamic' : '';
+    const themeClass = isMLBScoreboard
+      ? ' mlb-scoreboard'
+      : isDynamicColors
+        ? ' dynamic'
+        : '';
     const filledClass = isFilled ? ' filled' : '';
     return `<div class="out-dot${themeClass}${filledClass}"></div>`;
   }).join('');

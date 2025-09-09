@@ -151,13 +151,17 @@ The system uses intelligent update logic to minimize e-ink wear:
 ### Code Quality Checks
 
 #### Automatic Checks (GitHub Actions)
+
 All pushes and PRs are automatically checked for code quality using Black, Ruff, Prettier, and ESLint.
 
 #### Local Development Setup
+
 1. **Enable pre-commit hooks** (recommended):
+
    ```bash
    ./scripts/setup-hooks.sh
    ```
+
    This will automatically run all checks before each commit.
 
 2. **Manual checks**:
@@ -175,7 +179,6 @@ All pushes and PRs are automatically checked for code quality using Black, Ruff,
 - **Test screensaver**: http://localhost:5001/display?screensaver=true (force screensaver mode)
 - **Hot reload**: Auto-refresh on file changes
 - **Live data**: Fetch button to get current MLB scores
-
 
 **Configuration**: Code quality settings are defined in `pyproject.toml`
 

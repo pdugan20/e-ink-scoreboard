@@ -6,7 +6,10 @@ import {
   GAME_STATUS,
   FEATURE_FLAGS,
 } from '../config.js';
-import { MLB_STATUS_PATTERNS, getMLBActiveGameStatuses } from '../constants/mlb-constants.js';
+import {
+  MLB_STATUS_PATTERNS,
+  getMLBActiveGameStatuses,
+} from '../constants/mlb-constants.js';
 import {
   mapApiTeamName,
   getTeamLogo,
@@ -17,16 +20,19 @@ import {
 import { generateBaseballDiamondComponent } from '../diamond.js';
 import { themeManager } from '../theme-manager.js';
 import { updateCurrentTime, updateTimeForGameStart } from './time-renderer.js';
-import { tryShowScreensaver, showNoGamesMessage } from './screensaver-renderer.js';
+import {
+  tryShowScreensaver,
+  showNoGamesMessage,
+} from './screensaver-renderer.js';
 
 // Helper function to check if a team is in the favorite teams list
 function isFavoriteTeam(teamName, league) {
   const favoriteTeamList = favoriteTeams[league];
-  
+
   if (!favoriteTeamList) {
     return false;
   }
-  
+
   // Handle both string and array formats
   if (Array.isArray(favoriteTeamList)) {
     return favoriteTeamList.includes(teamName);
@@ -39,14 +45,14 @@ export function renderGames(games, league = LEAGUES.MLB) {
   const container = document.getElementById('games');
   const display = document.getElementById('display');
   const header = document.getElementById('header');
-  
+
   container.innerHTML = '';
 
   // Restore header if it was hidden (from screensaver mode)
   if (header) {
     header.style.display = '';
   }
-  
+
   // Remove screensaver mode class
   display.classList.remove('screensaver-mode');
 
@@ -67,7 +73,7 @@ export function renderGames(games, league = LEAGUES.MLB) {
       tryShowScreensaver(league);
       return;
     }
-    
+
     // Show "There are no games scheduled for today" message
     showNoGamesMessage();
     return;
@@ -82,13 +88,15 @@ export function renderGames(games, league = LEAGUES.MLB) {
   const displayGames = sortedGames.slice(0, maxGames);
 
   // Check if we should show "Games start at" message
-  const hasActiveGames = displayGames.some(game => {
+  const hasActiveGames = displayGames.some((game) => {
     const status = game.status?.toLowerCase() || '';
-    return getMLBActiveGameStatuses().some(activeStatus => status.includes(activeStatus));
+    return getMLBActiveGameStatuses().some((activeStatus) =>
+      status.includes(activeStatus)
+    );
   });
 
   // Check if any games have already finished (indicating the day's games have begun)
-  const hasFinishedGames = displayGames.some(game => {
+  const hasFinishedGames = displayGames.some((game) => {
     const status = game.status?.toLowerCase() || '';
     return status.includes('final') || status.includes('game over');
   });
@@ -126,10 +134,16 @@ export function renderGames(games, league = LEAGUES.MLB) {
       );
       gameEl.style.background = gradientBg;
       gameEl.classList.add('dynamic-colors');
-      
+
       // Update CSS variables for diamond colors when dynamic colors are applied
-      gameEl.style.setProperty('--diamond-base-filled-dynamic', 'var(--color-white-90)');
-      gameEl.style.setProperty('--diamond-base-empty-dynamic', 'var(--color-white-30)');
+      gameEl.style.setProperty(
+        '--diamond-base-filled-dynamic',
+        'var(--color-white-90)'
+      );
+      gameEl.style.setProperty(
+        '--diamond-base-empty-dynamic',
+        'var(--color-white-30)'
+      );
     }
 
     // Add theme class
@@ -191,9 +205,13 @@ export function renderGames(games, league = LEAGUES.MLB) {
 export function sortGamesByFavorite(games, league) {
   // Sort games to prioritize favorite teams
   return games.sort((a, b) => {
-    const aHasFavorite = isFavoriteTeam(a.away_team, league) || isFavoriteTeam(a.home_team, league);
-    const bHasFavorite = isFavoriteTeam(b.away_team, league) || isFavoriteTeam(b.home_team, league);
-    
+    const aHasFavorite =
+      isFavoriteTeam(a.away_team, league) ||
+      isFavoriteTeam(a.home_team, league);
+    const bHasFavorite =
+      isFavoriteTeam(b.away_team, league) ||
+      isFavoriteTeam(b.home_team, league);
+
     if (aHasFavorite && !bHasFavorite) return -1;
     if (!aHasFavorite && bHasFavorite) return 1;
     return 0;

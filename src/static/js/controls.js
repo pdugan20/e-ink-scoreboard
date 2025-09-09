@@ -45,14 +45,14 @@ window.setSize = function setSize(width, height) {
   const display = document.getElementById('display');
   frame.style.width = width + 40 + 'px'; // Add padding
   display.style.height = height + 'px';
-  
+
   // Add expanded class for 1600x1200 layout
   if (width >= 1400 && height >= 900) {
     display.classList.add('expanded');
   } else {
     display.classList.remove('expanded');
   }
-  
+
   targetWidth = width;
   targetHeight = height;
   updateSizeIndicator();
@@ -116,7 +116,10 @@ export async function initApp() {
   // Update time every minute, but don't override "Games start at" messages
   setInterval(() => {
     const currentTimeEl = document.getElementById('current-time');
-    if (currentTimeEl && !currentTimeEl.textContent.includes('Games start at')) {
+    if (
+      currentTimeEl &&
+      !currentTimeEl.textContent.includes('Games start at')
+    ) {
       updateCurrentTime();
     }
   }, 60000);

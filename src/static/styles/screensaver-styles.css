@@ -21,14 +21,16 @@
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(to top, 
-    rgba(255, 255, 255, 0.95) 0%, 
-    rgba(255, 255, 255, 0.85) 25%, 
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.85) 25%,
     rgba(255, 255, 255, 0.65) 50%,
     rgba(255, 255, 255, 0.4) 70%,
     rgba(255, 255, 255, 0.15) 85%,
     rgba(255, 255, 255, 0.03) 95%,
-    transparent 100%);
+    transparent 100%
+  );
   z-index: 1;
 }
 
@@ -42,7 +44,13 @@
 }
 
 .article-title {
-  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   font-size: 20px;
   font-weight: 600;
   line-height: 1.2;
@@ -51,7 +59,13 @@
 }
 
 .article-date {
-  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   font-size: 12px;
   font-weight: 400;
   color: var(--color-black);
@@ -59,7 +73,13 @@
 }
 
 .article-description {
-  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    'SF Pro Text',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.3;

@@ -9,7 +9,7 @@ const themeConfigs = {
     showLogos: true,
     dynamicColors: (hasFavoriteTeam) => hasFavoriteTeam,
     useDynamicDiamond: false,
-    hideLogosForMLBScoreboard: false
+    hideLogosForMLBScoreboard: false,
   },
   [THEMES.TEAM_COLORS]: {
     name: 'team-colors',
@@ -17,7 +17,7 @@ const themeConfigs = {
     showLogos: true,
     dynamicColors: () => true,
     useDynamicDiamond: false,
-    hideLogosForMLBScoreboard: false
+    hideLogosForMLBScoreboard: false,
   },
   [THEMES.MLB_SCOREBOARD]: {
     name: 'mlb-scoreboard',
@@ -25,8 +25,8 @@ const themeConfigs = {
     showLogos: false,
     dynamicColors: () => false,
     useDynamicDiamond: true,
-    hideLogosForMLBScoreboard: true
-  }
+    hideLogosForMLBScoreboard: true,
+  },
 };
 
 class ThemeManager {
@@ -38,12 +38,12 @@ class ThemeManager {
   setTheme(theme) {
     this.currentTheme = theme;
     this.config = themeConfigs[theme];
-    
+
     // Remove all theme classes
-    Object.values(themeConfigs).forEach(config => {
+    Object.values(themeConfigs).forEach((config) => {
       document.body.classList.remove(config.bodyClass);
     });
-    
+
     // Add current theme class
     if (this.config) {
       document.body.classList.add(this.config.bodyClass);
@@ -59,7 +59,9 @@ class ThemeManager {
   }
 
   shouldUseDynamicDiamond(hasDynamicColors) {
-    return this.config ? (this.config.useDynamicDiamond || hasDynamicColors) : hasDynamicColors;
+    return this.config
+      ? this.config.useDynamicDiamond || hasDynamicColors
+      : hasDynamicColors;
   }
 
   isMLBScoreboard() {

@@ -1,102 +1,111 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>E-Ink Scoreboard Display</title>
-    <link rel="stylesheet" href="/static/styles/variables.css">
-    <link rel="stylesheet" href="/static/styles/mlb-scores-styles.css">
-    <link rel="stylesheet" href="/static/styles/screensaver-styles.css">
+    <link rel="stylesheet" href="/static/styles/variables.css" />
+    <link rel="stylesheet" href="/static/styles/mlb-scores-styles.css" />
+    <link rel="stylesheet" href="/static/styles/screensaver-styles.css" />
     <style>
-        /* Clean display styles - remove dev UI elements */
-        body {
-            margin: 0;
-            padding: 0;
-            background: white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+      /* Clean display styles - remove dev UI elements */
+      body {
+        margin: 0;
+        padding: 0;
+        background: white;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
 
-        /* Hide dev elements */
-        .dev-tray,
-        .device-frame,
-        .size-indicator {
-            display: none !important;
-        }
+      /* Hide dev elements */
+      .dev-tray,
+      .device-frame,
+      .size-indicator {
+        display: none !important;
+      }
 
-        /* Make display full width/height */
-        .display {
-            width: 800px !important;
-            height: 480px !important;
-            margin: 0 !important;
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            background: white;
-            overflow: hidden;
-        }
+      /* Make display full width/height */
+      .display {
+        width: 800px !important;
+        height: 480px !important;
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: white;
+        overflow: hidden;
+      }
 
-        /* Optimize layout for 800x480 eink display - 3x5 grid */
-        .games-grid {
-            gap: 8px !important;
-            height: calc(100% - 65px) !important;
-            grid-template-rows: repeat(5, 1fr) !important;
-        }
+      /* Optimize layout for 800x480 eink display - 3x5 grid */
+      .games-grid {
+        gap: 8px !important;
+        height: calc(100% - 65px) !important;
+        grid-template-rows: repeat(5, 1fr) !important;
+      }
 
-        .game-pill {
-            padding: 10px 10px 10px 12px !important;
-            min-height: auto !important;
-        }
+      .game-pill {
+        padding: 10px 10px 10px 12px !important;
+        min-height: auto !important;
+      }
 
-        .header {
-            padding: 20px 15px !important;
-            height: auto !important;
-        }
+      .header {
+        padding: 20px 15px !important;
+        height: auto !important;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="display" id="display">
-        <div class="header" id="header">
-            <div class="header-left">
-                <img src="/assets/logos/leagues/mlb.png" alt="MLB" class="league-logo" id="league-logo">
-                <h1 id="header-title">MLB Scores</h1>
-            </div>
-            <div class="current-time" id="current-time"></div>
+      <div class="header" id="header">
+        <div class="header-left">
+          <img
+            src="/assets/logos/leagues/mlb.png"
+            alt="MLB"
+            class="league-logo"
+            id="league-logo"
+          />
+          <h1 id="header-title">MLB Scores</h1>
         </div>
-        <div class="games-grid" id="games">
-            <!-- Games will be inserted here -->
-        </div>
+        <div class="current-time" id="current-time"></div>
+      </div>
+      <div class="games-grid" id="games">
+        <!-- Games will be inserted here -->
+      </div>
     </div>
 
     <script type="module">
-        // Display-specific initialization - use live data by default
-        import './static/js/constants/mlb-logos.js';
-        import './static/js/constants/mlb-secondary-logos.js';
-        import './static/js/constants/mlb-colors.js';
-        import { loadTestData, loadMLBData, fetchLiveData, loadScreensaverData } from './static/js/data.js';
-        import { updateCurrentTime } from './static/js/renderer.js';
+      // Display-specific initialization - use live data by default
+      import './static/js/constants/mlb-logos.js';
+      import './static/js/constants/mlb-secondary-logos.js';
+      import './static/js/constants/mlb-colors.js';
+      import {
+        loadTestData,
+        loadMLBData,
+        fetchLiveData,
+        loadScreensaverData,
+      } from './static/js/data.js';
+      import { updateCurrentTime } from './static/js/renderer.js';
 
-        // Check URL parameters for test data or screensaver mode
-        const urlParams = new URLSearchParams(window.location.search);
-        const useTestData = urlParams.get('test') === 'true';
-        const useScreensaver = urlParams.get('screensaver') === 'true';
+      // Check URL parameters for test data or screensaver mode
+      const urlParams = new URLSearchParams(window.location.search);
+      const useTestData = urlParams.get('test') === 'true';
+      const useScreensaver = urlParams.get('screensaver') === 'true';
 
-        // Initialize with live or test data based on URL parameter
-        async function initDisplay() {
-            if (useScreensaver) {
-                await loadScreensaverData();
-            } else if (useTestData) {
-                await loadTestData();
-                loadMLBData();
-            } else {
-                await fetchLiveData();
-            }
+      // Initialize with live or test data based on URL parameter
+      async function initDisplay() {
+        if (useScreensaver) {
+          await loadScreensaverData();
+        } else if (useTestData) {
+          await loadTestData();
+          loadMLBData();
+        } else {
+          await fetchLiveData();
         }
+      }
 
-        // Initialize when page loads
-        initDisplay();
+      // Initialize when page loads
+      initDisplay();
     </script>
-</body>
-
+  </body>
 </html>

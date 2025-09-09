@@ -58,11 +58,12 @@ python eink_display.py --url http://localhost:5002/display
 For detailed troubleshooting steps, see **[docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md)**.
 
 Quick diagnostics:
+
 ```bash
 # Check services status
 sudo systemctl status sports-server.service sports-display.service
 
-# View recent logs  
+# View recent logs
 sudo journalctl -u sports-display.service --since "10 minutes ago"
 
 # Test display update

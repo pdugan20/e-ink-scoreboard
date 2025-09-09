@@ -1,10 +1,5 @@
 // Time and header rendering logic
-import {
-  displayTimezone,
-  DAYS,
-  MONTHS,
-  TIMEZONE_ABBREVIATIONS,
-} from '../config.js';
+import { displayTimezone, DAYS, MONTHS } from '../config.js';
 import { convertTimeToTimezone } from '../utils/teams.js';
 
 export function updateHeaderTitle(league) {
@@ -15,7 +10,11 @@ export function updateHeaderTitle(league) {
   const dayOfMonth = today.getDate();
 
   if (headerTitle) {
-    if (league === 'Mariners News' || league === 'Team News' || league.includes('News')) {
+    if (
+      league === 'Mariners News' ||
+      league === 'Team News' ||
+      league.includes('News')
+    ) {
       headerTitle.textContent = league;
     } else {
       headerTitle.textContent = `${league.toUpperCase()} Scores for ${dayName}, ${monthName} ${dayOfMonth}`;
@@ -28,7 +27,7 @@ export function updateCurrentTime(customText = null) {
   if (!currentTimeEl) return;
 
   const now = new Date();
-  
+
   // Convert to display timezone
   const timeOptions = {
     timeZone: displayTimezone,
@@ -36,18 +35,23 @@ export function updateCurrentTime(customText = null) {
     minute: '2-digit',
     hour12: true,
   };
-  
+
   const timeString = now.toLocaleTimeString('en-US', timeOptions);
-  
-  const displayText = customText !== null ? customText : `Last update at ${timeString}`;
+
+  const displayText =
+    customText !== null ? customText : `Last update at ${timeString}`;
   currentTimeEl.textContent = displayText;
 }
 
 export function updateTimeForGameStart(games) {
   // Find the earliest scheduled game to show "Games start at" time
-  const scheduledGames = games.filter(game => {
+  const scheduledGames = games.filter((game) => {
     const status = game.status?.toLowerCase() || '';
-    return status.includes('pm et') || status.includes('am et') || status.includes('scheduled');
+    return (
+      status.includes('pm et') ||
+      status.includes('am et') ||
+      status.includes('scheduled')
+    );
   });
 
   if (scheduledGames.length === 0) {
@@ -59,7 +63,7 @@ export function updateTimeForGameStart(games) {
   let earliestTime = null;
   let earliestGame = null;
 
-  scheduledGames.forEach(game => {
+  scheduledGames.forEach((game) => {
     const status = game.status || '';
     // Extract time from status like "7:30 PM ET"
     const timeMatch = status.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -67,15 +71,15 @@ export function updateTimeForGameStart(games) {
       const [, hourStr, minuteStr, ampm] = timeMatch;
       let hour24 = parseInt(hourStr);
       const minute = parseInt(minuteStr);
-      
+
       if (ampm.toUpperCase() === 'PM' && hour24 !== 12) {
         hour24 += 12;
       } else if (ampm.toUpperCase() === 'AM' && hour24 === 12) {
         hour24 = 0;
       }
-      
+
       const gameTime = hour24 * 60 + minute; // Convert to minutes for comparison
-      
+
       if (earliestTime === null || gameTime < earliestTime) {
         earliestTime = gameTime;
         earliestGame = game;

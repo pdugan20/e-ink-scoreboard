@@ -3,6 +3,17 @@ import js from '@eslint/js';
 export default [
   js.configs.recommended,
   {
+    ignores: [
+      'node_modules/**',
+      'venv/**',
+      '.git/**',
+      '.ruff_cache/**',
+      '*.min.js',
+      'dist/**',
+      'build/**',
+    ],
+  },
+  {
     files: ['src/static/js/**/*.js'],
     languageOptions: {
       ecmaVersion: 2024,
@@ -19,11 +30,11 @@ export default [
         parseInt: 'readonly',
         Intl: 'readonly',
         getComputedStyle: 'readonly',
-      }
+      },
     },
     rules: {
       'no-console': 'off',
       'prefer-const': 'warn',
-    }
-  }
+    },
+  },
 ];

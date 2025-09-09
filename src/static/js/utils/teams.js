@@ -1,5 +1,11 @@
 // Team helper functions
-import { displayTimezone, LEAGUES, TIME_PERIODS, COLOR_TYPES, TIMEZONE_ABBREVIATIONS } from '../config.js';
+import {
+  displayTimezone,
+  LEAGUES,
+  TIME_PERIODS,
+  COLOR_TYPES,
+  TIMEZONE_ABBREVIATIONS,
+} from '../config.js';
 import { MLB_TEAM_NAME_MAP } from '../constants/mlb-constants.js';
 import { mlbTeamLogos } from '../constants/mlb-logos.js';
 import {
@@ -18,7 +24,11 @@ export function mapApiTeamName(apiTeamName, league = LEAGUES.MLB) {
 }
 
 // Helper functions
-export function getTeamLogo(teamName, league = LEAGUES.MLB, useDynamicLogo = false) {
+export function getTeamLogo(
+  teamName,
+  league = LEAGUES.MLB,
+  useDynamicLogo = false
+) {
   if (league === LEAGUES.MLB) {
     // Check for white logo when dynamic colors are enabled
     if (
@@ -41,7 +51,11 @@ export function getTeamLogo(teamName, league = LEAGUES.MLB, useDynamicLogo = fal
   return null;
 }
 
-export function getTeamColor(teamName, league = LEAGUES.MLB, colorType = COLOR_TYPES.PRIMARY) {
+export function getTeamColor(
+  teamName,
+  league = LEAGUES.MLB,
+  colorType = COLOR_TYPES.PRIMARY
+) {
   if (league === LEAGUES.MLB && mlbTeamColors[teamName]) {
     return (
       mlbTeamColors[teamName][colorType] || mlbTeamColors[teamName].primary
@@ -50,28 +64,32 @@ export function getTeamColor(teamName, league = LEAGUES.MLB, colorType = COLOR_T
   return 'var(--color-gray-600)'; // Default gray fallback
 }
 
-export function generateGradientBackground(awayTeam, homeTeam, league = LEAGUES.MLB) {
+export function generateGradientBackground(
+  awayTeam,
+  homeTeam,
+  league = LEAGUES.MLB
+) {
   if (league !== LEAGUES.MLB) {
     // For non-MLB leagues, fall back to primary colors
     const awayColor = getTeamColor(awayTeam, league, COLOR_TYPES.PRIMARY);
     const homeColor = getTeamColor(homeTeam, league, COLOR_TYPES.PRIMARY);
     return `linear-gradient(105deg, ${awayColor}E6 0%, ${awayColor}E6 25%, ${homeColor}E6 75%, ${homeColor}E6 100%)`;
   }
-  
+
   // Get team color objects
   const awayTeamColors = mlbTeamColors[awayTeam];
   const homeTeamColors = mlbTeamColors[homeTeam];
-  
+
   if (!awayTeamColors || !homeTeamColors) {
     // Fallback if team colors not found
     const awayColor = getTeamColor(awayTeam, league, COLOR_TYPES.PRIMARY);
     const homeColor = getTeamColor(homeTeam, league, COLOR_TYPES.PRIMARY);
     return `linear-gradient(105deg, ${awayColor}E6 0%, ${awayColor}E6 25%, ${homeColor}E6 75%, ${homeColor}E6 100%)`;
   }
-  
+
   // Use dynamic optimization to get best colors
   const optimizedColors = getBestGradientColors(awayTeamColors, homeTeamColors);
-  
+
   // Diagonal gradient with 15 degree angle, colors blend in the center
   // Away team on left, home team on right (matching the display order)
   // Adding 90% opacity to lighten the colors slightly
@@ -81,7 +99,7 @@ export function generateGradientBackground(awayTeam, homeTeam, league = LEAGUES.
 export function convertTimeToTimezone(timeString) {
   // Convert ET times to the configured timezone and strip timezone markers
   // Input format: "10:40 PM ET"
-  
+
   // If no timezone marker found, return as-is
   if (!timeString.includes('ET')) {
     return timeString;
@@ -164,27 +182,30 @@ export function getTimezoneAbbreviation(timezone) {
 export function formatGameStatus(status) {
   // Clean up long status messages for better display
   const lowerStatus = status.toLowerCase();
-  
+
   if (lowerStatus.includes('manager challenge')) {
     return 'Challenge';
   }
-  
+
   if (lowerStatus.includes('instant replay')) {
     return 'Replay';
   }
-  
-  if (lowerStatus.includes('rain delay') || lowerStatus.includes('weather delay')) {
+
+  if (
+    lowerStatus.includes('rain delay') ||
+    lowerStatus.includes('weather delay')
+  ) {
     return 'Delay';
   }
-  
+
   if (lowerStatus.includes('commercial break')) {
     return 'Break';
   }
-  
+
   if (lowerStatus.includes('pitching change')) {
     return 'Sub';
   }
-  
+
   // Add other status cleanups as needed
   return status;
 }

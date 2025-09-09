@@ -12,7 +12,7 @@
   {
     "away_record": "89-51",
     "away_score": 0,
-    "away_team": "Los Angeles Dodgers", 
+    "away_team": "Los Angeles Dodgers",
     "home_record": "74-66",
     "home_score": 0,
     "home_team": "San Francisco Giants",
@@ -23,7 +23,7 @@
     "away_record": "78-62",
     "away_score": 0,
     "away_team": "Houston Astros",
-    "home_record": "68-72", 
+    "home_record": "68-72",
     "home_score": 0,
     "home_team": "Texas Rangers",
     "status": "7:02 PM ET",
@@ -35,7 +35,7 @@
     "away_team": "Atlanta Braves",
     "home_record": "85-55",
     "home_score": 0,
-    "home_team": "Philadelphia Phillies", 
+    "home_team": "Philadelphia Phillies",
     "status": "7:03 PM ET",
     "venue": "Citizens Bank Park"
   },
