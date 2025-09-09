@@ -102,7 +102,7 @@ src/                       # Core application files
 scripts/                   # Installation and setup scripts
 ├── install.sh             # Raspberry Pi installation
 ├── configure.sh           # Interactive configuration
-└── setup_services.sh      # Systemd service setup
+└── setup-services.sh      # Systemd service setup
 
 docs/                      # Documentation
 ├── API.md                 # API endpoints and responses
@@ -148,6 +148,27 @@ The system uses intelligent update logic to minimize e-ink wear:
 
 ## Development
 
+### Code Quality Checks
+
+#### Automatic Checks (GitHub Actions)
+All pushes and PRs are automatically checked for code quality using Black, Ruff, Prettier, and ESLint.
+
+#### Local Development Setup
+1. **Enable pre-commit hooks** (recommended):
+   ```bash
+   ./scripts/setup-hooks.sh
+   ```
+   This will automatically run all checks before each commit.
+
+2. **Manual checks**:
+   ```bash
+   ./scripts/check-all.sh  # Run all checks
+   black .                 # Format Python code
+   ruff check --fix .      # Fix Python linting issues
+   npx prettier --write .  # Format JS/TS/JSON files
+   npx eslint --fix .      # Fix JavaScript linting issues
+   ```
+
 - **Preview**: http://localhost:5001/ (dev controls)
 - **Clean display**: http://localhost:5001/display (screenshot target)
 - **Test data**: http://localhost:5001/display?test=true (sample data)
@@ -155,26 +176,6 @@ The system uses intelligent update logic to minimize e-ink wear:
 - **Hot reload**: Auto-refresh on file changes
 - **Live data**: Fetch button to get current MLB scores
 
-### Code Quality Tools
-
-This project uses Black for code formatting and Ruff for linting to maintain consistent code quality.
-
-```bash
-# Activate virtual environment first
-source venv/bin/activate
-
-# Format all Python code
-black src/
-
-# Check for linting issues
-ruff check src/
-
-# Auto-fix linting issues where possible
-ruff check --fix src/
-
-# Format with Ruff (alternative to Black)
-ruff format src/
-```
 
 **Configuration**: Code quality settings are defined in `pyproject.toml`
 

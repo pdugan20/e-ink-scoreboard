@@ -16,7 +16,7 @@ cd e-ink-scoreboard
 ./scripts/configure.sh
 
 # Setup auto-startup services
-./scripts/setup_services.sh
+./scripts/setup-services.sh
 
 # Reboot to apply hardware changes
 sudo reboot

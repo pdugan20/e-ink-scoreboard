@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo "Running black check..."
+black --check . || { echo "Black check failed. Run 'black .' to fix formatting."; exit 1; }
+
+echo "Running ruff check..."
+ruff check . || { echo "Ruff check failed. Run 'ruff check --fix .' to fix issues."; exit 1; }
+
+echo "Running prettier check..."
+npx prettier --check . || { echo "Prettier check failed. Run 'npx prettier --write .' to fix formatting."; exit 1; }
+
+echo "Running eslint check..."
+npx eslint . || { echo "ESLint check failed. Run 'npx eslint --fix .' to fix issues."; exit 1; }
+
+echo "All checks passed!"
+exit 0

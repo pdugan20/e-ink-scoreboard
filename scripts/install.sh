@@ -77,14 +77,14 @@ playwright install chromium || echo "⚠️  Playwright install failed - will fa
 
 # Make scripts executable
 chmod +x src/eink_display.py
-chmod +x scripts/setup_services.sh
+chmod +x scripts/setup-services.sh
 chmod +x scripts/configure.sh
 
 echo "✅ Installation complete!"
 echo ""
 echo "Next steps:"
 echo "1. Run './scripts/configure.sh' to set preferences"
-echo "2. Run './scripts/setup_services.sh' to configure auto-startup"
+echo "2. Run './scripts/setup-services.sh' to configure auto-startup"
 echo "3. Test with: 'python src/eink_display.py --once'"
 echo "4. Reboot to apply all hardware changes"
 echo ""
