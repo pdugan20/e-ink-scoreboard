@@ -7,6 +7,7 @@ import json
 import os
 import random
 import re
+import signal
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from urllib.parse import urljoin
@@ -93,12 +94,12 @@ class ScreensaverService:
         return self._fetch_article_from_rss(rss_url, team_name)
 
     def _fetch_article_from_rss(self, rss_url, team_name):
-        """Fetch and parse article from RSS feed."""
+        """Fetch and parse article from RSS feed with timeout protection."""
         try:
-            # Parse the RSS feed (proxy handles all the complexity)
-            feed = feedparser.parse(rss_url)
+            # Parse the RSS feed with timeout protection
+            feed = self._parse_feed_with_timeout(rss_url, timeout=10)
 
-            if not feed.entries:
+            if not feed or not feed.entries:
                 return self._create_error_response(f"No articles found for {team_name}")
 
             # Get the last 10 articles (or fewer if there aren't 10)
@@ -114,6 +115,38 @@ class ScreensaverService:
             return self._create_error_response(
                 f"Error fetching article for {team_name}: {str(e)}"
             )
+
+    def _parse_feed_with_timeout(self, rss_url, timeout=10):
+        """Parse RSS feed with timeout to prevent hanging."""
+
+        def timeout_handler(signum, frame):
+            raise TimeoutError(f"RSS feed parsing timed out after {timeout} seconds")
+
+        # Set up timeout signal (Unix only)
+        if hasattr(signal, "SIGALRM"):
+            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(timeout)
+
+            try:
+                feed = feedparser.parse(rss_url)
+                signal.alarm(0)  # Cancel the alarm
+                return feed
+            except TimeoutError:
+                print(f"RSS feed parsing timed out for {rss_url}")
+                return None
+            except Exception as e:
+                signal.alarm(0)  # Cancel the alarm
+                raise e
+            finally:
+                signal.signal(signal.SIGALRM, old_handler)
+        else:
+            # Fallback for systems without signal support (Windows)
+            try:
+                feed = feedparser.parse(rss_url)
+                return feed
+            except Exception as e:
+                print(f"RSS feed parsing failed for {rss_url}: {e}")
+                return None
 
     def _process_article(self, article, team_name):
         """Process and format article data."""

@@ -6,6 +6,8 @@ import logging
 import time
 from datetime import datetime
 
+import requests
+
 logger = logging.getLogger(__name__)
 
 
@@ -89,9 +91,10 @@ class RefreshController:
                     last_screensaver_hour = None  # Reset screensaver hour tracking
                     force_update = True
 
-                # Check if we have active games and if there are any games at all for the day
-                has_active_games = self.game_checker.check_active_games()
-                has_any_games = self.game_checker.check_any_games_today()
+                # Get consistent game state to prevent race conditions during transitions
+                game_state = self.game_checker.get_game_state()
+                has_active_games = game_state["has_active_games"]
+                has_any_games = game_state["has_any_games"]
                 screensaver_eligible = False  # Initialize here to avoid scope issues
 
                 if has_any_games:
@@ -159,9 +162,9 @@ class RefreshController:
                                 "No games, no screensaver - waiting for next day"
                             )
 
-                # Check for scheduled games that might have started (preserves original detection logic)
+                # Check for scheduled games that might have started (use cached game state)
                 if not force_update and not screensaver_eligible:
-                    scheduled_games = self.game_checker.check_scheduled_games()
+                    scheduled_games = game_state["scheduled_games"]
 
                     # If we have scheduled games and haven't detected new games yet, update once
                     if scheduled_games and not new_games_detected:
@@ -177,6 +180,12 @@ class RefreshController:
             except KeyboardInterrupt:
                 logger.info("Shutting down...")
                 break
+            except (requests.exceptions.RequestException, TimeoutError) as e:
+                logger.warning(f"Network/timeout error (will retry): {e}")
+                time.sleep(
+                    min(self.config["retry_delay"] * 2, 30)
+                )  # Backoff with max 30s
             except Exception as e:
-                logger.error(f"Unexpected error: {e}")
-                time.sleep(self.config["retry_delay"])
+                logger.error(f"Unexpected error in refresh loop: {e}")
+                # Try to continue with a longer delay to prevent tight error loops
+                time.sleep(min(self.config["retry_delay"] * 3, 60))  # Longer backoff
