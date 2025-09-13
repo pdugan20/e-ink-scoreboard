@@ -57,6 +57,20 @@ sudo systemctl daemon-reload
 sudo systemctl enable sports-server.service
 sudo systemctl enable sports-display.service
 
+# Setup daily reboot for memory management
+echo "⏰ Setting up daily reboot schedule..."
+CRON_JOB="0 4 * * * /sbin/shutdown -r now"
+CRON_COMMENT="# E-Ink Scoreboard: Daily reboot at 4 AM for memory management"
+
+# Check if cron job already exists
+if ! (crontab -l 2>/dev/null | grep -q "E-Ink Scoreboard.*Daily reboot"); then
+    # Add the cron job
+    (crontab -l 2>/dev/null; echo "$CRON_COMMENT"; echo "$CRON_JOB") | crontab -
+    echo "✅ Daily reboot scheduled for 4:00 AM"
+else
+    echo "✅ Daily reboot schedule already configured"
+fi
+
 echo "✅ Services created and enabled!"
 echo ""
 echo "To start services now:"
@@ -69,3 +83,11 @@ echo "  sudo systemctl status sports-display.service"
 echo ""
 echo "To view logs:"
 echo "  sudo journalctl -u sports-display.service -f"
+echo "  tail -f /tmp/eink_display.log"
+echo ""
+echo "To analyze logs for debugging:"
+echo "  ./scripts/analyze-logs.sh"
+echo ""
+echo "Scheduled maintenance:"
+echo "  Daily reboot at 4:00 AM for memory management"
+echo "  View cron jobs: crontab -l"

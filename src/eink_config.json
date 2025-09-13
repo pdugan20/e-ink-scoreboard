@@ -4,10 +4,18 @@
   "display_width": 800,
   "display_height": 480,
   "screenshot_scale": 1,
-  "refresh_interval": "120",
+  "refresh_interval": 120,
   "apply_dithering": false,
   "dither_saturation": 0.8,
   "max_retries": 3,
   "retry_delay": 5,
+  "logging": {
+    "level": "INFO",
+    "log_file": "/tmp/eink_display.log",
+    "max_log_size_mb": 50,
+    "backup_count": 5,
+    "log_memory_usage": true,
+    "log_browser_processes": true
+  },
   "_comment": "Configuration for eink display controller"
 }

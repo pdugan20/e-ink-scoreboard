@@ -25,11 +25,12 @@ sudo reboot
 **What the install script does:**
 
 - Updates system packages
-- Installs all dependencies (Python, Chromium, graphics libraries)
+- Installs all dependencies (Python, Chromium, graphics libraries, system monitoring)
 - Configures SPI/I2C for Inky display
 - Installs Pimoroni Inky library with virtual environment
 - Installs your project dependencies
 - Sets up Playwright for high-quality screenshots
+- Creates log directories and sets up comprehensive logging
 
 ---
 

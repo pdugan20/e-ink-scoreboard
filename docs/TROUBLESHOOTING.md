@@ -181,6 +181,29 @@ top -p $(pgrep -f "sports")
 
 ## Log Analysis
 
+### Application Logs
+
+The system now includes comprehensive application logging with resource monitoring:
+
+```bash
+# View application logs (new detailed logging)
+tail -f /tmp/eink_display.log
+
+# Filter for errors and resource information
+tail -f /tmp/eink_display.log | grep -E 'ERROR|CRITICAL|RESOURCE_SNAPSHOT'
+
+# Quick log analysis tool
+./scripts/analyze-logs.sh
+```
+
+**The log analysis script provides:**
+
+- Recent errors and memory issues
+- Browser process tracking and cleanup
+- Resource usage snapshots
+- System memory analysis
+- Out-of-memory (OOM) kill detection
+
 ### View Service Logs
 
 ```bash
@@ -203,6 +226,19 @@ tail -f /var/log/syslog | grep sports
 
 # Check for errors
 grep -i error /var/log/syslog | tail -20
+
+# Check for out-of-memory kills
+sudo journalctl --since "1 hour ago" | grep -i "oom\|killed"
+```
+
+### Debug Browser Process Issues
+
+```bash
+# Check for hanging browser processes
+ps aux | grep -E "chromium|chrome|playwright" | grep -v grep
+
+# Monitor browser process count during screenshot
+watch -n 2 "ps aux | grep -E 'chromium|chrome|playwright' | grep -v grep | wc -l"
 ```
 
 ## Configuration Issues
@@ -270,6 +306,22 @@ sudo pkill -f "eink_display.py"
 sudo systemctl start sports-server.service
 sleep 5
 sudo systemctl start sports-display.service
+```
+
+### Scheduled Maintenance
+
+The system includes a daily reboot at 4:00 AM for memory management:
+
+```bash
+# View scheduled reboots
+crontab -l | grep reboot
+
+# Disable daily reboot (if needed)
+crontab -e
+# Comment out or remove the reboot line
+
+# Manual reboot
+sudo reboot
 ```
 
 ### Factory Reset

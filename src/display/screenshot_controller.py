@@ -6,8 +6,17 @@ import logging
 import os
 import platform
 import subprocess
+import time
+from contextlib import contextmanager
 
+import psutil
 from PIL import Image
+
+from utils.logging_config import (
+    log_after_screenshot,
+    log_before_screenshot,
+    log_browser_cleanup,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +28,7 @@ class ScreenshotController:
         self.config = config
         self.is_mac = platform.system() == "Darwin"
         self.is_pi = platform.system() == "Linux" and self._is_raspberry_pi()
+        self._browser_process_pids = set()  # Track browser process PIDs for cleanup
 
         if self.is_pi:
             self.inky = self._initialize_inky_display()
@@ -64,66 +74,180 @@ class ScreenshotController:
                 logger.error(f"Failed to initialize Inky display: {e2}")
                 raise
 
-    def take_screenshot(self):
-        """Take screenshot using available method"""
-        # Try Playwright first (works on both Mac and Pi)
+    def _kill_hanging_browsers(self):
+        """Kill any hanging browser processes to prevent resource leaks."""
+        killed_processes = []
         try:
-            return self._screenshot_playwright()
-        except ImportError:
-            logger.info("Playwright not available, falling back to system Chromium")
-            if self.is_mac:
-                return self._screenshot_mac_chromium()
-            else:
-                return self._screenshot_linux()
+            for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+                try:
+                    name = proc.info["name"].lower()
+                    cmdline = " ".join(proc.info["cmdline"] or []).lower()
+
+                    # Look for browser processes that might be hanging
+                    is_browser = any(
+                        browser in name
+                        for browser in ["chromium", "chrome", "playwright"]
+                    )
+                    has_headless = "headless" in cmdline
+                    has_display_url = (
+                        self.config["web_server_url"].split("/")[-1] in cmdline
+                    )
+
+                    if is_browser and (has_headless or has_display_url):
+                        try:
+                            proc.terminate()
+                            killed_processes.append(
+                                {"pid": proc.info["pid"], "name": proc.info["name"]}
+                            )
+                            logger.info(
+                                f"Terminated hanging browser process: {proc.info['pid']} ({proc.info['name']})"
+                            )
+
+                            # Give process time to terminate gracefully
+                            time.sleep(1)
+
+                            # Force kill if still running
+                            if proc.is_running():
+                                proc.kill()
+                                logger.warning(
+                                    f"Force killed stubborn browser process: {proc.info['pid']}"
+                                )
+
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            pass  # Process already gone or can't access
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+
+            if killed_processes:
+                log_browser_cleanup(logger, {"killed_processes": killed_processes})
+
+        except Exception as e:
+            logger.warning(f"Error during browser cleanup: {e}")
+
+    @contextmanager
+    def _browser_process_manager(self):
+        """Context manager to ensure browser processes are cleaned up."""
+        initial_browsers = self._count_browser_processes()
+        log_before_screenshot(logger)
+
+        try:
+            yield
+        finally:
+            final_browsers = self._count_browser_processes()
+
+            # If we have more browser processes than we started with, try cleanup
+            if final_browsers > initial_browsers:
+                logger.warning(
+                    f"Browser process count increased from {initial_browsers} to {final_browsers}"
+                )
+                self._kill_hanging_browsers()
+                time.sleep(2)  # Give cleanup time to work
+                after_cleanup = self._count_browser_processes()
+                logger.info(f"After cleanup: {after_cleanup} browser processes")
+
+    def _count_browser_processes(self):
+        """Count current browser processes."""
+        try:
+            count = 0
+            for proc in psutil.process_iter(["name"]):
+                try:
+                    name = proc.info["name"].lower()
+                    if any(
+                        browser in name
+                        for browser in ["chromium", "chrome", "playwright"]
+                    ):
+                        count += 1
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+            return count
+        except Exception:
+            return 0
+
+    def take_screenshot(self):
+        """Take screenshot using available method with browser process management."""
+        with self._browser_process_manager():
+            # Try Playwright first (works on both Mac and Pi)
+            try:
+                success = self._screenshot_playwright()
+                log_after_screenshot(logger, success)
+                return success
+            except ImportError:
+                logger.info("Playwright not available, falling back to system Chromium")
+                if self.is_mac:
+                    success = self._screenshot_mac_chromium()
+                else:
+                    success = self._screenshot_linux()
+                log_after_screenshot(logger, success)
+                return success
 
     def _screenshot_playwright(self):
         """Take screenshot using Playwright (works on both Mac and Pi)"""
         from playwright.sync_api import sync_playwright
 
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-
-            # Get scale factor from config
-            scale_factor = self.config.get("screenshot_scale", 1)
-
-            page = browser.new_page(
-                viewport={
-                    "width": self.config["display_width"],
-                    "height": self.config["display_height"],
-                },
-                device_scale_factor=scale_factor,  # High DPI rendering
-            )
-
-            logger.info(
-                f"Taking screenshot with Playwright ({scale_factor}x DPI rendering)..."
-            )
-
-            # Increase timeout for slower Pi and RSS feed loading
-            page.set_default_timeout(90000)  # 90 seconds
-
-            try:
-                page.goto(
-                    self.config["web_server_url"],
-                    wait_until="networkidle",
-                    timeout=90000,
-                )
-            except Exception as e:
-                # Fallback to domcontentloaded if networkidle times out
-                logger.warning(f"Network idle timeout, trying domcontentloaded: {e}")
-                page.goto(
-                    self.config["web_server_url"],
-                    wait_until="domcontentloaded",
-                    timeout=60000,
+        browser = None
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(
+                    headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"]
                 )
 
-            # Wait for images to load (especially screensaver images)
-            page.wait_for_timeout(8000)
+                # Get scale factor from config
+                scale_factor = self.config.get("screenshot_scale", 1)
 
-            page.screenshot(path=self.config["screenshot_path"], full_page=False)
-            browser.close()
+                page = browser.new_page(
+                    viewport={
+                        "width": self.config["display_width"],
+                        "height": self.config["display_height"],
+                    },
+                    device_scale_factor=scale_factor,  # High DPI rendering
+                )
 
-            logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
-            return True
+                logger.info(
+                    f"Taking screenshot with Playwright ({scale_factor}x DPI rendering)..."
+                )
+
+                # Increase timeout for slower Pi and RSS feed loading
+                page.set_default_timeout(90000)  # 90 seconds
+
+                try:
+                    page.goto(
+                        self.config["web_server_url"],
+                        wait_until="networkidle",
+                        timeout=90000,
+                    )
+                except Exception as e:
+                    # Fallback to domcontentloaded if networkidle times out
+                    logger.warning(
+                        f"Network idle timeout, trying domcontentloaded: {e}"
+                    )
+                    page.goto(
+                        self.config["web_server_url"],
+                        wait_until="domcontentloaded",
+                        timeout=60000,
+                    )
+
+                # Wait for images to load (especially screensaver images)
+                page.wait_for_timeout(8000)
+
+                page.screenshot(path=self.config["screenshot_path"], full_page=False)
+
+                # Ensure page and browser are properly closed
+                page.close()
+                browser.close()
+                browser = None
+
+                logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
+                return True
+
+        except Exception as e:
+            logger.error(f"Playwright screenshot failed: {e}")
+            # Ensure browser is closed even on error
+            if browser:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
+            return False
 
     def _screenshot_mac_chromium(self):
         """Take screenshot on Mac using Chrome headless fallback"""

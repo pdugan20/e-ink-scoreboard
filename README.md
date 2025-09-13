@@ -197,6 +197,7 @@ All pushes and PRs are automatically checked for code quality using Black, Ruff,
 - Flask (web server)
 - Pillow (image processing)
 - Inky library (Raspberry Pi E Ink display driver)
+- Psutil (system monitoring and resource management)
 
 ## Roadmap
 

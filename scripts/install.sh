@@ -71,6 +71,14 @@ source ~/.virtualenvs/pimoroni/bin/activate
 echo "📦 Installing Python packages..."
 pip install -r requirements.txt
 
+# Create log directory and set permissions
+echo "📝 Setting up logging..."
+sudo mkdir -p /var/log/eink-display
+sudo chown $(whoami):$(whoami) /var/log/eink-display
+mkdir -p /tmp/eink-logs
+chmod 755 /tmp/eink-logs
+echo "✅ Log directories created"
+
 # Install Playwright
 echo "🌐 Installing Playwright..."
 playwright install chromium || echo "⚠️  Playwright install failed - will fall back to system Chromium"
@@ -79,6 +87,7 @@ playwright install chromium || echo "⚠️  Playwright install failed - will fa
 chmod +x src/eink_display.py
 chmod +x scripts/setup-services.sh
 chmod +x scripts/configure.sh
+chmod +x scripts/analyze-logs.sh
 
 echo "✅ Installation complete!"
 echo ""
@@ -87,5 +96,10 @@ echo "1. Run './scripts/configure.sh' to set preferences"
 echo "2. Run './scripts/setup-services.sh' to configure auto-startup"
 echo "3. Test with: 'python src/eink_display.py --once'"
 echo "4. Reboot to apply all hardware changes"
+echo ""
+echo "📝 Debugging tools:"
+echo "• View logs: tail -f /tmp/eink_display.log"
+echo "• Analyze logs: ./scripts/analyze-logs.sh"
+echo "• Service status: sudo systemctl status sports-display.service"
 echo ""
 echo "🎉 Your sports scores display is ready!"

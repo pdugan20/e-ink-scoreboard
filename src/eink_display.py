@@ -16,9 +16,8 @@ import requests
 from display.game_checker import GameChecker
 from display.refresh_controller import RefreshController
 from display.screenshot_controller import ScreenshotController
+from utils.logging_config import setup_logging
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Default configuration (will be overridden by config file)
@@ -72,7 +71,20 @@ class EinkDisplayController:
 
     def run_continuous(self):
         """Run continuous refresh loop with smart game detection and screensaver refresh"""
-        return self.refresh_controller.run_continuous(self.wait_for_server)
+        try:
+            return self.refresh_controller.run_continuous(self.wait_for_server)
+        finally:
+            self.cleanup()
+
+    def cleanup(self):
+        """Clean up resources."""
+        logger.info("Cleaning up resources...")
+        if hasattr(self, "game_checker"):
+            self.game_checker.cleanup()
+        if hasattr(self, "screenshot_controller"):
+            # Kill any remaining browser processes
+            if hasattr(self.screenshot_controller, "_kill_hanging_browsers"):
+                self.screenshot_controller._kill_hanging_browsers()
 
 
 def load_config(config_file="eink_config.json"):
@@ -113,6 +125,9 @@ def main():
 
     # Load configuration
     config = load_config(args.config)
+
+    # Setup comprehensive logging first
+    setup_logging(config)
 
     # Override with command line arguments
     if args.interval:

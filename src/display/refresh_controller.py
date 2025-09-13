@@ -8,6 +8,8 @@ from datetime import datetime
 
 import requests
 
+from utils.logging_config import log_resource_snapshot
+
 logger = logging.getLogger(__name__)
 
 
@@ -175,6 +177,11 @@ class RefreshController:
                         success = self.refresh_display(force_update=True)
 
                 logger.debug(f"Next check in {self.config['refresh_interval']} seconds")
+
+                # Log resource usage every hour
+                if datetime.now().minute == 0:
+                    log_resource_snapshot(logger, "HOURLY_CHECK")
+
                 time.sleep(int(self.config["refresh_interval"]))
 
             except KeyboardInterrupt:
@@ -182,10 +189,24 @@ class RefreshController:
                 break
             except (requests.exceptions.RequestException, TimeoutError) as e:
                 logger.warning(f"Network/timeout error (will retry): {e}")
+                log_resource_snapshot(logger, "NETWORK_ERROR")
                 time.sleep(
                     min(self.config["retry_delay"] * 2, 30)
                 )  # Backoff with max 30s
+            except MemoryError as e:
+                logger.critical(
+                    f"Memory error detected - system may be low on RAM: {e}"
+                )
+                log_resource_snapshot(logger, "MEMORY_ERROR")
+                # Force garbage collection and wait longer
+                import gc
+
+                gc.collect()
+                time.sleep(
+                    min(self.config["retry_delay"] * 5, 120)
+                )  # Longer backoff for memory issues
             except Exception as e:
                 logger.error(f"Unexpected error in refresh loop: {e}")
+                log_resource_snapshot(logger, "UNEXPECTED_ERROR")
                 # Try to continue with a longer delay to prevent tight error loops
                 time.sleep(min(self.config["retry_delay"] * 3, 60))  # Longer backoff

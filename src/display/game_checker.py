@@ -39,6 +39,19 @@ class GameChecker:
         self._api_failure_threshold = 3
         self._circuit_open_until = 0
 
+        # Create persistent session for connection pooling
+        self._session = requests.Session()
+        # Set reasonable timeouts and connection limits
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=2,  # Small pool for this application
+            pool_maxsize=5,
+            max_retries=requests.adapters.Retry(
+                total=2, backoff_factor=0.3, status_forcelist=[500, 502, 503, 504]
+            ),
+        )
+        self._session.mount("http://", adapter)
+        self._session.mount("https://", adapter)
+
     def get_game_state(self):
         """Get game state with caching and circuit breaker to prevent race conditions."""
         current_time = time.time()
@@ -65,7 +78,7 @@ class GameChecker:
 
             # Get game data via API (single call for consistency)
             api_url = f"{self.base_url}/api/scores/MLB"
-            response = requests.get(api_url, timeout=5)
+            response = self._session.get(api_url, timeout=5)
 
             if response.status_code != 200:
                 self._handle_api_failure()
@@ -162,7 +175,7 @@ class GameChecker:
             # Check screensaver API
             api_url = f"{self.base_url}/api/screensaver/mlb"
 
-            response = requests.get(api_url, timeout=10)
+            response = self._session.get(api_url, timeout=10)
             if response.status_code != 200:
                 return False
 
@@ -178,3 +191,15 @@ class GameChecker:
         """Check for scheduled games using cached game state."""
         game_state = self.get_game_state()
         return game_state["scheduled_games"]
+
+    def cleanup(self):
+        """Clean up resources (call on shutdown)."""
+        try:
+            self._session.close()
+            logger.info("Game checker session closed")
+        except Exception as e:
+            logger.warning(f"Error closing game checker session: {e}")
+
+    def __del__(self):
+        """Cleanup on garbage collection."""
+        self.cleanup()

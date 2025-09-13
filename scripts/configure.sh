@@ -42,12 +42,19 @@ with open(file_path, 'w') as f:
 update_json_config() {
     local key="$1"
     local value="$2"
-    
+    local value_type="${3:-string}"  # Default to string, can specify 'number'
+
     python3 -c "
 import json
 with open('src/eink_config.json', 'r') as f:
     config = json.load(f)
-config['$key'] = '$value'
+
+# Set value based on type
+if '$value_type' == 'number':
+    config['$key'] = int('$value')
+else:
+    config['$key'] = '$value'
+
 with open('src/eink_config.json', 'w') as f:
     json.dump(config, f, indent=2)
 "
@@ -242,7 +249,7 @@ case $interval_choice in
 esac
 
 echo "✅ Set refresh interval: $interval seconds"
-update_json_config "refresh_interval" "$interval"
+update_json_config "refresh_interval" "$interval" "number"
 
 echo ""
 echo "🎨 Choose display theme:"
