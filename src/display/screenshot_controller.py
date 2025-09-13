@@ -28,7 +28,6 @@ class ScreenshotController:
         self.config = config
         self.is_mac = platform.system() == "Darwin"
         self.is_pi = platform.system() == "Linux" and self._is_raspberry_pi()
-        self._browser_process_pids = set()  # Track browser process PIDs for cleanup
 
         if self.is_pi:
             self.inky = self._initialize_inky_display()
