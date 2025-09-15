@@ -3,7 +3,7 @@
 
 set -e
 
-LOG_FILE="/tmp/eink_display.log"
+LOG_FILE="$HOME/logs/eink_display.log"
 SYSTEM_LOG_TIME_RANGE="1 hour ago"
 
 echo "🔍 E-Ink Display Log Analysis"
@@ -12,7 +12,7 @@ echo "============================"
 # Check if log file exists
 if [[ ! -f "$LOG_FILE" ]]; then
     echo "❌ Log file not found: $LOG_FILE"
-    echo "💡 Make sure the display service is running and has write permissions to /tmp/"
+    echo "💡 Make sure the display service is running and has write permissions to ~/logs/"
     exit 1
 fi
 

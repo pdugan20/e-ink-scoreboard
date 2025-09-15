@@ -46,9 +46,13 @@ class ScreenshotController:
 
     def _initialize_inky_display(self):
         """Initialize the Inky e-ink display"""
+        if not self.is_pi:
+            logger.info("Not on Raspberry Pi, skipping Inky display initialization")
+            return None
+
         try:
             # Try auto-detection first
-            from inky.auto import auto
+            from inky.auto import auto  # type: ignore
 
             inky = auto()
             logger.info(f"Auto-detected Inky display: {inky.width}x{inky.height}")
@@ -62,7 +66,7 @@ class ScreenshotController:
                 f"Auto-detection failed ({e}), trying Inky Impression 7.3..."
             )
             try:
-                from inky import Inky_Impressions_7
+                from inky import Inky_Impressions_7  # type: ignore
 
                 inky = Inky_Impressions_7()
                 logger.info(

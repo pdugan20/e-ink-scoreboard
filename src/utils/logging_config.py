@@ -76,8 +76,9 @@ def setup_logging(config):
     """Setup comprehensive logging with rotation and resource monitoring."""
     logging_config = config.get("logging", {})
 
-    # Create logs directory if it doesn't exist
-    log_file = logging_config.get("log_file", "/tmp/eink_display.log")
+    # Use persistent log directory in user's home folder by default
+    default_log_file = os.path.expanduser("~/logs/eink_display.log")
+    log_file = logging_config.get("log_file", default_log_file)
     log_dir = os.path.dirname(log_file)
     os.makedirs(log_dir, exist_ok=True)
 
