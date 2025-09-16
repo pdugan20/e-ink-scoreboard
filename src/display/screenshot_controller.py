@@ -164,13 +164,87 @@ class ScreenshotController:
         except Exception:
             return 0
 
+    def _check_memory_available(self):
+        """Check if there's enough memory to safely take a screenshot."""
+        try:
+            mem = psutil.virtual_memory()
+            available_mb = mem.available / 1024 / 1024
+
+            # Based on logs, problems occur when available memory < 200MB
+            MIN_MEMORY_MB = 200
+
+            if available_mb < MIN_MEMORY_MB:
+                logger.warning(
+                    f"Low memory: {available_mb:.0f}MB available (minimum {MIN_MEMORY_MB}MB recommended)"
+                )
+
+                # Try to free memory
+                import gc
+
+                gc.collect()
+
+                # Kill any hanging browsers to free memory
+                self._kill_hanging_browsers()
+
+                # Check again after cleanup
+                mem = psutil.virtual_memory()
+                available_mb = mem.available / 1024 / 1024
+
+                if available_mb < MIN_MEMORY_MB:
+                    logger.error(
+                        f"Still low memory after cleanup: {available_mb:.0f}MB"
+                    )
+                    return False
+
+            logger.debug(f"Memory check passed: {available_mb:.0f}MB available")
+            return True
+
+        except Exception as e:
+            logger.warning(f"Could not check memory: {e}")
+            return True  # Proceed anyway if we can't check
+
     def take_screenshot(self):
         """Take screenshot using Playwright with browser process management."""
+        # Check memory before attempting screenshot
+        if not self._check_memory_available():
+            logger.warning("Insufficient memory for screenshot, skipping this cycle")
+            return False
+
         with self._browser_process_manager():
             try:
-                success = self._screenshot_playwright()
-                log_after_screenshot(logger, success)
-                return success
+                # Add a hard timeout for the entire screenshot operation
+                import signal
+
+                def timeout_handler(signum, frame):
+                    raise TimeoutError(
+                        "Screenshot operation timed out after 120 seconds"
+                    )
+
+                # Set alarm for 2 minutes (should be plenty based on logs showing 20-40s normal)
+                if not self.is_mac:  # signal.alarm doesn't work well on Mac
+                    signal.signal(signal.SIGALRM, timeout_handler)
+                    signal.alarm(120)
+
+                try:
+                    success = self._screenshot_playwright()
+                    log_after_screenshot(logger, success)
+
+                    # Force garbage collection after screenshot to free memory
+                    import gc
+
+                    gc.collect()
+
+                    return success
+                finally:
+                    if not self.is_mac:
+                        signal.alarm(0)  # Cancel the alarm
+
+            except TimeoutError as e:
+                logger.error(f"Screenshot timed out: {e}")
+                logger.info("Killing any hanging browser processes...")
+                self._kill_hanging_browsers()
+                log_after_screenshot(logger, False)
+                return False
             except ImportError as e:
                 logger.error(f"Playwright not available: {e}")
                 logger.error(
@@ -190,9 +264,22 @@ class ScreenshotController:
         browser = None
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(
-                    headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"]
-                )
+                # Memory-optimized args for Raspberry Pi
+                browser_args = [
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-software-rasterizer",
+                    "--disable-background-timer-throttling",
+                    "--disable-backgrounding-occluded-windows",
+                    "--disable-renderer-backgrounding",
+                    "--disable-features=TranslateUI",
+                    "--disable-ipc-flooding-protection",
+                    "--max_old_space_size=256",  # Limit memory usage
+                    "--single-process",  # Use single process to reduce memory
+                ]
+
+                browser = p.chromium.launch(headless=True, args=browser_args)
 
                 # Get scale factor from config
                 scale_factor = self.config.get("screenshot_scale", 1)
@@ -211,13 +298,13 @@ class ScreenshotController:
                 )
 
                 # Increase timeout for slower Pi and RSS feed loading
-                page.set_default_timeout(90000)  # 90 seconds
+                page.set_default_timeout(60000)  # 60 seconds (reduced from 90)
 
                 try:
                     page.goto(
                         self.config["web_server_url"],
                         wait_until="networkidle",
-                        timeout=90000,
+                        timeout=60000,  # 60 seconds should be enough based on logs
                     )
                 except Exception as e:
                     # Fallback to domcontentloaded if networkidle times out

@@ -12,10 +12,10 @@
   "logging": {
     "level": "INFO",
     "log_file": "~/logs/eink_display.log",
-    "max_log_size_mb": 50,
-    "backup_count": 5,
-    "log_memory_usage": true,
-    "log_browser_processes": true
+    "max_log_size_mb": 10,
+    "backup_count": 2,
+    "log_memory_usage": false,
+    "log_browser_processes": false
   },
   "_comment": "Configuration for eink display controller"
 }
