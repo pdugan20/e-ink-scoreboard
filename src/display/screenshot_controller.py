@@ -232,15 +232,21 @@ class ScreenshotController:
                 # Add a hard timeout for the entire screenshot operation
                 import signal
 
+                # Timeout long enough for slow Pi Zero
+                SCREENSHOT_TIMEOUT = 150  # 2.5 minutes should be enough
+
                 def timeout_handler(signum, frame):
+                    logger.error(
+                        f"Screenshot timeout after {SCREENSHOT_TIMEOUT}s - killing browsers"
+                    )
+                    BrowserCleanup.force_kill_all_browsers()
                     raise TimeoutError(
-                        "Screenshot operation timed out after 120 seconds"
+                        f"Screenshot operation timed out after {SCREENSHOT_TIMEOUT} seconds"
                     )
 
-                # Reduced timeout to 60 seconds to prevent zombie accumulation
                 if not self.is_mac:  # signal.alarm doesn't work well on Mac
                     signal.signal(signal.SIGALRM, timeout_handler)
-                    signal.alarm(60)
+                    signal.alarm(SCREENSHOT_TIMEOUT)
 
                 try:
                     success = self._screenshot_playwright()
@@ -300,6 +306,8 @@ class ScreenshotController:
                     "--disable-features=site-per-process",
                     "--memory-pressure-off",
                     "--max_old_space_size=96",  # Additional JS heap limit
+                    "--aggressive-cache-discard",  # Discard cache aggressively
+                    "--disable-features=RendererCodeIntegrity",  # Reduce overhead
                 ]
 
                 logger.debug(
@@ -355,6 +363,10 @@ class ScreenshotController:
                 page.close()
                 browser.close()
                 browser = None
+
+                # Extra cleanup for Playwright node processes
+                time.sleep(1)  # Give browser time to cleanup
+                BrowserCleanup.force_kill_all_browsers()
 
                 logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
                 return True

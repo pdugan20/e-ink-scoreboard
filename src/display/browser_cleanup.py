@@ -19,14 +19,22 @@ class BrowserCleanup:
         """Force kill ALL browser processes immediately."""
         killed_count = 0
         try:
-            # Use pkill for more aggressive cleanup
-            for browser_name in ["chromium", "chrome", "playwright"]:
+            # Kill Playwright node processes specifically
+            for process_name in ["chromium", "chrome", "playwright", "node"]:
                 try:
-                    subprocess.run(
-                        ["pkill", "-9", "-f", browser_name],
-                        capture_output=True,
-                        timeout=5,
-                    )
+                    # Kill processes containing playwright in path
+                    if process_name == "node":
+                        subprocess.run(
+                            ["pkill", "-9", "-f", "playwright/driver/node"],
+                            capture_output=True,
+                            timeout=5,
+                        )
+                    else:
+                        subprocess.run(
+                            ["pkill", "-9", "-f", process_name],
+                            capture_output=True,
+                            timeout=5,
+                        )
                     killed_count += 1
                 except Exception:
                     pass
@@ -37,10 +45,14 @@ class BrowserCleanup:
                     name = proc.info["name"].lower() if proc.info["name"] else ""
                     cmdline = " ".join(proc.info["cmdline"] or []).lower()
 
-                    if any(
+                    # Check for browser processes AND playwright node processes
+                    is_browser = any(
                         b in name or b in cmdline
                         for b in ["chromium", "chrome", "playwright"]
-                    ):
+                    )
+                    is_playwright_node = "node" in name and "playwright" in cmdline
+
+                    if is_browser or is_playwright_node:
                         proc.kill()  # Direct SIGKILL
                         killed_count += 1
                 except (
