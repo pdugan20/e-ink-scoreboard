@@ -186,7 +186,14 @@ class ScreenshotController:
         browser = None
         try:
             with sync_playwright() as p:
-                browser = p.firefox.launch(headless=True)
+                # Firefox preferences for better color rendering
+                firefox_prefs = {
+                    "gfx.color_management.mode": 1,  # Enable color management
+                    "gfx.color_management.rendering_intent": 0,  # Perceptual rendering
+                }
+                browser = p.firefox.launch(
+                    headless=True, firefox_user_prefs=firefox_prefs
+                )
 
                 # Get scale factor from config
                 scale_factor = self.config.get("screenshot_scale", 1)
@@ -197,6 +204,7 @@ class ScreenshotController:
                         "height": self.config["display_height"],
                     },
                     device_scale_factor=scale_factor,  # High DPI rendering
+                    color_scheme="light",  # Force light mode for consistent rendering
                 )
 
                 logger.info(
