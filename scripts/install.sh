@@ -79,10 +79,10 @@ mkdir -p /tmp/eink-logs
 chmod 755 /tmp/eink-logs
 echo "✅ Log directories created"
 
-# Install Playwright and WebKit dependencies
+# Install Playwright and Chromium dependencies
 echo "🌐 Installing Playwright..."
-playwright install-deps webkit || echo "⚠️  Failed to install WebKit system dependencies"
-playwright install webkit || echo "⚠️  Playwright WebKit install failed - screenshots won't work"
+playwright install-deps chromium || echo "⚠️  Failed to install Chromium system dependencies"
+playwright install chromium || echo "⚠️  Playwright Chromium install failed - screenshots won't work"
 
 # Make scripts executable
 chmod +x src/eink_display.py

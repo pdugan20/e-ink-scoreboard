@@ -25,7 +25,7 @@ Display live sports scores on your e-ink display with professional quality and r
 
    # Use requirements-dev.txt for Mac (excludes Pi-specific hardware packages)
    pip install -r requirements-dev.txt
-   playwright install webkit
+   playwright install chromium
    ```
 
    **Note:** Mac development uses `requirements-dev.txt` which excludes the `inky` package and its dependencies (`spidev`, `gpiod`) since these are Linux-only hardware libraries for the Raspberry Pi.

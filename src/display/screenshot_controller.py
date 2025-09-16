@@ -86,7 +86,8 @@ class ScreenshotController:
 
                     # Look for browser processes that might be hanging
                     is_browser = any(
-                        browser in name for browser in ["webkit", "playwright"]
+                        browser in name
+                        for browser in ["chromium", "chrome", "playwright"]
                     )
                     has_headless = "headless" in cmdline
                     has_display_url = (
@@ -152,7 +153,10 @@ class ScreenshotController:
             for proc in psutil.process_iter(["name"]):
                 try:
                     name = proc.info["name"].lower()
-                    if any(browser in name for browser in ["webkit", "playwright"]):
+                    if any(
+                        browser in name
+                        for browser in ["chromium", "chrome", "playwright"]
+                    ):
                         count += 1
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
@@ -170,7 +174,7 @@ class ScreenshotController:
             except ImportError as e:
                 logger.error(f"Playwright not available: {e}")
                 logger.error(
-                    "Please install Playwright: pip install playwright && playwright install webkit"
+                    "Please install Playwright: pip install playwright && playwright install chromium"
                 )
                 log_after_screenshot(logger, False)
                 return False
@@ -180,13 +184,15 @@ class ScreenshotController:
                 return False
 
     def _screenshot_playwright(self):
-        """Take screenshot using Playwright with WebKit (works on both Mac and Pi)"""
+        """Take screenshot using Playwright with Chromium (works on both Mac and Pi)"""
         from playwright.sync_api import sync_playwright
 
         browser = None
         try:
             with sync_playwright() as p:
-                browser = p.webkit.launch(headless=True)
+                browser = p.chromium.launch(
+                    headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"]
+                )
 
                 # Get scale factor from config
                 scale_factor = self.config.get("screenshot_scale", 1)
