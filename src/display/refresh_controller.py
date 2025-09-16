@@ -115,23 +115,39 @@ class RefreshController:
                         else:
                             logger.error("Display refresh failed")
                     else:
-                        # Games exist but none active - wait until next day
-                        logger.info(
-                            "Games finished for today, display staying static until next day"
-                        )
-                        # Calculate time until midnight (next day)
-                        now = datetime.now()
-                        tomorrow = datetime(now.year, now.month, now.day) + timedelta(
-                            days=1
-                        )
-                        seconds_until_tomorrow = (tomorrow - now).total_seconds()
-                        # Add a small buffer (1 minute) to ensure we're past midnight
-                        sleep_seconds = seconds_until_tomorrow + 60
-                        logger.info(
-                            f"Sleeping for {sleep_seconds/3600:.1f} hours until next day ({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
-                        )
-                        time.sleep(sleep_seconds)
-                        continue  # Skip the regular sleep interval and restart the loop
+                        # No active games - check if there are still scheduled games
+                        scheduled_games = game_state.get("scheduled_games", [])
+                        final_games = game_state.get("final_games", [])
+
+                        if scheduled_games:
+                            # Games are scheduled but haven't started yet - keep checking
+                            logger.info(
+                                f"No active games, but {len(scheduled_games)} scheduled games pending. "
+                                f"Continuing regular checks."
+                            )
+                        elif final_games and not scheduled_games:
+                            # All games are final and no more scheduled - wait until next day
+                            logger.info(
+                                "All games finished for today, display staying static until next day"
+                            )
+                            # Calculate time until midnight (next day)
+                            now = datetime.now()
+                            tomorrow = datetime(
+                                now.year, now.month, now.day
+                            ) + timedelta(days=1)
+                            seconds_until_tomorrow = (tomorrow - now).total_seconds()
+                            # Add a small buffer (1 minute) to ensure we're past midnight
+                            sleep_seconds = seconds_until_tomorrow + 60
+                            logger.info(
+                                f"Sleeping for {sleep_seconds/3600:.1f} hours until next day ({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
+                            )
+                            time.sleep(sleep_seconds)
+                            continue  # Skip the regular sleep interval and restart the loop
+                        else:
+                            # Edge case: games exist but no clear status
+                            logger.info(
+                                "Games exist but status unclear, continuing regular checks"
+                            )
 
                 else:
                     # No active games - check if screensaver is eligible
