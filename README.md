@@ -22,9 +22,13 @@ Display live sports scores on your e-ink display with professional quality and r
    cd e-ink-scoreboard
    python3 -m venv venv
    source venv/bin/activate
-   pip install -r requirements.txt
-   playwright install chromium
+
+   # Use requirements-dev.txt for Mac (excludes Pi-specific hardware packages)
+   pip install -r requirements-dev.txt
+   playwright install firefox
    ```
+
+   **Note:** Mac development uses `requirements-dev.txt` which excludes the `inky` package and its dependencies (`spidev`, `gpiod`) since these are Linux-only hardware libraries for the Raspberry Pi.
 
 2. **Test the display**:
 
@@ -48,6 +52,8 @@ Display live sports scores on your e-ink display with professional quality and r
 ### Raspberry Pi Deployment
 
 See **[docs/RASPBERRY_PI_SETUP.md](docs/RASPBERRY_PI_SETUP.md)** for complete installation instructions.
+
+**Note:** Raspberry Pi uses the full `requirements.txt` which includes the `inky` display library and hardware dependencies.
 
 For additional Inky Impression setup guidance, see the official **[Getting Started with Inky Impression](https://learn.pimoroni.com/article/getting-started-with-inky-impression)** guide.
 

@@ -42,7 +42,7 @@ echo ""
 # Show screenshot activity
 echo "📸 Screenshot Activity:"
 echo "----------------------"
-tail -n 1000 "$LOG_FILE" | grep -i "screenshot\|playwright\|chromium" | tail -n 20 || echo "No screenshot activity found"
+tail -n 1000 "$LOG_FILE" | grep -i "screenshot\|playwright\|firefox" | tail -n 20 || echo "No screenshot activity found"
 echo ""
 
 # Show recent startup/shutdown
@@ -62,7 +62,7 @@ fi
 
 if command -v ps &> /dev/null; then
     echo "E-ink related processes:"
-    ps aux | grep -E "eink_display|sports-|chromium|playwright" | grep -v grep || echo "No related processes found"
+    ps aux | grep -E "eink_display|sports-|firefox|playwright" | grep -v grep || echo "No related processes found"
     echo ""
 fi
 
@@ -70,7 +70,7 @@ fi
 echo "🌐 Browser Processes:"
 echo "-------------------"
 if command -v ps &> /dev/null; then
-    ps aux | grep -E "chromium|chrome|playwright" | grep -v grep | head -n 10 || echo "No browser processes found"
+    ps aux | grep -E "firefox|playwright" | grep -v grep | head -n 10 || echo "No browser processes found"
 fi
 
 echo ""

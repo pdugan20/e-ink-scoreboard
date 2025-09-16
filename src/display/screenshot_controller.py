@@ -3,9 +3,7 @@ Screenshot and image processing logic for e-ink display.
 """
 
 import logging
-import os
 import platform
-import subprocess
 import time
 from contextlib import contextmanager
 
@@ -88,8 +86,7 @@ class ScreenshotController:
 
                     # Look for browser processes that might be hanging
                     is_browser = any(
-                        browser in name
-                        for browser in ["chromium", "chrome", "playwright"]
+                        browser in name for browser in ["firefox", "playwright"]
                     )
                     has_headless = "headless" in cmdline
                     has_display_url = (
@@ -155,10 +152,7 @@ class ScreenshotController:
             for proc in psutil.process_iter(["name"]):
                 try:
                     name = proc.info["name"].lower()
-                    if any(
-                        browser in name
-                        for browser in ["chromium", "chrome", "playwright"]
-                    ):
+                    if any(browser in name for browser in ["firefox", "playwright"]):
                         count += 1
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
@@ -167,32 +161,32 @@ class ScreenshotController:
             return 0
 
     def take_screenshot(self):
-        """Take screenshot using available method with browser process management."""
+        """Take screenshot using Playwright with browser process management."""
         with self._browser_process_manager():
-            # Try Playwright first (works on both Mac and Pi)
             try:
                 success = self._screenshot_playwright()
                 log_after_screenshot(logger, success)
                 return success
-            except ImportError:
-                logger.info("Playwright not available, falling back to system Chromium")
-                if self.is_mac:
-                    success = self._screenshot_mac_chromium()
-                else:
-                    success = self._screenshot_linux()
-                log_after_screenshot(logger, success)
-                return success
+            except ImportError as e:
+                logger.error(f"Playwright not available: {e}")
+                logger.error(
+                    "Please install Playwright: pip install playwright && playwright install firefox"
+                )
+                log_after_screenshot(logger, False)
+                return False
+            except Exception as e:
+                logger.error(f"Screenshot failed: {e}")
+                log_after_screenshot(logger, False)
+                return False
 
     def _screenshot_playwright(self):
-        """Take screenshot using Playwright (works on both Mac and Pi)"""
+        """Take screenshot using Playwright with Firefox (works on both Mac and Pi)"""
         from playwright.sync_api import sync_playwright
 
         browser = None
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(
-                    headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"]
-                )
+                browser = p.firefox.launch(headless=True)
 
                 # Get scale factor from config
                 scale_factor = self.config.get("screenshot_scale", 1)
@@ -250,104 +244,6 @@ class ScreenshotController:
                     browser.close()
                 except Exception:
                     pass
-            return False
-
-    def _screenshot_mac_chromium(self):
-        """Take screenshot on Mac using Chrome headless fallback"""
-        try:
-            # Fallback to Chrome headless
-            chrome_paths = [
-                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-                "/Applications/Chromium.app/Contents/MacOS/Chromium",
-                "google-chrome",
-                "chromium-browser",
-            ]
-
-            chrome_cmd = None
-            for path in chrome_paths:
-                if (
-                    os.path.exists(path)
-                    or subprocess.run(["which", path], capture_output=True).returncode
-                    == 0
-                ):
-                    chrome_cmd = path
-                    break
-
-            if not chrome_cmd:
-                raise RuntimeError("Neither Playwright nor Chrome/Chromium found")
-
-            cmd = [
-                chrome_cmd,
-                "--headless",
-                "--disable-gpu",
-                "--no-sandbox",
-                "--disable-web-security",
-                "--allow-running-insecure-content",
-                f"--window-size={self.config['display_width']},{self.config['display_height']}",
-                f"--screenshot={self.config['screenshot_path']}",
-                "--force-device-scale-factor=1",
-                "--hide-scrollbars",
-                "--disable-background-timer-throttling",
-                "--virtual-time-budget=10000",
-                "--run-all-compositor-stages-before-draw",
-                self.config["web_server_url"],
-            ]
-
-            logger.info(
-                "Taking screenshot with Chrome (waiting for all resources to load)..."
-            )
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
-
-            if result.returncode != 0:
-                raise RuntimeError(f"Screenshot failed: {result.stderr}")
-
-            if not os.path.exists(self.config["screenshot_path"]):
-                raise RuntimeError("Screenshot file not created")
-
-            logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Mac screenshot failed: {e}")
-            return False
-
-    def _screenshot_linux(self):
-        """Take screenshot on Linux/Pi using chromium-browser"""
-        try:
-            cmd = [
-                "/usr/bin/chromium",
-                "--headless",
-                "--disable-gpu",
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-web-security",
-                "--allow-running-insecure-content",
-                f"--window-size={self.config['display_width']},{self.config['display_height']}",
-                f"--screenshot={self.config['screenshot_path']}",
-                "--force-device-scale-factor=1",  # Ensure 1:1 pixel rendering
-                "--hide-scrollbars",  # Hide any scrollbars
-                "--disable-background-timer-throttling",  # Ensure full rendering
-                "--virtual-time-budget=10000",  # Wait 10 seconds for all resources
-                "--run-all-compositor-stages-before-draw",
-                self.config["web_server_url"],
-            ]
-
-            logger.info(
-                "Taking screenshot with Chromium (waiting for all resources to load)..."
-            )
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
-
-            if result.returncode != 0:
-                raise RuntimeError(f"Screenshot failed: {result.stderr}")
-
-            if not os.path.exists(self.config["screenshot_path"]):
-                raise RuntimeError("Screenshot file not created")
-
-            logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
-            return True
-
-        except Exception as e:
-            logger.error(f"Linux screenshot failed: {e}")
             return False
 
     def process_image(self):

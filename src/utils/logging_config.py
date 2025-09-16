@@ -42,18 +42,15 @@ class ResourceMonitoringFormatter(logging.Formatter):
 def count_browser_processes():
     """Count running browser processes that might be hanging."""
     try:
-        # Look for chromium, chrome, and playwright processes
+        # Look for firefox and playwright processes
         browser_processes = []
         for proc in psutil.process_iter(["pid", "name", "cmdline"]):
             try:
                 name = proc.info["name"].lower()
                 cmdline = " ".join(proc.info["cmdline"] or []).lower()
 
-                if any(
-                    browser in name for browser in ["chromium", "chrome", "playwright"]
-                ) or any(
-                    browser in cmdline
-                    for browser in ["chromium", "chrome", "playwright"]
+                if any(browser in name for browser in ["firefox", "playwright"]) or any(
+                    browser in cmdline for browser in ["firefox", "playwright"]
                 ):
                     browser_processes.append(
                         {

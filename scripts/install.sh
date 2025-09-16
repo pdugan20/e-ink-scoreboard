@@ -20,7 +20,7 @@ sudo apt update && sudo apt upgrade -y
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-sudo apt install -y python3-pip python3-venv git chromium-browser
+sudo apt install -y python3-pip python3-venv git
 sudo apt install -y libjpeg-dev libopenjp2-7 libtiff5-dev
 
 # Configure hardware interfaces
@@ -79,9 +79,10 @@ mkdir -p /tmp/eink-logs
 chmod 755 /tmp/eink-logs
 echo "✅ Log directories created"
 
-# Install Playwright
+# Install Playwright and Firefox dependencies
 echo "🌐 Installing Playwright..."
-playwright install chromium || echo "⚠️  Playwright install failed - will fall back to system Chromium"
+playwright install-deps firefox || echo "⚠️  Failed to install Firefox system dependencies"
+playwright install firefox || echo "⚠️  Playwright Firefox install failed - screenshots won't work"
 
 # Make scripts executable
 chmod +x src/eink_display.py
