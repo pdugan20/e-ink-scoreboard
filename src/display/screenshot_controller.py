@@ -265,47 +265,33 @@ class ScreenshotController:
 
     def _screenshot_playwright(self):
         """Take screenshot using Playwright with Chromium (works on both Mac and Pi)"""
+        logger.debug("Starting Playwright screenshot process...")
         from playwright.sync_api import sync_playwright
 
         browser = None
         try:
+            logger.debug("Creating Playwright instance...")
             with sync_playwright() as p:
-                # Memory-optimized args for Raspberry Pi
                 browser_args = [
                     "--no-sandbox",
                     "--disable-dev-shm-usage",
                     "--disable-gpu",
                     "--disable-software-rasterizer",
+                    "--disable-extensions",
+                    "--disable-plugins",
+                    "--disable-translate",
+                    "--disable-webgl",
+                    f"--js-flags=--max-old-space-size={BROWSER_JS_HEAP_MB}",  # Limit JS heap
                     "--disable-background-timer-throttling",
                     "--disable-backgrounding-occluded-windows",
                     "--disable-renderer-backgrounding",
-                    "--disable-features=TranslateUI",
-                    "--disable-ipc-flooding-protection",
-                    "--single-process",  # Use single process to reduce memory
-                    "--disable-features=site-per-process",
-                    "--disable-extensions",
-                    "--disable-plugins",
-                    "--disable-sync",
-                    "--disable-translate",
-                    "--disable-webgl",
-                    "--disable-webgl2",
-                    "--disable-web-security",
-                    f"--js-flags=--max-old-space-size={BROWSER_JS_HEAP_MB}",  # Limit JS heap
-                    "--memory-pressure-off",
-                    f"--max_old_space_size={BROWSER_JS_HEAP_MB}",  # Limit memory usage
-                    "--disable-shared-workers",
-                    "--disable-audio-output",
-                    "--disable-notifications",
-                    "--disable-component-extensions-with-background-pages",
-                    "--disable-default-apps",
-                    "--disable-file-system",
-                    "--disable-logging",
-                    "--disable-print-preview",
-                    "--aggressive-cache-discard",
-                    "--aggressive-tab-discard",
                 ]
 
+                logger.debug(
+                    f"Launching browser with {len(browser_args)} optimization flags..."
+                )
                 browser = p.chromium.launch(headless=True, args=browser_args)
+                logger.debug("Browser launched successfully")
 
                 # Get scale factor from config
                 scale_factor = self.config.get("screenshot_scale", 1)
