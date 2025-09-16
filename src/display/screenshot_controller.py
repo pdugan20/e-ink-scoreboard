@@ -281,8 +281,28 @@ class ScreenshotController:
                     "--disable-renderer-backgrounding",
                     "--disable-features=TranslateUI",
                     "--disable-ipc-flooding-protection",
-                    "--max_old_space_size=256",  # Limit memory usage
                     "--single-process",  # Use single process to reduce memory
+                    "--disable-features=site-per-process",
+                    "--disable-extensions",
+                    "--disable-plugins",
+                    "--disable-sync",
+                    "--disable-translate",
+                    "--disable-webgl",
+                    "--disable-webgl2",
+                    "--disable-web-security",
+                    "--js-flags=--max-old-space-size=128",  # Limit JS heap to 128MB
+                    "--memory-pressure-off",
+                    "--max_old_space_size=128",  # Limit memory usage
+                    "--disable-shared-workers",
+                    "--disable-audio-output",
+                    "--disable-notifications",
+                    "--disable-component-extensions-with-background-pages",
+                    "--disable-default-apps",
+                    "--disable-file-system",
+                    "--disable-logging",
+                    "--disable-print-preview",
+                    "--aggressive-cache-discard",
+                    "--aggressive-tab-discard",
                 ]
 
                 browser = p.chromium.launch(headless=True, args=browser_args)
@@ -303,28 +323,30 @@ class ScreenshotController:
                     f"Taking screenshot with Playwright ({scale_factor}x DPI rendering)..."
                 )
 
-                # Increase timeout for slower Pi and RSS feed loading
-                page.set_default_timeout(60000)  # 60 seconds (reduced from 90)
+                # Reduce timeout for low-memory conditions
+                page.set_default_timeout(30000)  # 30 seconds
 
                 try:
-                    page.goto(
-                        self.config["web_server_url"],
-                        wait_until="networkidle",
-                        timeout=60000,  # 60 seconds should be enough based on logs
-                    )
-                except Exception as e:
-                    # Fallback to domcontentloaded if networkidle times out
-                    logger.warning(
-                        f"Network idle timeout, trying domcontentloaded: {e}"
-                    )
+                    # Try faster domcontentloaded first in low memory conditions
                     page.goto(
                         self.config["web_server_url"],
                         wait_until="domcontentloaded",
-                        timeout=60000,
+                        timeout=30000,  # 30 seconds
                     )
 
-                # Wait for images to load (especially screensaver images)
-                page.wait_for_timeout(8000)
+                    # Brief wait for critical content to render
+                    page.wait_for_timeout(3000)
+
+                except Exception as e:
+                    # If even domcontentloaded fails, try minimal load
+                    logger.warning(f"Page load timeout, trying minimal load: {e}")
+                    page.goto(
+                        self.config["web_server_url"],
+                        wait_until="commit",
+                        timeout=15000,
+                    )
+                    # Give a bit more time for content to appear
+                    page.wait_for_timeout(5000)
 
                 page.screenshot(path=self.config["screenshot_path"], full_page=False)
 

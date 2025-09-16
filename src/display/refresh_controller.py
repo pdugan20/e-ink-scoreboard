@@ -6,6 +6,7 @@ import logging
 import time
 from datetime import datetime, timedelta
 
+import psutil
 import requests
 
 from utils.logging_config import log_resource_snapshot
@@ -20,6 +21,45 @@ class RefreshController:
         self.config = config
         self.game_checker = game_checker
         self.screenshot_controller = screenshot_controller
+
+    def _wait_for_memory_on_startup(self):
+        """Wait for sufficient memory before attempting first display update"""
+
+        MIN_MEMORY_MB = 200
+        max_wait_minutes = 5
+        check_interval = 10  # seconds
+
+        start_time = time.time()
+
+        while time.time() - start_time < (max_wait_minutes * 60):
+            try:
+                mem = psutil.virtual_memory()
+                available_mb = mem.available / 1024 / 1024
+
+                if available_mb >= MIN_MEMORY_MB:
+                    logger.info(
+                        f"Sufficient memory available for startup: {available_mb:.0f}MB"
+                    )
+                    return
+
+                logger.info(
+                    f"Waiting for memory to free up: {available_mb:.0f}MB available, need {MIN_MEMORY_MB}MB"
+                )
+
+                # Try to free memory
+                import gc
+
+                gc.collect()
+
+                time.sleep(check_interval)
+
+            except Exception as e:
+                logger.warning(f"Error checking memory during startup: {e}")
+                return  # Proceed anyway if we can't check
+
+        logger.warning(
+            f"Memory wait timeout after {max_wait_minutes} minutes, proceeding anyway"
+        )
 
     def refresh_display(self, force_update=False):
         """Complete refresh cycle: screenshot -> process -> display
@@ -73,6 +113,9 @@ class RefreshController:
 
         if not wait_for_server_callback():
             return False
+
+        # Wait for sufficient memory on startup
+        self._wait_for_memory_on_startup()
 
         last_game_date = None
         new_games_detected = False
