@@ -11,7 +11,7 @@
   "retry_delay": 5,
   "logging": {
     "level": "INFO",
-    "log_file": "/tmp/eink_display.log",
+    "log_file": "~/logs/eink_display.log",
     "max_log_size_mb": 50,
     "backup_count": 5,
     "log_memory_usage": true,

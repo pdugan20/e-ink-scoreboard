@@ -187,10 +187,10 @@ The system now includes comprehensive application logging with resource monitori
 
 ```bash
 # View application logs (new detailed logging)
-tail -f /tmp/eink_display.log
+tail -f ~/logs/eink_display.log
 
 # Filter for errors and resource information
-tail -f /tmp/eink_display.log | grep -E 'ERROR|CRITICAL|RESOURCE_SNAPSHOT'
+tail -f ~/logs/eink_display.log | grep -E 'ERROR|CRITICAL|RESOURCE_SNAPSHOT'
 
 # Quick log analysis tool
 ./scripts/analyze-logs.sh
