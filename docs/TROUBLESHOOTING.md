@@ -238,7 +238,7 @@ sudo journalctl --since "1 hour ago" | grep -i "oom\|killed"
 ps aux | grep -E "chromium|chrome|playwright" | grep -v grep
 
 # Monitor browser process count during screenshot
-watch -n 2 "ps aux | grep -E 'webkit|playwright' | grep -v grep | wc -l"
+watch -n 2 "ps aux | grep -E 'chromium|chrome|playwright' | grep -v grep | wc -l"
 ```
 
 ## Configuration Issues
