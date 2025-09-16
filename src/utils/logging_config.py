@@ -78,7 +78,9 @@ def setup_logging(config):
 
     # Use persistent log directory in user's home folder by default
     default_log_file = os.path.expanduser("~/logs/eink_display.log")
-    log_file = logging_config.get("log_file", default_log_file)
+    log_file = os.path.expanduser(
+        logging_config.get("log_file", default_log_file)
+    )  # Expand ~ in config path too
     log_dir = os.path.dirname(log_file)
     os.makedirs(log_dir, exist_ok=True)
 
