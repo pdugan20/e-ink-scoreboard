@@ -171,7 +171,9 @@ class ScreenshotController:
             available_mb = mem.available / 1024 / 1024
 
             # Based on logs, problems occur when available memory < 200MB
+            # But we can try with 150MB for important updates
             MIN_MEMORY_MB = 200
+            CRITICAL_MIN_MB = 150
 
             if available_mb < MIN_MEMORY_MB:
                 logger.warning(
@@ -190,11 +192,15 @@ class ScreenshotController:
                 mem = psutil.virtual_memory()
                 available_mb = mem.available / 1024 / 1024
 
-                if available_mb < MIN_MEMORY_MB:
+                if available_mb < CRITICAL_MIN_MB:
                     logger.error(
-                        f"Still low memory after cleanup: {available_mb:.0f}MB"
+                        f"Critically low memory after cleanup: {available_mb:.0f}MB (minimum {CRITICAL_MIN_MB}MB)"
                     )
                     return False
+                elif available_mb < MIN_MEMORY_MB:
+                    logger.warning(
+                        f"Memory still below recommended after cleanup: {available_mb:.0f}MB, proceeding cautiously"
+                    )
 
             logger.debug(f"Memory check passed: {available_mb:.0f}MB available")
             return True
