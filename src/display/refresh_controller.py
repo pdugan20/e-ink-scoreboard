@@ -4,7 +4,7 @@ Refresh logic and timing for e-ink display controller.
 
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 
@@ -115,10 +115,23 @@ class RefreshController:
                         else:
                             logger.error("Display refresh failed")
                     else:
-                        # Games exist but none active - just log, don't update display
+                        # Games exist but none active - wait until next day
                         logger.info(
                             "Games finished for today, display staying static until next day"
                         )
+                        # Calculate time until midnight (next day)
+                        now = datetime.now()
+                        tomorrow = datetime(now.year, now.month, now.day) + timedelta(
+                            days=1
+                        )
+                        seconds_until_tomorrow = (tomorrow - now).total_seconds()
+                        # Add a small buffer (1 minute) to ensure we're past midnight
+                        sleep_seconds = seconds_until_tomorrow + 60
+                        logger.info(
+                            f"Sleeping for {sleep_seconds/3600:.1f} hours until next day ({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
+                        )
+                        time.sleep(sleep_seconds)
+                        continue  # Skip the regular sleep interval and restart the loop
 
                 else:
                     # No active games - check if screensaver is eligible
