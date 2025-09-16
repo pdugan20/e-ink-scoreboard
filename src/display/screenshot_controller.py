@@ -10,6 +10,11 @@ from contextlib import contextmanager
 import psutil
 from PIL import Image
 
+from config.memory_config import (
+    BROWSER_JS_HEAP_MB,
+    MEMORY_MINIMUM_MB,
+    MEMORY_RECOMMENDED_MB,
+)
 from utils.logging_config import (
     log_after_screenshot,
     log_before_screenshot,
@@ -170,14 +175,9 @@ class ScreenshotController:
             mem = psutil.virtual_memory()
             available_mb = mem.available / 1024 / 1024
 
-            # Based on logs, problems occur when available memory < 200MB
-            # But we can try with 150MB for important updates
-            MIN_MEMORY_MB = 200
-            CRITICAL_MIN_MB = 150
-
-            if available_mb < MIN_MEMORY_MB:
+            if available_mb < MEMORY_RECOMMENDED_MB:
                 logger.warning(
-                    f"Low memory: {available_mb:.0f}MB available (minimum {MIN_MEMORY_MB}MB recommended)"
+                    f"Low memory: {available_mb:.0f}MB available (minimum {MEMORY_RECOMMENDED_MB}MB recommended)"
                 )
 
                 # Try to free memory
@@ -192,12 +192,12 @@ class ScreenshotController:
                 mem = psutil.virtual_memory()
                 available_mb = mem.available / 1024 / 1024
 
-                if available_mb < CRITICAL_MIN_MB:
+                if available_mb < MEMORY_MINIMUM_MB:
                     logger.error(
-                        f"Critically low memory after cleanup: {available_mb:.0f}MB (minimum {CRITICAL_MIN_MB}MB)"
+                        f"Critically low memory after cleanup: {available_mb:.0f}MB (minimum {MEMORY_MINIMUM_MB}MB)"
                     )
                     return False
-                elif available_mb < MIN_MEMORY_MB:
+                elif available_mb < MEMORY_RECOMMENDED_MB:
                     logger.warning(
                         f"Memory still below recommended after cleanup: {available_mb:.0f}MB, proceeding cautiously"
                     )
@@ -290,9 +290,9 @@ class ScreenshotController:
                     "--disable-webgl",
                     "--disable-webgl2",
                     "--disable-web-security",
-                    "--js-flags=--max-old-space-size=128",  # Limit JS heap to 128MB
+                    f"--js-flags=--max-old-space-size={BROWSER_JS_HEAP_MB}",  # Limit JS heap
                     "--memory-pressure-off",
-                    "--max_old_space_size=128",  # Limit memory usage
+                    f"--max_old_space_size={BROWSER_JS_HEAP_MB}",  # Limit memory usage
                     "--disable-shared-workers",
                     "--disable-audio-output",
                     "--disable-notifications",

@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import psutil
 import requests
 
+from config.memory_config import MEMORY_STARTUP_WAIT_MB
 from utils.logging_config import log_resource_snapshot
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,6 @@ class RefreshController:
     def _wait_for_memory_on_startup(self):
         """Wait for sufficient memory before attempting first display update"""
 
-        MIN_MEMORY_MB = 200
         max_wait_minutes = 5
         check_interval = 10  # seconds
 
@@ -36,14 +36,14 @@ class RefreshController:
                 mem = psutil.virtual_memory()
                 available_mb = mem.available / 1024 / 1024
 
-                if available_mb >= MIN_MEMORY_MB:
+                if available_mb >= MEMORY_STARTUP_WAIT_MB:
                     logger.info(
                         f"Sufficient memory available for startup: {available_mb:.0f}MB"
                     )
                     return
 
                 logger.info(
-                    f"Waiting for memory to free up: {available_mb:.0f}MB available, need {MIN_MEMORY_MB}MB"
+                    f"Waiting for memory to free up: {available_mb:.0f}MB available, need {MEMORY_STARTUP_WAIT_MB}MB"
                 )
 
                 # Try to free memory
