@@ -59,7 +59,7 @@ sudo systemctl restart sports-display.service
 
 ```bash
 # Test Playwright manually
-python -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); browser = p.firefox.launch(headless=True); page = browser.new_page(); page.goto('http://localhost:5001/display'); page.screenshot(path='/tmp/test.png'); browser.close(); p.stop()"
+python -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); browser = p.webkit.launch(headless=True); page = browser.new_page(); page.goto('http://localhost:5001/display'); page.screenshot(path='/tmp/test.png'); browser.close(); p.stop()"
 
 # Check screenshot was created
 ls -la /tmp/test.png
@@ -72,7 +72,7 @@ ls -la /tmp/test.png
 python3 -c "from playwright.sync_api import sync_playwright; print('Playwright OK')"
 
 # Reinstall Playwright if needed
-./venv/bin/playwright install firefox
+./venv/bin/playwright install webkit
 ```
 
 ## SPI/Display Issues
@@ -235,10 +235,10 @@ sudo journalctl --since "1 hour ago" | grep -i "oom\|killed"
 
 ```bash
 # Check for hanging browser processes
-ps aux | grep -E "firefox|playwright" | grep -v grep
+ps aux | grep -E "webkit|playwright" | grep -v grep
 
 # Monitor browser process count during screenshot
-watch -n 2 "ps aux | grep -E 'firefox|playwright' | grep -v grep | wc -l"
+watch -n 2 "ps aux | grep -E 'webkit|playwright' | grep -v grep | wc -l"
 ```
 
 ## Configuration Issues

@@ -86,7 +86,7 @@ class ScreenshotController:
 
                     # Look for browser processes that might be hanging
                     is_browser = any(
-                        browser in name for browser in ["firefox", "playwright"]
+                        browser in name for browser in ["webkit", "playwright"]
                     )
                     has_headless = "headless" in cmdline
                     has_display_url = (
@@ -152,7 +152,7 @@ class ScreenshotController:
             for proc in psutil.process_iter(["name"]):
                 try:
                     name = proc.info["name"].lower()
-                    if any(browser in name for browser in ["firefox", "playwright"]):
+                    if any(browser in name for browser in ["webkit", "playwright"]):
                         count += 1
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
@@ -170,7 +170,7 @@ class ScreenshotController:
             except ImportError as e:
                 logger.error(f"Playwright not available: {e}")
                 logger.error(
-                    "Please install Playwright: pip install playwright && playwright install firefox"
+                    "Please install Playwright: pip install playwright && playwright install webkit"
                 )
                 log_after_screenshot(logger, False)
                 return False
@@ -180,20 +180,13 @@ class ScreenshotController:
                 return False
 
     def _screenshot_playwright(self):
-        """Take screenshot using Playwright with Firefox (works on both Mac and Pi)"""
+        """Take screenshot using Playwright with WebKit (works on both Mac and Pi)"""
         from playwright.sync_api import sync_playwright
 
         browser = None
         try:
             with sync_playwright() as p:
-                # Firefox preferences for better color rendering
-                firefox_prefs = {
-                    "gfx.color_management.mode": 1,  # Enable color management
-                    "gfx.color_management.rendering_intent": 0,  # Perceptual rendering
-                }
-                browser = p.firefox.launch(
-                    headless=True, firefox_user_prefs=firefox_prefs
-                )
+                browser = p.webkit.launch(headless=True)
 
                 # Get scale factor from config
                 scale_factor = self.config.get("screenshot_scale", 1)
