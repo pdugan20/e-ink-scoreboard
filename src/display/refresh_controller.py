@@ -101,9 +101,33 @@ class RefreshController:
 
                 if has_any_games:
                     # There are games today (active, final, or scheduled) - show game scoreboard
-                    # Only update if there are active games OR it's a forced update (new day)
-                    if has_active_games or force_update:
-                        success = self.refresh_display(force_update=force_update)
+                    scheduled_games = game_state.get("scheduled_games", [])
+
+                    # Update display if:
+                    # 1. There are active games (live updates)
+                    # 2. It's a new day (force_update=True)
+                    # 3. There are scheduled games and we haven't shown them yet today
+                    should_update = (
+                        has_active_games
+                        or force_update
+                        or (scheduled_games and not new_games_detected)
+                    )
+
+                    if should_update:
+                        # Mark that we've shown scheduled games for today
+                        if (
+                            scheduled_games
+                            and not new_games_detected
+                            and not has_active_games
+                        ):
+                            logger.info(
+                                f"Found {len(scheduled_games)} scheduled games - updating display for today's schedule"
+                            )
+                            new_games_detected = True
+
+                        success = self.refresh_display(
+                            force_update=(force_update or not has_active_games)
+                        )
                         last_screensaver_hour = (
                             None  # Reset since we're not in screensaver mode
                         )
@@ -115,8 +139,7 @@ class RefreshController:
                         else:
                             logger.error("Display refresh failed")
                     else:
-                        # No active games - check if there are still scheduled games
-                        scheduled_games = game_state.get("scheduled_games", [])
+                        # No active games and already displayed scheduled games
                         final_games = game_state.get("final_games", [])
 
                         if scheduled_games:
@@ -192,18 +215,6 @@ class RefreshController:
                             logger.debug(
                                 "No games, no screensaver - waiting for next day"
                             )
-
-                # Check for scheduled games that might have started (use cached game state)
-                if not force_update and not screensaver_eligible:
-                    scheduled_games = game_state["scheduled_games"]
-
-                    # If we have scheduled games and haven't detected new games yet, update once
-                    if scheduled_games and not new_games_detected:
-                        logger.info(
-                            f"Found {len(scheduled_games)} scheduled games - updating display once for new day"
-                        )
-                        new_games_detected = True
-                        success = self.refresh_display(force_update=True)
 
                 logger.debug(f"Next check in {self.config['refresh_interval']} seconds")
 
