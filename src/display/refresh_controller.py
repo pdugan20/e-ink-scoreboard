@@ -120,6 +120,7 @@ class RefreshController:
         last_game_date = None
         new_games_detected = False
         last_screensaver_hour = None
+        last_final_game_count = 0
 
         while True:
             try:
@@ -134,6 +135,7 @@ class RefreshController:
                     last_game_date = current_date
                     new_games_detected = False
                     last_screensaver_hour = None  # Reset screensaver hour tracking
+                    last_final_game_count = 0  # Reset final game count for new day
                     force_update = True
 
                 # Get consistent game state to prevent race conditions during transitions
@@ -145,15 +147,25 @@ class RefreshController:
                 if has_any_games:
                     # There are games today (active, final, or scheduled) - show game scoreboard
                     scheduled_games = game_state.get("scheduled_games", [])
+                    final_games = game_state.get("final_games", [])
+                    current_final_count = len(final_games)
+
+                    # Check if new games have finished (transitioned to final)
+                    new_final_games = (
+                        current_final_count > last_final_game_count
+                        and last_final_game_count > 0
+                    )
 
                     # Update display if:
                     # 1. There are active games (live updates)
                     # 2. It's a new day (force_update=True)
                     # 3. There are scheduled games and we haven't shown them yet today
+                    # 4. New games have just finished (need to show final scores)
                     should_update = (
                         has_active_games
                         or force_update
                         or (scheduled_games and not new_games_detected)
+                        or new_final_games
                     )
 
                     if should_update:
@@ -168,12 +180,24 @@ class RefreshController:
                             )
                             new_games_detected = True
 
+                        # Log if updating due to newly finished games
+                        if new_final_games:
+                            logger.info(
+                                f"Game(s) finished - updating display with final scores ({current_final_count} final games)"
+                            )
+
                         success = self.refresh_display(
-                            force_update=(force_update or not has_active_games)
+                            force_update=(
+                                force_update or not has_active_games or new_final_games
+                            )
                         )
                         last_screensaver_hour = (
                             None  # Reset since we're not in screensaver mode
                         )
+
+                        # Update the final game count after successful display update
+                        if success:
+                            last_final_game_count = current_final_count
 
                         if success and not force_update:
                             logger.info(f"Checked for active games at {datetime.now()}")
@@ -183,7 +207,8 @@ class RefreshController:
                             logger.error("Display refresh failed")
                     else:
                         # No active games and already displayed scheduled games
-                        final_games = game_state.get("final_games", [])
+                        # Update the final game count even when not updating display
+                        last_final_game_count = current_final_count
 
                         if scheduled_games:
                             # Games are scheduled but haven't started yet - keep checking
