@@ -15,6 +15,7 @@ from config.memory_config import (
     MEMORY_MINIMUM_MB,
     MEMORY_RECOMMENDED_MB,
 )
+from display.browser_cleanup import BrowserCleanup
 from utils.logging_config import (
     log_after_screenshot,
     log_before_screenshot,
@@ -196,7 +197,17 @@ class ScreenshotController:
                     logger.error(
                         f"Critically low memory after cleanup: {available_mb:.0f}MB (minimum {MEMORY_MINIMUM_MB}MB)"
                     )
-                    return False
+                    # Try emergency recovery
+                    logger.info("Attempting emergency memory recovery...")
+                    recovered_mb = BrowserCleanup.emergency_memory_recovery()
+                    if recovered_mb < MEMORY_MINIMUM_MB:
+                        logger.error(
+                            f"Still low memory after emergency recovery: {recovered_mb:.0f}MB"
+                        )
+                        return False
+                    logger.info(
+                        f"Memory recovered to {recovered_mb:.0f}MB, proceeding..."
+                    )
                 elif available_mb < MEMORY_RECOMMENDED_MB:
                     logger.warning(
                         f"Memory still below recommended after cleanup: {available_mb:.0f}MB, proceeding cautiously"
@@ -226,10 +237,10 @@ class ScreenshotController:
                         "Screenshot operation timed out after 120 seconds"
                     )
 
-                # Set alarm for 2 minutes (should be plenty based on logs showing 20-40s normal)
+                # Reduced timeout to 60 seconds to prevent zombie accumulation
                 if not self.is_mac:  # signal.alarm doesn't work well on Mac
                     signal.signal(signal.SIGALRM, timeout_handler)
-                    signal.alarm(120)
+                    signal.alarm(60)
 
                 try:
                     success = self._screenshot_playwright()
@@ -247,8 +258,8 @@ class ScreenshotController:
 
             except TimeoutError as e:
                 logger.error(f"Screenshot timed out: {e}")
-                logger.info("Killing any hanging browser processes...")
-                self._kill_hanging_browsers()
+                logger.info("Force killing ALL browser processes...")
+                BrowserCleanup.force_kill_all_browsers()
                 log_after_screenshot(logger, False)
                 return False
             except ImportError as e:
@@ -285,6 +296,10 @@ class ScreenshotController:
                     "--disable-background-timer-throttling",
                     "--disable-backgrounding-occluded-windows",
                     "--disable-renderer-backgrounding",
+                    "--single-process",  # Critical for Pi Zero memory constraints
+                    "--disable-features=site-per-process",
+                    "--memory-pressure-off",
+                    "--max_old_space_size=96",  # Additional JS heap limit
                 ]
 
                 logger.debug(
@@ -310,14 +325,14 @@ class ScreenshotController:
                 )
 
                 # Reduce timeout for low-memory conditions
-                page.set_default_timeout(30000)  # 30 seconds
+                page.set_default_timeout(20000)  # 20 seconds
 
                 try:
                     # Try faster domcontentloaded first in low memory conditions
                     page.goto(
                         self.config["web_server_url"],
                         wait_until="domcontentloaded",
-                        timeout=30000,  # 30 seconds
+                        timeout=20000,  # 20 seconds
                     )
 
                     # Brief wait for critical content to render
