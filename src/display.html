@@ -75,30 +75,21 @@
     </div>
 
     <script type="module">
-      // Display-specific initialization - use live data by default
+      // Display-specific initialization - always use live data
       import './static/js/constants/mlb-logos.js';
       import './static/js/constants/mlb-secondary-logos.js';
       import './static/js/constants/mlb-colors.js';
-      import {
-        loadTestData,
-        loadMLBData,
-        fetchLiveData,
-        loadScreensaverData,
-      } from './static/js/data.js';
+      import { fetchLiveData, loadScreensaverData } from './static/js/data.js';
       import { updateCurrentTime } from './static/js/renderer.js';
 
-      // Check URL parameters for test data or screensaver mode
+      // Check URL parameters for screensaver mode
       const urlParams = new URLSearchParams(window.location.search);
-      const useTestData = urlParams.get('test') === 'true';
       const useScreensaver = urlParams.get('screensaver') === 'true';
 
-      // Initialize with live or test data based on URL parameter
+      // Initialize with live data or screensaver
       async function initDisplay() {
         if (useScreensaver) {
           await loadScreensaverData();
-        } else if (useTestData) {
-          await loadTestData();
-          loadMLBData();
         } else {
           await fetchLiveData();
         }

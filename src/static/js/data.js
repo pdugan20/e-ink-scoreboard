@@ -1,3 +1,5 @@
+/* global AbortController, clearTimeout */
+
 // Data loading and management
 import { renderGames, updateHeaderTitle } from './renderer.js';
 
@@ -65,8 +67,23 @@ export async function fetchLiveData() {
   const league = 'MLB';
 
   try {
-    // Try to fetch from dev server if running
-    const response = await fetch(`/api/scores/${league}`);
+    // Try to fetch from API with longer timeout for slow Pi
+    // Use AbortController if available (modern browsers)
+    const fetchOptions = {};
+    let timeoutId;
+
+    if (typeof AbortController !== 'undefined') {
+      const controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      fetchOptions.signal = controller.signal;
+    }
+
+    const response = await fetch(`/api/scores/${league}`, fetchOptions);
+
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+
     if (response.ok) {
       const data = await response.json();
 
@@ -78,14 +95,20 @@ export async function fetchLiveData() {
       renderGames(prioritizedData);
       console.log('Loaded live data:', prioritizedData);
     } else {
-      // Fall back to sample data
-      console.log('Dev server not running, using MLB sample data');
-      loadMLBData();
+      // Show error message
+      console.error('API returned error:', response.status);
+      updateHeaderTitle('Error Loading Scores');
+      document.getElementById('games').innerHTML =
+        '<div style="padding: 20px; text-align: center;">Failed to load scores (HTTP ' +
+        response.status +
+        ')</div>';
     }
   } catch (error) {
-    // Dev server not running, use sample data
-    console.log('Dev server not available, using MLB sample data');
-    loadMLBData();
+    // Show error message
+    console.error('Error fetching scores:', error);
+    updateHeaderTitle('Connection Error');
+    document.getElementById('games').innerHTML =
+      '<div style="padding: 20px; text-align: center;">Unable to connect to API server</div>';
   }
 }
 

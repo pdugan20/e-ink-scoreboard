@@ -336,26 +336,30 @@ class ScreenshotController:
                 page.set_default_timeout(20000)  # 20 seconds
 
                 try:
-                    # Try faster domcontentloaded first in low memory conditions
+                    # Load the page and wait for network to settle
                     page.goto(
                         self.config["web_server_url"],
-                        wait_until="domcontentloaded",
-                        timeout=20000,  # 20 seconds
+                        wait_until="domcontentloaded",  # Don't wait for all resources
+                        timeout=30000,  # 30 seconds
                     )
 
-                    # Brief wait for critical content to render
-                    page.wait_for_timeout(3000)
+                    # Wait for games to be rendered by JavaScript
+                    # Either wait for game cards OR error message
+                    try:
+                        page.wait_for_selector(
+                            ".game-card, .game-pill, #games > div",
+                            timeout=15000,  # 15 seconds for content
+                        )
+                        logger.info("Game content detected")
+                    except Exception:
+                        # If no games appear, wait a bit more for JS to execute
+                        logger.warning("No game content found, waiting for JS...")
+                        page.wait_for_timeout(8000)
 
                 except Exception as e:
-                    # If even domcontentloaded fails, try minimal load
-                    logger.warning(f"Page load timeout, trying minimal load: {e}")
-                    page.goto(
-                        self.config["web_server_url"],
-                        wait_until="commit",
-                        timeout=15000,
-                    )
-                    # Give a bit more time for content to appear
-                    page.wait_for_timeout(5000)
+                    # Last resort - just wait for JS to execute
+                    logger.warning(f"Page load issue: {e}")
+                    page.wait_for_timeout(10000)  # Give JS 10 seconds
 
                 page.screenshot(path=self.config["screenshot_path"], full_page=False)
 
