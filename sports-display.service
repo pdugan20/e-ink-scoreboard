@@ -1,0 +1,31 @@
+[Unit]
+Description=Sports E-Ink Display Service
+After=network.target
+
+[Service]
+Type=simple
+User=patdugan
+WorkingDirectory=/home/patdugan/sports-display
+Environment="PATH=/home/patdugan/.virtualenvs/pimoroni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/patdugan/.virtualenvs/pimoroni/bin/python src/eink_display.py --config src/eink_config.json
+
+# Restart policy
+Restart=always
+RestartSec=30
+
+# Watchdog - systemd will restart if no watchdog ping in 3 minutes
+WatchdogSec=180
+# Note: The Python script needs to implement sd_notify for this to work fully
+
+# Resource limits to prevent runaway memory usage
+MemoryLimit=200M
+MemorySwapMax=100M
+
+# Kill timeout - if service doesn't stop gracefully in 30s, force kill
+TimeoutStopSec=30
+KillMode=mixed
+KillSignal=SIGTERM
+FinalKillSignal=SIGKILL
+
+[Install]
+WantedBy=multi-user.target

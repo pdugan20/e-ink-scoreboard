@@ -30,9 +30,16 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
-# Create sports-display.service
-echo "📝 Creating display update service..."
-sudo tee /etc/systemd/system/sports-display.service > /dev/null <<EOF
+# Copy sports-display.service file
+echo "📝 Installing display service..."
+if [ -f "sports-display.service" ]; then
+    # Update paths in service file before copying
+    sed "s|/home/patdugan/sports-display|$PROJECT_DIR|g; s|/home/patdugan/.virtualenvs/pimoroni|$VENV_PATH|g" sports-display.service | sudo tee /etc/systemd/system/sports-display.service > /dev/null
+    echo "✅ Service file installed with correct paths"
+else
+    echo "⚠️ Warning: sports-display.service file not found in project root"
+    echo "Creating basic service file..."
+    sudo tee /etc/systemd/system/sports-display.service > /dev/null <<EOF
 [Unit]
 Description=E-Ink Scoreboard Display
 After=network.target sports-server.service
@@ -50,6 +57,7 @@ RestartSec=30
 [Install]
 WantedBy=multi-user.target
 EOF
+fi
 
 # Enable and start services
 echo "🚀 Enabling services..."
