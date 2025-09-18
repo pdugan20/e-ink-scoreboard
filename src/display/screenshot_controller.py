@@ -469,76 +469,36 @@ class ScreenshotController:
             logger.warning(f"Dithering failed, using original image: {e}")
             return img
 
-    def _reset_display(self):
-        """Attempt to reset the e-ink display connection."""
-        try:
-            logger.info("Attempting to reset e-ink display...")
-
-            # Try to reset SPI connection
-            if hasattr(self.inky, "spi"):
-                try:
-                    self.inky.spi.close()
-                except Exception:
-                    pass
-
-            # Reinitialize display
-            self.inky = self._initialize_inky_display()
-            logger.info("Display reset completed")
-            return True
-        except Exception as e:
-            logger.error(f"Display reset failed: {e}")
-            return False
-
     def update_display(self, img):
         """Update the eink display or save for testing"""
         if self.is_pi and self.inky:
             try:
-                import threading
+                # Convert image for eink display
+                self.inky.set_image(img)
+                logger.info("Starting e-ink display update...")
 
-                # Use a thread with timeout to prevent hanging
-                update_success = False
-                update_error = None
+                # Add a simple timeout using signal alarm
+                import signal
 
-                def update_display_thread():
-                    nonlocal update_success, update_error
-                    try:
-                        # Convert image for eink display
-                        self.inky.set_image(img)
-                        logger.info("Starting e-ink display update...")
-                        self.inky.show()
-                        update_success = True
-                    except Exception as e:
-                        update_error = e
-
-                # Start display update in thread
-                thread = threading.Thread(target=update_display_thread)
-                thread.daemon = True
-                thread.start()
-
-                # Wait up to 60 seconds for display update
-                thread.join(timeout=60)
-
-                if thread.is_alive():
-                    logger.error("E-ink display update timed out after 60 seconds!")
-                    logger.warning(
-                        "Display thread still running - may need system restart"
+                def timeout_handler(signum, frame):
+                    raise TimeoutError(
+                        "E-ink display update timed out after 90 seconds"
                     )
-                    # Try to recover by resetting the display
-                    try:
-                        self._reset_display()
-                    except Exception as e:
-                        logger.error(f"Failed to reset display: {e}")
-                    return False
 
-                if update_error:
-                    raise update_error
+                # Set alarm for 90 seconds (usually takes ~28 seconds)
+                if not self.is_mac:
+                    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                    signal.alarm(90)
 
-                if update_success:
+                try:
+                    self.inky.show()
                     logger.info("Updated eink display")
                     return True
-                else:
-                    logger.error("Display update failed without error")
-                    return False
+                finally:
+                    # Cancel alarm
+                    if not self.is_mac:
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, old_handler)
             except Exception as e:
                 logger.error(f"Display update failed: {e}")
                 return False
