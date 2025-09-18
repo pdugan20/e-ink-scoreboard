@@ -6,8 +6,12 @@ This runs in a separate process that can be killed if it hangs.
 
 import json
 import logging
+import os
 import sys
 import time
+
+# Add parent directory to path so we can import display module
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,6 +24,7 @@ def take_screenshot(config_json):
     try:
         from playwright.sync_api import sync_playwright
 
+        # Import BrowserCleanup from the display module
         from display.browser_cleanup import BrowserCleanup
 
         with sync_playwright() as p:
