@@ -22,6 +22,7 @@ sudo apt update && sudo apt upgrade -y
 echo "📦 Installing dependencies..."
 sudo apt install -y python3-pip python3-venv git
 sudo apt install -y libjpeg-dev libopenjp2-7 libtiff5-dev
+sudo apt install -y libsystemd-dev pkg-config  # For systemd watchdog support
 
 # Configure hardware interfaces
 echo "⚙️  Configuring SPI and I2C..."

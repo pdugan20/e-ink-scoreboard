@@ -46,13 +46,26 @@ After=network.target sports-server.service
 Requires=sports-server.service
 
 [Service]
-Type=simple
+Type=notify
 User=$USER
 WorkingDirectory=$PROJECT_DIR
-Environment=PATH=$VENV_PATH/bin
+Environment="PATH=$VENV_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ExecStart=$VENV_PATH/bin/python src/eink_display.py --config src/eink_config.json
+
+# Restart policy
 Restart=always
 RestartSec=30
+
+# Watchdog - systemd will restart if no heartbeat in 3 minutes
+WatchdogSec=180
+
+# Resource limits
+MemoryLimit=200M
+MemorySwapMax=100M
+
+# Kill timeout
+TimeoutStopSec=30
+KillMode=mixed
 
 [Install]
 WantedBy=multi-user.target
