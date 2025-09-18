@@ -71,6 +71,10 @@ source ~/.virtualenvs/pimoroni/bin/activate
 echo "📦 Installing Python packages..."
 pip install -r requirements.txt
 
+# Install systemd Python module for watchdog support
+echo "📦 Installing systemd module for watchdog..."
+pip install systemd-python || echo "⚠️ systemd-python not available, watchdog disabled"
+
 # Create log directory and set permissions
 echo "📝 Setting up logging..."
 sudo mkdir -p /var/log/eink-display

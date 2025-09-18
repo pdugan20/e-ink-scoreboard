@@ -12,6 +12,14 @@ import time
 
 import requests
 
+# Try to import systemd notifier for watchdog
+try:
+    from systemd import daemon
+
+    SYSTEMD_AVAILABLE = True
+except ImportError:
+    SYSTEMD_AVAILABLE = False
+
 # Import our modular display components
 from display.game_checker import GameChecker
 from display.refresh_controller import RefreshController
@@ -71,6 +79,24 @@ class EinkDisplayController:
 
     def run_continuous(self):
         """Run continuous refresh loop with smart game detection and screensaver refresh"""
+        # Notify systemd we're ready
+        if SYSTEMD_AVAILABLE:
+            daemon.notify("READY=1")
+            logger.info("Systemd watchdog enabled")
+
+        # Start a thread to send watchdog heartbeats
+        if SYSTEMD_AVAILABLE:
+            import threading
+
+            def watchdog_heartbeat():
+                while True:
+                    daemon.notify("WATCHDOG=1")
+                    time.sleep(30)  # Send heartbeat every 30 seconds
+
+            watchdog_thread = threading.Thread(target=watchdog_heartbeat, daemon=True)
+            watchdog_thread.start()
+            logger.info("Watchdog heartbeat thread started")
+
         try:
             return self.refresh_controller.run_continuous(self.wait_for_server)
         finally:

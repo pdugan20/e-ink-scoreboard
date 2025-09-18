@@ -3,7 +3,7 @@ Description=Sports E-Ink Display Service
 After=network.target
 
 [Service]
-Type=simple
+Type=notify
 User=patdugan
 WorkingDirectory=/home/patdugan/sports-display
 Environment="PATH=/home/patdugan/.virtualenvs/pimoroni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
