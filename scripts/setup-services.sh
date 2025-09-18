@@ -10,6 +10,12 @@ USER=$(whoami)
 PROJECT_DIR=$(pwd)
 VENV_PATH="$HOME/.virtualenvs/pimoroni"
 
+# Make scripts executable
+echo "🔧 Making scripts executable..."
+chmod +x src/display/screenshot_worker.py 2>/dev/null || true
+chmod +x src/watchdog_monitor.py 2>/dev/null || true
+chmod +x scripts/*.sh 2>/dev/null || true
+
 # Create sports-server.service
 echo "📝 Creating web server service..."
 sudo tee /etc/systemd/system/sports-server.service > /dev/null <<EOF
@@ -72,11 +78,38 @@ WantedBy=multi-user.target
 EOF
 fi
 
+# Install watchdog monitor service
+echo "🐕 Installing watchdog monitor service..."
+if [ -f "sports-watchdog.service" ]; then
+    sed "s|/home/patdugan/sports-display|$PROJECT_DIR|g; s|/home/patdugan/.virtualenvs/pimoroni|$VENV_PATH|g" sports-watchdog.service | sudo tee /etc/systemd/system/sports-watchdog.service > /dev/null
+    echo "✅ Watchdog service installed"
+else
+    echo "⚠️ Creating basic watchdog service..."
+    sudo tee /etc/systemd/system/sports-watchdog.service > /dev/null <<EOF
+[Unit]
+Description=Sports Display Watchdog Monitor
+After=network.target sports-display.service
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$PROJECT_DIR
+Environment="PATH=$VENV_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=$VENV_PATH/bin/python src/watchdog_monitor.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
+EOF
+fi
+
 # Enable and start services
 echo "🚀 Enabling services..."
 sudo systemctl daemon-reload
 sudo systemctl enable sports-server.service
 sudo systemctl enable sports-display.service
+sudo systemctl enable sports-watchdog.service
 
 # Setup daily reboot for memory management
 echo "⏰ Setting up daily reboot schedule..."

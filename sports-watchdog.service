@@ -1,0 +1,21 @@
+[Unit]
+Description=Sports Display Watchdog Monitor
+After=network.target sports-display.service
+
+[Service]
+Type=simple
+User=patdugan
+WorkingDirectory=/home/patdugan/sports-display
+Environment="PATH=/home/patdugan/.virtualenvs/pimoroni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/patdugan/.virtualenvs/pimoroni/bin/python src/watchdog_monitor.py
+
+# Restart policy
+Restart=always
+RestartSec=60
+
+# This is a simple monitoring service, no watchdog needed
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

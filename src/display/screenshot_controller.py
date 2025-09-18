@@ -281,8 +281,69 @@ class ScreenshotController:
                 return False
 
     def _screenshot_playwright(self):
-        """Take screenshot using Playwright with Chromium (works on both Mac and Pi)"""
-        logger.debug("Starting Playwright screenshot process...")
+        """Take screenshot using subprocess to prevent kernel hangs."""
+        logger.debug("Starting screenshot subprocess...")
+
+        # ONLY use subprocess - no fallback to prevent freezes
+        return self._screenshot_subprocess()
+
+    def _screenshot_subprocess(self):
+        """Run screenshot in subprocess that can be killed if it hangs."""
+        try:
+            import json
+            import os
+            import subprocess
+
+            # Prepare config for subprocess
+            config_data = {
+                "web_server_url": self.config["web_server_url"],
+                "screenshot_path": self.config["screenshot_path"],
+                "display_width": self.config["display_width"],
+                "display_height": self.config["display_height"],
+                "screenshot_scale": self.config.get("screenshot_scale", 1),
+                "browser_js_heap_mb": BROWSER_JS_HEAP_MB,
+            }
+            config_json = json.dumps(config_data)
+
+            # Path to worker script
+            worker_path = os.path.join(
+                os.path.dirname(__file__), "screenshot_worker.py"
+            )
+
+            # Run subprocess with timeout
+            logger.info("Taking screenshot via subprocess (isolated process)...")
+            result = subprocess.run(
+                ["python", worker_path, config_json],
+                capture_output=True,
+                text=True,
+                timeout=90,  # Kill subprocess if it takes > 90 seconds
+            )
+
+            if result.returncode == 0:
+                logger.info("Subprocess screenshot succeeded")
+                return True
+            else:
+                logger.error(f"Subprocess failed: {result.stderr}")
+                return False
+
+        except subprocess.TimeoutExpired:
+            logger.error("Subprocess screenshot timed out after 90 seconds")
+            # Kill any hanging browser processes
+            BrowserCleanup.force_kill_all_browsers()
+            return False
+        except Exception as e:
+            logger.error(f"Subprocess screenshot error: {e}")
+            return False
+
+    def _screenshot_direct_DISABLED(self):
+        """Direct screenshot method - DISABLED to prevent kernel hangs."""
+        # This method is kept for reference but should NOT be used
+        # as it can cause kernel-level freezes on the Pi
+        logger.error("Direct screenshot method is disabled to prevent freezes")
+        return False
+
+    def _screenshot_direct_original(self):
+        """Original implementation - DO NOT USE."""
         from playwright.sync_api import sync_playwright
 
         browser = None
