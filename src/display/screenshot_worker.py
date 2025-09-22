@@ -7,6 +7,7 @@ This runs in a separate process that can be killed if it hangs.
 import json
 import logging
 import os
+import signal
 import sys
 import time
 
@@ -17,9 +18,27 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def timeout_handler(signum, frame):
+    """Handle timeout by killing browsers and exiting."""
+    logger.error("Worker process timeout - force killing browsers and exiting")
+    try:
+        from display.browser_cleanup import BrowserCleanup
+
+        BrowserCleanup.force_kill_all_browsers()
+    except Exception:
+        pass
+    sys.exit(1)
+
+
 def take_screenshot(config_json):
     """Take a screenshot in an isolated process."""
     config = json.loads(config_json)
+
+    # Set up internal timeout (85 seconds - 5 less than parent's 90s timeout)
+    # This ensures we cleanup before the parent kills us
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(85)
+    logger.info("Worker timeout set to 85 seconds")
 
     try:
         from playwright.sync_api import sync_playwright
@@ -27,6 +46,7 @@ def take_screenshot(config_json):
         # Import BrowserCleanup from the display module
         from display.browser_cleanup import BrowserCleanup
 
+        logger.info("Starting Playwright...")
         with sync_playwright() as p:
             browser_args = [
                 "--no-sandbox",
@@ -49,8 +69,11 @@ def take_screenshot(config_json):
                 "--disable-features=RendererCodeIntegrity",
             ]
 
+            logger.info("Launching browser...")
             browser = p.chromium.launch(headless=True, args=browser_args)
+            logger.info("Browser launched successfully")
 
+            logger.info("Creating new page...")
             page = browser.new_page(
                 viewport={
                     "width": config["display_width"],
@@ -64,9 +87,11 @@ def take_screenshot(config_json):
             page.set_default_timeout(20000)
 
             # Load page
+            logger.info(f"Loading page: {config['web_server_url']}")
             page.goto(
                 config["web_server_url"], wait_until="domcontentloaded", timeout=30000
             )
+            logger.info("Page loaded")
 
             # Wait for content
             try:
@@ -89,11 +114,17 @@ def take_screenshot(config_json):
             time.sleep(1)
             BrowserCleanup.force_kill_all_browsers()
 
-            logger.info(f"Screenshot saved to {config['screenshot_path']}")
+            # Cancel the timeout alarm since we succeeded
+            signal.alarm(0)
+            logger.info(
+                f"Screenshot saved to {config['screenshot_path']}, timeout cancelled"
+            )
             return 0
 
     except Exception as e:
         logger.error(f"Screenshot failed: {e}")
+        # Cancel the timeout alarm
+        signal.alarm(0)
         # Try to cleanup on error
         try:
             BrowserCleanup.force_kill_all_browsers()
