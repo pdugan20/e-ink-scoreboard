@@ -84,18 +84,37 @@ class EinkDisplayController:
             daemon.notify("READY=1")
             logger.info("Systemd watchdog enabled")
 
-        # Start a thread to send watchdog heartbeats
-        if SYSTEMD_AVAILABLE:
-            import threading
+        # Start threads for both systemd and file-based heartbeats
+        import threading
 
-            def watchdog_heartbeat():
+        # Systemd watchdog heartbeat
+        if SYSTEMD_AVAILABLE:
+
+            def systemd_heartbeat():
                 while True:
                     daemon.notify("WATCHDOG=1")
                     time.sleep(30)  # Send heartbeat every 30 seconds
 
-            watchdog_thread = threading.Thread(target=watchdog_heartbeat, daemon=True)
-            watchdog_thread.start()
-            logger.info("Watchdog heartbeat thread started")
+            systemd_thread = threading.Thread(target=systemd_heartbeat, daemon=True)
+            systemd_thread.start()
+            logger.info("Systemd watchdog heartbeat thread started")
+
+        # File-based heartbeat for enhanced watchdog
+        def file_heartbeat():
+            heartbeat_path = "/tmp/eink_heartbeat"
+            while True:
+                try:
+                    # Update heartbeat file
+                    with open(heartbeat_path, "w") as f:
+                        f.write(str(time.time()))
+                    time.sleep(60)  # Update every 60 seconds
+                except Exception as e:
+                    logger.error(f"Failed to update heartbeat file: {e}")
+                    time.sleep(60)
+
+        file_thread = threading.Thread(target=file_heartbeat, daemon=True)
+        file_thread.start()
+        logger.info("File-based heartbeat thread started")
 
         try:
             return self.refresh_controller.run_continuous(self.wait_for_server)

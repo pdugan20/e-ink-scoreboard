@@ -229,38 +229,16 @@ class ScreenshotController:
 
         with self._browser_process_manager():
             try:
-                # Add a hard timeout for the entire screenshot operation
-                import signal
+                # Subprocess guardian now handles timeouts and resource checks
+                success = self._screenshot_playwright()
+                log_after_screenshot(logger, success)
 
-                # Timeout long enough for slow Pi Zero
-                SCREENSHOT_TIMEOUT = 150  # 2.5 minutes should be enough
+                # Force garbage collection after screenshot to free memory
+                import gc
 
-                def timeout_handler(signum, frame):
-                    logger.error(
-                        f"Screenshot timeout after {SCREENSHOT_TIMEOUT}s - killing browsers"
-                    )
-                    BrowserCleanup.force_kill_all_browsers()
-                    raise TimeoutError(
-                        f"Screenshot operation timed out after {SCREENSHOT_TIMEOUT} seconds"
-                    )
+                gc.collect()
 
-                if not self.is_mac:  # signal.alarm doesn't work well on Mac
-                    signal.signal(signal.SIGALRM, timeout_handler)
-                    signal.alarm(SCREENSHOT_TIMEOUT)
-
-                try:
-                    success = self._screenshot_playwright()
-                    log_after_screenshot(logger, success)
-
-                    # Force garbage collection after screenshot to free memory
-                    import gc
-
-                    gc.collect()
-
-                    return success
-                finally:
-                    if not self.is_mac:
-                        signal.alarm(0)  # Cancel the alarm
+                return success
 
             except TimeoutError as e:
                 logger.error(f"Screenshot timed out: {e}")
@@ -292,7 +270,8 @@ class ScreenshotController:
         try:
             import json
             import os
-            import subprocess
+
+            from .subprocess_guardian import run_safe_subprocess
 
             # Prepare config for subprocess
             config_data = {
@@ -310,37 +289,29 @@ class ScreenshotController:
                 os.path.dirname(__file__), "screenshot_worker.py"
             )
 
-            # Run subprocess with timeout
-            logger.info("Taking screenshot via subprocess (isolated process)...")
-            result = subprocess.run(
+            # Run subprocess with guardian protection
+            logger.info("Taking screenshot via guarded subprocess...")
+            success, stdout, stderr = run_safe_subprocess(
                 ["python", worker_path, config_json],
-                capture_output=True,
-                text=True,
-                timeout=90,  # Kill subprocess if it takes > 90 seconds
+                timeout=90,
+                check_resources=True,
+                critical_operation=True,  # Screenshots are critical
             )
 
-            if result.returncode == 0:
+            if success:
                 logger.info("Subprocess screenshot succeeded")
                 return True
             else:
-                logger.error(f"Subprocess failed: {result.stderr}")
+                logger.error(f"Subprocess failed: {stderr}")
+                # Guardian already handles cleanup, but ensure browsers are dead
+                BrowserCleanup.force_kill_all_browsers()
                 return False
 
-        except subprocess.TimeoutExpired:
-            logger.error("Subprocess screenshot timed out after 90 seconds")
-            # Kill any hanging browser processes
-            BrowserCleanup.force_kill_all_browsers()
-            return False
         except Exception as e:
             logger.error(f"Subprocess screenshot error: {e}")
+            # Emergency cleanup
+            BrowserCleanup.force_kill_all_browsers()
             return False
-
-    def _screenshot_direct_DISABLED(self):
-        """Direct screenshot method - DISABLED to prevent kernel hangs."""
-        # This method is kept for reference but should NOT be used
-        # as it can cause kernel-level freezes on the Pi
-        logger.error("Direct screenshot method is disabled to prevent freezes")
-        return False
 
     def _screenshot_direct_original(self):
         """Original implementation - DO NOT USE."""
