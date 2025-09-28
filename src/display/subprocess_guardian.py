@@ -12,6 +12,7 @@ This module provides robust subprocess execution with multiple layers of protect
 import logging
 import os
 import subprocess
+import threading
 import time
 from threading import Timer
 from typing import Optional, Tuple
@@ -157,19 +158,55 @@ class SubprocessGuardian:
             logger.info(f"Starting guarded subprocess: {' '.join(cmd)}")
             logger.info(f"Timeout: {timeout}s, Critical: {critical_operation}")
 
-            # Start the subprocess
+            # Start the subprocess with unbuffered output
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
+                bufsize=1,  # Line buffered for real-time output
                 # Prevent subprocess from creating new session
                 start_new_session=False,
-                # Set memory limits for subprocess
-                env={**os.environ, "PYTHONMALLOC": "malloc"},
+                # Set memory limits for subprocess and unbuffer Python
+                env={
+                    **os.environ,
+                    "PYTHONMALLOC": "malloc",
+                    "PYTHONUNBUFFERED": "1",  # Force Python unbuffered
+                },
             )
 
             self.active_processes.add(process.pid)
+            logger.info(f"Started subprocess PID {process.pid}")
+
+            # Collect output in lists
+            stdout_lines = []
+            stderr_lines = []
+
+            # Function to read output in real-time
+            def read_output(pipe, prefix, output_list):
+                """Read from pipe line by line and log immediately."""
+                try:
+                    for line in iter(pipe.readline, ""):
+                        if line:
+                            line = line.rstrip()
+                            output_list.append(line)
+                            # Log immediately with prefix
+                            logger.info(f"[{prefix}] {line}")
+                except Exception as e:
+                    logger.error(f"Error reading {prefix}: {e}")
+
+            # Start threads to read stdout and stderr
+            stdout_thread = threading.Thread(
+                target=read_output, args=(process.stdout, "WORKER", stdout_lines)
+            )
+            stderr_thread = threading.Thread(
+                target=read_output, args=(process.stderr, "WORKER-ERR", stderr_lines)
+            )
+
+            stdout_thread.daemon = True
+            stderr_thread.daemon = True
+            stdout_thread.start()
+            stderr_thread.start()
 
             # Set up emergency killer as backup
             def emergency_kill():
@@ -189,22 +226,25 @@ class SubprocessGuardian:
 
             # Wait for process with timeout
             try:
-                stdout, stderr = process.communicate(timeout=timeout)
-                returncode = process.returncode
+                returncode = process.wait(timeout=timeout)
+
+                # Give threads a moment to finish reading
+                stdout_thread.join(timeout=0.5)
+                stderr_thread.join(timeout=0.5)
+
+                # Join output lines
+                stdout = "\n".join(stdout_lines)
+                stderr = "\n".join(stderr_lines)
 
                 if returncode == 0:
                     logger.info(f"Subprocess {process.pid} completed successfully")
-                    if stdout:
-                        logger.debug(f"Subprocess stdout: {stdout[:500]}")
                     return True, stdout, stderr
                 else:
                     logger.error(
                         f"Subprocess {process.pid} failed with code {returncode}"
                     )
-                    if stdout:
-                        logger.error(f"Subprocess stdout: {stdout}")
                     if stderr:
-                        logger.error(f"Subprocess stderr: {stderr}")
+                        logger.error(f"Final stderr: {stderr}")
                     return False, stdout, stderr
 
             except subprocess.TimeoutExpired:
