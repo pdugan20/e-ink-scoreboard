@@ -194,11 +194,17 @@ class SubprocessGuardian:
 
                 if returncode == 0:
                     logger.info(f"Subprocess {process.pid} completed successfully")
+                    if stdout:
+                        logger.debug(f"Subprocess stdout: {stdout[:500]}")
                     return True, stdout, stderr
                 else:
                     logger.error(
                         f"Subprocess {process.pid} failed with code {returncode}"
                     )
+                    if stdout:
+                        logger.error(f"Subprocess stdout: {stdout}")
+                    if stderr:
+                        logger.error(f"Subprocess stderr: {stderr}")
                     return False, stdout, stderr
 
             except subprocess.TimeoutExpired:

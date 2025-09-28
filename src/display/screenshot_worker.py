@@ -14,8 +14,17 @@ import time
 # Add parent directory to path so we can import display module
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-logging.basicConfig(level=logging.INFO)
+# Configure logging to be visible
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - WORKER - %(levelname)s - %(message)s",
+    force=True,
+)
 logger = logging.getLogger(__name__)
+
+# Immediate startup message
+print("WORKER: Screenshot worker process started", flush=True)
+logger.info("Screenshot worker initialized")
 
 
 def timeout_handler(signum, frame):
@@ -28,21 +37,27 @@ def timeout_handler(signum, frame):
 
 def take_screenshot(config_json):
     """Take a screenshot in an isolated process."""
+    print("WORKER: Parsing config", flush=True)
     config = json.loads(config_json)
+    print(f"WORKER: Config parsed, URL: {config.get('web_server_url')}", flush=True)
 
     # Set up internal timeout (145 seconds - less than parent's 150s)
     # This ensures clean exit before parent kills us
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(145)
     logger.info("Worker timeout set to 145 seconds")
+    print("WORKER: Timeout alarm set for 145 seconds", flush=True)
 
     try:
+        print("WORKER: Importing playwright...", flush=True)
         from playwright.sync_api import sync_playwright
 
         # Import BrowserCleanup from the display module
+        print("WORKER: Importing browser cleanup...", flush=True)
         from display.browser_cleanup import BrowserCleanup
 
         logger.info("Starting Playwright...")
+        print("WORKER: Starting Playwright context...", flush=True)
         with sync_playwright() as p:
             browser_args = [
                 "--no-sandbox",
