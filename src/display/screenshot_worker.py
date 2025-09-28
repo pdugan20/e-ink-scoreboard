@@ -110,8 +110,11 @@ def take_screenshot(config_json):
             page.close()
             browser.close()
 
-            # Give browser time to fully close
-            time.sleep(0.5)
+            # Wait longer for browser to fully close on Pi Zero
+            time.sleep(2)
+
+            # Make sure playwright is cleaned up
+            p.stop()
 
             # Cancel the timeout alarm since we succeeded
             signal.alarm(0)

@@ -174,6 +174,12 @@ def main():
     # Setup comprehensive logging first
     setup_logging(config)
 
+    # Clean up any leftover browser processes on startup
+    from display.browser_cleanup import BrowserCleanup
+
+    logger.info("Cleaning up any leftover browser processes from previous runs...")
+    BrowserCleanup.force_kill_all_browsers()
+
     # Override with command line arguments
     if args.interval:
         config["refresh_interval"] = args.interval

@@ -25,15 +25,15 @@ class SubprocessGuardian:
     """Manages subprocess execution with multiple safety mechanisms."""
 
     # Memory thresholds (adjusted for Pi Zero with 512MB RAM)
-    MIN_AVAILABLE_MEMORY_MB = 120  # Don't start if less than this available
+    MIN_AVAILABLE_MEMORY_MB = 100  # Don't start if less than this available
     CRITICAL_MEMORY_MB = 80  # Abort if drops below this
 
     # Timeouts
     DEFAULT_TIMEOUT = 90
     KILL_GRACE_PERIOD = 5  # Seconds to wait after SIGTERM before SIGKILL
 
-    # System load thresholds
-    MAX_LOAD_AVERAGE = 3.0  # Don't start if 1-min load avg exceeds this
+    # System load thresholds (relaxed for Pi Zero)
+    MAX_LOAD_AVERAGE = 5.0  # Don't start if 1-min load avg exceeds this
 
     def __init__(self):
         self.active_processes = set()
