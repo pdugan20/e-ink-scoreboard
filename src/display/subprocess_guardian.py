@@ -200,7 +200,7 @@ class SubprocessGuardian:
                 target=read_output, args=(process.stdout, "WORKER", stdout_lines)
             )
             stderr_thread = threading.Thread(
-                target=read_output, args=(process.stderr, "WORKER-ERR", stderr_lines)
+                target=read_output, args=(process.stderr, "WORKER", stderr_lines)
             )
 
             stdout_thread.daemon = True

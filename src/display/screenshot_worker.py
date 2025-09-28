@@ -14,17 +14,16 @@ import time
 # Add parent directory to path so we can import display module
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Configure logging to be visible
+# Configure logging to be visible - simple format since parent adds prefix
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - WORKER - %(levelname)s - %(message)s",
+    format="%(message)s",  # Simple format - parent adds [WORKER] prefix
     force=True,
 )
 logger = logging.getLogger(__name__)
 
 # Immediate startup message
-print("WORKER: Screenshot worker process started", flush=True)
-logger.info("Screenshot worker initialized")
+logger.info("Worker process started")
 
 
 def timeout_handler(signum, frame):
@@ -37,27 +36,25 @@ def timeout_handler(signum, frame):
 
 def take_screenshot(config_json):
     """Take a screenshot in an isolated process."""
-    print("WORKER: Parsing config", flush=True)
+    logger.info("Parsing config")
     config = json.loads(config_json)
-    print(f"WORKER: Config parsed, URL: {config.get('web_server_url')}", flush=True)
+    logger.info(f"Config parsed - URL: {config.get('web_server_url')}")
 
     # Set up internal timeout (145 seconds - less than parent's 150s)
     # This ensures clean exit before parent kills us
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(145)
-    logger.info("Worker timeout set to 145 seconds")
-    print("WORKER: Timeout alarm set for 145 seconds", flush=True)
+    logger.info("Timeout alarm set for 145 seconds")
 
     try:
-        print("WORKER: Importing playwright...", flush=True)
+        logger.info("Importing playwright")
         from playwright.sync_api import sync_playwright
 
         # Import BrowserCleanup from the display module
-        print("WORKER: Importing browser cleanup...", flush=True)
+        logger.info("Importing browser cleanup")
         from display.browser_cleanup import BrowserCleanup
 
-        logger.info("Starting Playwright...")
-        print("WORKER: Starting Playwright context...", flush=True)
+        logger.info("Starting Playwright context")
         with sync_playwright() as p:
             browser_args = [
                 "--no-sandbox",
@@ -80,11 +77,11 @@ def take_screenshot(config_json):
                 "--disable-features=RendererCodeIntegrity",
             ]
 
-            logger.info("Launching browser...")
+            logger.info("Launching browser")
             browser = p.chromium.launch(headless=True, args=browser_args)
-            logger.info("Browser launched successfully")
+            logger.info("Browser launched")
 
-            logger.info("Creating new page...")
+            logger.info("Creating page")
             page = browser.new_page(
                 viewport={
                     "width": config["display_width"],
@@ -98,7 +95,7 @@ def take_screenshot(config_json):
             page.set_default_timeout(30000)
 
             # Load page with generous timeout for slow Pi Zero
-            logger.info(f"Loading page: {config['web_server_url']}")
+            logger.info(f"Loading page - {config['web_server_url']}")
             page.goto(
                 config["web_server_url"], wait_until="domcontentloaded", timeout=60000
             )
@@ -111,7 +108,7 @@ def take_screenshot(config_json):
                 )
                 logger.info("Game content detected")
             except Exception:
-                logger.warning("No game content found, waiting for JS...")
+                logger.warning("No game content found - waiting for JS")
                 page.wait_for_timeout(10000)
 
             # Take screenshot
@@ -129,9 +126,7 @@ def take_screenshot(config_json):
 
             # Cancel the timeout alarm since we succeeded
             signal.alarm(0)
-            logger.info(
-                f"Screenshot saved to {config['screenshot_path']}, timeout cancelled"
-            )
+            logger.info(f"Screenshot saved - {config['screenshot_path']}")
             return 0
 
     except Exception as e:

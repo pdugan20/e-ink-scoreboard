@@ -24,7 +24,7 @@ echo ""
 # Show recent errors
 echo "🚨 Recent Errors (last 50 lines):"
 echo "--------------------------------"
-tail -n 1000 "$LOG_FILE" | grep -i "error\|critical\|exception\|failed" | tail -n 50 || echo "No recent errors found"
+tail -n 1000 "$LOG_FILE" | grep -iE "error|critical|exception|failed|timeout" | tail -n 50 || echo "No recent errors found"
 echo ""
 
 # Show memory snapshots
@@ -36,19 +36,25 @@ echo ""
 # Show browser process info
 echo "🌐 Browser Process Information:"
 echo "------------------------------"
-tail -n 1000 "$LOG_FILE" | grep -i "browser" | tail -n 20 || echo "No browser process info found"
+tail -n 1000 "$LOG_FILE" | grep -E "browser|Browser|\[WORKER\].*browser" | tail -n 20 || echo "No browser process info found"
 echo ""
 
 # Show screenshot activity
 echo "📸 Screenshot Activity:"
 echo "----------------------"
-tail -n 1000 "$LOG_FILE" | grep -i "screenshot\|playwright\|chromium" | tail -n 20 || echo "No screenshot activity found"
+tail -n 1000 "$LOG_FILE" | grep -E "screenshot|\[WORKER\]|playwright|chromium" | tail -n 20 || echo "No screenshot activity found"
+echo ""
+
+# Show worker subprocess logs
+echo "👷 Worker Subprocess Activity:"
+echo "-----------------------------"
+tail -n 1000 "$LOG_FILE" | grep "\[WORKER\]" | tail -n 30 || echo "No worker subprocess logs found"
 echo ""
 
 # Show recent startup/shutdown
 echo "🔄 Service Restarts:"
 echo "-------------------"
-tail -n 1000 "$LOG_FILE" | grep -E "STARTING|Shutting down|cleanup" | tail -n 10 || echo "No recent restarts found"
+tail -n 1000 "$LOG_FILE" | grep -E "STARTING|Shutting down|Cleaning up" | tail -n 10 || echo "No recent restarts found"
 echo ""
 
 # Check system memory and process status
@@ -92,4 +98,4 @@ if command -v journalctl &> /dev/null; then
 fi
 
 echo "✅ Analysis complete!"
-echo "💡 For real-time monitoring: tail -f $LOG_FILE | grep -E 'ERROR|CRITICAL|RESOURCE_SNAPSHOT'"
+echo "💡 For real-time monitoring: tail -f $LOG_FILE | grep -E 'ERROR|CRITICAL|RESOURCE_SNAPSHOT|\[WORKER\]'"

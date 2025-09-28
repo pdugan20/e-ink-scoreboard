@@ -56,21 +56,21 @@ class EinkDisplayController:
 
     def wait_for_server(self, timeout=60):
         """Wait for the web server to be available"""
-        logger.info(f"Waiting for server at {self.config['web_server_url']}")
+        logger.info(f"Waiting for server - {self.config['web_server_url']}")
         start_time = time.time()
 
         while time.time() - start_time < timeout:
             try:
                 response = requests.get(self.config["web_server_url"], timeout=5)
                 if response.status_code == 200:
-                    logger.info("Server is ready")
+                    logger.info("Server ready")
                     return True
             except requests.RequestException:
                 pass
 
             time.sleep(2)
 
-        logger.error(f"Server not available after {timeout} seconds")
+        logger.error(f"Server timeout - {timeout}s")
         return False
 
     def refresh_display(self, force_update=False):
@@ -82,7 +82,7 @@ class EinkDisplayController:
         # Notify systemd we're ready
         if SYSTEMD_AVAILABLE:
             daemon.notify("READY=1")
-            logger.info("Systemd watchdog enabled")
+            logger.info("Watchdog enabled")
 
         # Start threads for both systemd and file-based heartbeats
         import threading
@@ -97,7 +97,7 @@ class EinkDisplayController:
 
             systemd_thread = threading.Thread(target=systemd_heartbeat, daemon=True)
             systemd_thread.start()
-            logger.info("Systemd watchdog heartbeat thread started")
+            logger.info("Watchdog heartbeat started")
 
         # File-based heartbeat for enhanced watchdog
         def file_heartbeat():
@@ -109,12 +109,12 @@ class EinkDisplayController:
                         f.write(str(time.time()))
                     time.sleep(60)  # Update every 60 seconds
                 except Exception as e:
-                    logger.error(f"Failed to update heartbeat file: {e}")
+                    logger.error(f"Heartbeat update failed - {e}")
                     time.sleep(60)
 
         file_thread = threading.Thread(target=file_heartbeat, daemon=True)
         file_thread.start()
-        logger.info("File-based heartbeat thread started")
+        logger.info("File heartbeat started")
 
         try:
             return self.refresh_controller.run_continuous(self.wait_for_server)
@@ -123,7 +123,7 @@ class EinkDisplayController:
 
     def cleanup(self):
         """Clean up resources."""
-        logger.info("Cleaning up resources...")
+        logger.info("Cleaning up resources")
         if hasattr(self, "game_checker"):
             self.game_checker.cleanup()
         if hasattr(self, "screenshot_controller"):
@@ -142,7 +142,7 @@ def load_config(config_file="eink_config.json"):
                 config.update(user_config)
                 return config
         except Exception as e:
-            logger.warning(f"Failed to load config file: {e}")
+            logger.warning(f"Config load failed - {e}")
     return CONFIG
 
 
@@ -177,7 +177,7 @@ def main():
     # Clean up any leftover browser processes on startup
     from display.browser_cleanup import BrowserCleanup
 
-    logger.info("Cleaning up any leftover browser processes from previous runs...")
+    logger.info("Cleaning up leftover browser processes")
     BrowserCleanup.force_kill_all_browsers()
 
     # Override with command line arguments
@@ -187,7 +187,7 @@ def main():
         config["web_server_url"] = args.url
     if args.dithering:
         config["apply_dithering"] = True
-        logger.info("Dithering enabled via command line flag")
+        logger.info("Dithering enabled")
 
     # Create controller
     controller = EinkDisplayController(config)

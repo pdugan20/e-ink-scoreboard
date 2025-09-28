@@ -54,7 +54,7 @@ class RefreshController:
                 time.sleep(check_interval)
 
             except Exception as e:
-                logger.warning(f"Error checking memory during startup: {e}")
+                logger.warning(f"Memory check error - {e}")
                 return  # Proceed anyway if we can't check
 
         logger.warning(
@@ -71,13 +71,13 @@ class RefreshController:
         This prevents unnecessary e-ink refreshes when games are only scheduled
         but preserves the ability to update the display when games start.
         """
-        logger.info("Starting display refresh...")
+        logger.info("Starting display refresh")
 
         # Check for active games unless forced
         if not force_update:
             has_active_games = self.game_checker.check_active_games()
             if not has_active_games:
-                logger.info("No active games found - skipping display update")
+                logger.info("No active games - skipping update")
                 return True  # Return success but skip display update
 
         # Take screenshot with retries
@@ -131,7 +131,7 @@ class RefreshController:
                 # Force update if it's a new day
                 force_update = False
                 if last_game_date != current_date:
-                    logger.info(f"New game day detected: {current_date}")
+                    logger.info(f"New game day - {current_date}")
                     last_game_date = current_date
                     new_games_detected = False
                     last_screensaver_hour = None  # Reset screensaver hour tracking
@@ -293,10 +293,10 @@ class RefreshController:
                 time.sleep(int(self.config["refresh_interval"]))
 
             except KeyboardInterrupt:
-                logger.info("Shutting down...")
+                logger.info("Shutting down")
                 break
             except (requests.exceptions.RequestException, TimeoutError) as e:
-                logger.warning(f"Network/timeout error (will retry): {e}")
+                logger.warning(f"Network error - {e}")
                 log_resource_snapshot(logger, "NETWORK_ERROR")
                 time.sleep(
                     min(self.config["retry_delay"] * 2, 30)
@@ -314,7 +314,7 @@ class RefreshController:
                     min(self.config["retry_delay"] * 5, 120)
                 )  # Longer backoff for memory issues
             except Exception as e:
-                logger.error(f"Unexpected error in refresh loop: {e}")
+                logger.error(f"Refresh loop error - {e}")
                 log_resource_snapshot(logger, "UNEXPECTED_ERROR")
                 # Try to continue with a longer delay to prevent tight error loops
                 time.sleep(min(self.config["retry_delay"] * 3, 60))  # Longer backoff
