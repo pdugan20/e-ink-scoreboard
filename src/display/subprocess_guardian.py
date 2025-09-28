@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 class SubprocessGuardian:
     """Manages subprocess execution with multiple safety mechanisms."""
 
-    # Memory thresholds
-    MIN_AVAILABLE_MEMORY_MB = 180  # Don't start if less than this available
-    CRITICAL_MEMORY_MB = 150  # Abort if drops below this
+    # Memory thresholds (adjusted for Pi Zero with 512MB RAM)
+    MIN_AVAILABLE_MEMORY_MB = 120  # Don't start if less than this available
+    CRITICAL_MEMORY_MB = 80  # Abort if drops below this
 
     # Timeouts
     DEFAULT_TIMEOUT = 90

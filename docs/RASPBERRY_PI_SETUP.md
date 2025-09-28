@@ -73,7 +73,7 @@ python src/eink_display.py --once
 
 ## Notes
 
-- **Eink Display Lifespan**: Avoid refreshing more than once every 5 minutes to preserve display
+- **Eink Display Lifespan**: Avoid refreshing more than once every 6 minutes to preserve display
 - **Power**: Consider a UPS for uninterrupted operation
 - **Network**: Ensure stable internet connection for live sports data
 - **Storage**: Use a high-quality SD card (Class 10+) for reliability

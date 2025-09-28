@@ -110,9 +110,8 @@ def take_screenshot(config_json):
             page.close()
             browser.close()
 
-            # Force cleanup browser processes
-            time.sleep(1)
-            BrowserCleanup.force_kill_all_browsers()
+            # Give browser time to fully close
+            time.sleep(0.5)
 
             # Cancel the timeout alarm since we succeeded
             signal.alarm(0)

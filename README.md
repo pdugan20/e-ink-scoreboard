@@ -80,7 +80,7 @@ Edit `src/eink_config.json` to customize:
   "display_width": 800,
   "display_height": 480,
   "screenshot_scale": 2,
-  "refresh_interval": 300,
+  "refresh_interval": 360,
   "max_retries": 3,
   "retry_delay": 5
 }
@@ -88,8 +88,7 @@ Edit `src/eink_config.json` to customize:
 
 **Refresh Intervals:**
 
-- **120 seconds (2m)** - Live action
-- **300 seconds (5m)** - Default, good for active games
+- **360 seconds (6m)** - Default, good for active games
 - **900 seconds (15m)** - Balanced for general use
 - **1800 seconds (30m)** - Conservative, preserves display life
 
@@ -147,7 +146,7 @@ python src/eink_display.py --url "http://localhost:5001/display?screensaver=true
 The system uses intelligent update logic to minimize e-ink wear:
 
 - **New game day**: Updates once to show upcoming games
-- **During games**: Regular updates every 2-5 minutes while games are active
+- **During games**: Regular updates every 6 minutes while games are active
 - **Games scheduled only**: Skips updates to preserve display longevity
 
 **Force an update**: Use `--once` flag or restart the display service on Raspberry Pi.

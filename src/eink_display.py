@@ -35,7 +35,7 @@ CONFIG = {
     "display_width": 800,
     "display_height": 480,
     "screenshot_scale": 1,
-    "refresh_interval": 300,
+    "refresh_interval": 360,
     "apply_dithering": False,
     "dither_saturation": 0.8,
     "max_retries": 3,

@@ -17,7 +17,7 @@ The display uses smart update logic to minimize e-ink wear:
 **Update Schedule:**
 
 1. **Daily**: One update when new games are detected for the day
-2. **During games**: Updates every 2-5 minutes (configurable) while games are active
+2. **During games**: Updates every 6 minutes (configurable) while games are active
 3. **Between games**: No updates until next active game
 
 ### Force a Display Update
