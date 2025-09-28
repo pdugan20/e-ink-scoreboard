@@ -19,14 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 def timeout_handler(signum, frame):
-    """Handle timeout by killing browsers and exiting."""
-    logger.error("Worker process timeout - force killing browsers and exiting")
-    try:
-        from display.browser_cleanup import BrowserCleanup
-
-        BrowserCleanup.force_kill_all_browsers()
-    except Exception:
-        pass
+    """Handle timeout by exiting cleanly."""
+    logger.error("Worker process timeout - exiting")
+    # Don't force kill browsers here - let the parent process handle cleanup
+    # This prevents zombie processes from accumulating
     sys.exit(1)
 
 
@@ -34,11 +30,11 @@ def take_screenshot(config_json):
     """Take a screenshot in an isolated process."""
     config = json.loads(config_json)
 
-    # Set up internal timeout (85 seconds - 5 less than parent's 90s timeout)
-    # This ensures we cleanup before the parent kills us
+    # Set up internal timeout (145 seconds - less than parent's 150s)
+    # This ensures clean exit before parent kills us
     signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(85)
-    logger.info("Worker timeout set to 85 seconds")
+    signal.alarm(145)
+    logger.info("Worker timeout set to 145 seconds")
 
     try:
         from playwright.sync_api import sync_playwright
@@ -83,25 +79,25 @@ def take_screenshot(config_json):
                 color_scheme="light",
             )
 
-            # Set page timeout
-            page.set_default_timeout(20000)
+            # Set page timeout (longer for Pi Zero)
+            page.set_default_timeout(30000)
 
-            # Load page
+            # Load page with generous timeout for slow Pi Zero
             logger.info(f"Loading page: {config['web_server_url']}")
             page.goto(
-                config["web_server_url"], wait_until="domcontentloaded", timeout=30000
+                config["web_server_url"], wait_until="domcontentloaded", timeout=60000
             )
             logger.info("Page loaded")
 
             # Wait for content
             try:
                 page.wait_for_selector(
-                    ".game-card, .game-pill, #games > div", timeout=15000
+                    ".game-card, .game-pill, #games > div", timeout=20000
                 )
                 logger.info("Game content detected")
             except Exception:
                 logger.warning("No game content found, waiting for JS...")
-                page.wait_for_timeout(8000)
+                page.wait_for_timeout(10000)
 
             # Take screenshot
             page.screenshot(path=config["screenshot_path"], full_page=False)

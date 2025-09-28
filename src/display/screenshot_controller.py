@@ -293,7 +293,7 @@ class ScreenshotController:
             logger.info("Taking screenshot via guarded subprocess...")
             success, stdout, stderr = run_safe_subprocess(
                 ["python", worker_path, config_json],
-                timeout=90,
+                timeout=150,  # Increased for slow Pi Zero
                 check_resources=True,
                 critical_operation=True,  # Screenshots are critical
             )
