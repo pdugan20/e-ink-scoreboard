@@ -4,10 +4,10 @@ After=network.target
 
 [Service]
 Type=notify
-User=patdugan
-WorkingDirectory=/home/patdugan/sports-display
-Environment="PATH=/home/patdugan/.virtualenvs/pimoroni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/home/patdugan/.virtualenvs/pimoroni/bin/python src/eink_display.py --config src/eink_config.json
+User={{USER}}
+WorkingDirectory={{PROJECT_DIR}}
+Environment="PATH={{VENV_PATH}}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart={{VENV_PATH}}/bin/python src/eink_display.py --config src/eink_config.json
 
 # Restart policy
 Restart=always

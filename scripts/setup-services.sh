@@ -38,12 +38,15 @@ EOF
 
 # Copy sports-display.service file
 echo "📝 Installing display service..."
-if [ -f "sports-display.service" ]; then
-    # Update paths in service file before copying
-    sed "s|/home/patdugan/sports-display|$PROJECT_DIR|g; s|/home/patdugan/.virtualenvs/pimoroni|$VENV_PATH|g" sports-display.service | sudo tee /etc/systemd/system/sports-display.service > /dev/null
+if [ -f "services/sports-display.service" ]; then
+    # Replace template placeholders with actual values
+    sed -e "s|{{USER}}|$USER|g" \
+        -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
+        -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
+        services/sports-display.service | sudo tee /etc/systemd/system/sports-display.service > /dev/null
     echo "✅ Service file installed with correct paths"
 else
-    echo "⚠️ Warning: sports-display.service file not found in project root"
+    echo "⚠️ Warning: sports-display.service file not found in services directory"
     echo "Creating basic service file..."
     sudo tee /etc/systemd/system/sports-display.service > /dev/null <<EOF
 [Unit]
@@ -80,8 +83,12 @@ fi
 
 # Install watchdog monitor service
 echo "🐕 Installing watchdog monitor service..."
-if [ -f "sports-watchdog.service" ]; then
-    sed "s|/home/patdugan/sports-display|$PROJECT_DIR|g; s|/home/patdugan/.virtualenvs/pimoroni|$VENV_PATH|g" sports-watchdog.service | sudo tee /etc/systemd/system/sports-watchdog.service > /dev/null
+if [ -f "services/sports-watchdog.service" ]; then
+    # Replace template placeholders with actual values
+    sed -e "s|{{USER}}|$USER|g" \
+        -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
+        -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
+        services/sports-watchdog.service | sudo tee /etc/systemd/system/sports-watchdog.service > /dev/null
     echo "✅ Watchdog service installed"
 else
     echo "⚠️ Creating basic watchdog service..."

@@ -4,10 +4,10 @@ After=network.target sports-display.service
 
 [Service]
 Type=simple
-User=patdugan
-WorkingDirectory=/home/patdugan/sports-display
-Environment="PATH=/home/patdugan/.virtualenvs/pimoroni/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/home/patdugan/.virtualenvs/pimoroni/bin/python src/watchdog_monitor.py
+User={{USER}}
+WorkingDirectory={{PROJECT_DIR}}
+Environment="PATH={{VENV_PATH}}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart={{VENV_PATH}}/bin/python src/watchdog_monitor.py
 
 # Restart policy
 Restart=always

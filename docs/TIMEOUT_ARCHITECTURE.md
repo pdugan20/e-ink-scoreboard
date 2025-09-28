@@ -177,14 +177,14 @@ If a screenshot fails:
 
 ### Log Locations
 
-- Main log: `/home/patdugan/logs/eink_display.log`
+- Main log: `~/logs/eink_display.log`
 - System log: `sudo journalctl -u sports-display.service -f`
 
 ### Monitoring Commands
 
 ```bash
 # Watch for timeout errors
-tail -f /home/patdugan/logs/eink_display.log | grep -i timeout
+tail -f ~/logs/eink_display.log | grep -i timeout
 
 # Check browser processes
 ps aux | grep -E 'chromium|playwright'
