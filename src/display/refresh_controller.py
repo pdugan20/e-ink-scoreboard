@@ -241,7 +241,7 @@ class RefreshController:
                             )
 
                 else:
-                    # No active games - check if screensaver is eligible
+                    # No games today - check if screensaver is eligible
                     screensaver_eligible = (
                         self.game_checker.check_screensaver_eligible()
                     )
@@ -255,7 +255,13 @@ class RefreshController:
                         )
 
                         if should_update_screensaver:
-                            logger.info("Refreshing screensaver with new article")
+                            if force_update:
+                                logger.info(
+                                    "No games today - entering screensaver mode"
+                                )
+                            else:
+                                logger.info("Refreshing screensaver with new article")
+
                             success = self.refresh_display(force_update=True)
                             if success:
                                 last_screensaver_hour = current_hour
@@ -270,8 +276,9 @@ class RefreshController:
                             )
 
                     else:
-                        # No screensaver available - only update on new day (original behavior)
+                        # No screensaver available - show no games message
                         if force_update:
+                            logger.info("No games today - displaying no-games message")
                             success = self.refresh_display(force_update=True)
                             if success:
                                 logger.info(

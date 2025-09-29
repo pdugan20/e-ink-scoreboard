@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import time
+from datetime import datetime
 
 import requests
 
@@ -38,6 +39,7 @@ class GameChecker:
         self._api_failure_count = 0
         self._api_failure_threshold = 3
         self._circuit_open_until = 0
+        self._last_cache_date = None  # Track the date of cached data
 
         # Create persistent session for connection pooling
         self._session = requests.Session()
@@ -52,9 +54,33 @@ class GameChecker:
         self._session.mount("http://", adapter)
         self._session.mount("https://", adapter)
 
+    def _get_fallback_game_state(self, current_date):
+        """Get fallback game state when API is unavailable or cache is stale."""
+        # Don't use stale cache from previous day
+        if self._last_game_state and self._last_cache_date == current_date:
+            return self._last_game_state
+        else:
+            # Return safe default for new day when API is unavailable
+            return {
+                "has_active_games": False,
+                "has_any_games": False,
+                "games": [],
+                "active_games": [],
+                "scheduled_games": [],
+                "final_games": [],
+            }
+
     def get_game_state(self):
         """Get game state with caching and circuit breaker to prevent race conditions."""
         current_time = time.time()
+        current_date = datetime.now().strftime("%Y-%m-%d")
+
+        # Clear cache if it's a new day to prevent showing yesterday's games
+        if self._last_cache_date and self._last_cache_date != current_date:
+            logger.info(f"New day detected ({current_date}), clearing game state cache")
+            self._last_game_state = None
+            self._game_state_cache_time = 0
+            self._last_cache_date = current_date
 
         # Cache game state for 30 seconds to prevent inconsistent reads during transitions
         if (
@@ -66,11 +92,7 @@ class GameChecker:
         # Circuit breaker: if we've had too many failures, use cached state for a while
         if current_time < self._circuit_open_until:
             logger.warning("API circuit breaker open, using cached game state")
-            return self._last_game_state or {
-                "has_active_games": True,
-                "has_any_games": True,
-                "games": [],
-            }
+            return self._get_fallback_game_state(current_date)
 
         try:
             # Load game status config
@@ -83,12 +105,7 @@ class GameChecker:
             if response.status_code != 200:
                 self._handle_api_failure()
                 logger.warning(f"Could not fetch game data: {response.status_code}")
-                # Return cached state if available, otherwise default
-                return self._last_game_state or {
-                    "has_active_games": True,
-                    "has_any_games": True,
-                    "games": [],
-                }
+                return self._get_fallback_game_state(current_date)
 
             # Reset failure count on success
             self._api_failure_count = 0
@@ -132,6 +149,7 @@ class GameChecker:
             # Cache the result
             self._last_game_state = game_state
             self._game_state_cache_time = current_time
+            self._last_cache_date = current_date  # Update cache date
 
             logger.info(
                 f"Game state: {len(active_games)} active, {len(scheduled_games)} scheduled, {len(final_games)} final"
@@ -142,12 +160,7 @@ class GameChecker:
         except Exception as e:
             self._handle_api_failure()
             logger.error(f"Error getting game state: {e}")
-            # Return cached state if available, otherwise safe default
-            return self._last_game_state or {
-                "has_active_games": True,
-                "has_any_games": True,
-                "games": [],
-            }
+            return self._get_fallback_game_state(current_date)
 
     def _handle_api_failure(self):
         """Handle API failure with circuit breaker pattern."""
