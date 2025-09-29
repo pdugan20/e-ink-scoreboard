@@ -118,12 +118,18 @@ class ScreensaverService:
 
     def _parse_feed_with_timeout(self, rss_url, timeout=10):
         """Parse RSS feed with timeout to prevent hanging."""
+        import threading
 
-        def timeout_handler(signum, frame):
-            raise TimeoutError(f"RSS feed parsing timed out after {timeout} seconds")
+        # Check if we're in main thread for signal support
+        if threading.current_thread() is threading.main_thread() and hasattr(
+            signal, "SIGALRM"
+        ):
+            # Original signal-based implementation for main thread
+            def timeout_handler(signum, frame):
+                raise TimeoutError(
+                    f"RSS feed parsing timed out after {timeout} seconds"
+                )
 
-        # Set up timeout signal (Unix only)
-        if hasattr(signal, "SIGALRM"):
             old_handler = signal.signal(signal.SIGALRM, timeout_handler)
             signal.alarm(timeout)
 
@@ -140,13 +146,30 @@ class ScreensaverService:
             finally:
                 signal.signal(signal.SIGALRM, old_handler)
         else:
-            # Fallback for systems without signal support (Windows)
-            try:
-                feed = feedparser.parse(rss_url)
-                return feed
-            except Exception as e:
-                print(f"RSS feed parsing failed for {rss_url}: {e}")
+            # Thread-safe implementation for Flask dev server and other threads
+            result = {"feed": None, "error": None}
+
+            def parse_feed():
+                try:
+                    result["feed"] = feedparser.parse(rss_url)
+                except Exception as e:
+                    result["error"] = e
+
+            thread = threading.Thread(target=parse_feed)
+            thread.daemon = True
+            thread.start()
+            thread.join(timeout)
+
+            if thread.is_alive():
+                # Thread is still running, timeout occurred
+                print(f"RSS feed parsing timed out for {rss_url}")
                 return None
+
+            if result["error"]:
+                print(f"RSS feed parsing failed for {rss_url}: {result['error']}")
+                return None
+
+            return result["feed"]
 
     def _process_article(self, article, team_name):
         """Process and format article data."""

@@ -45,9 +45,11 @@ def fetch_mlb_games():
 
         today = datetime.now().strftime("%Y-%m-%d")
         url = f"{MLB_API_BASE}/schedule/games/?sportId=1&date={today}&hydrate=linescore"
+        logger.debug(f"Fetching MLB games from: {url}")
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
+        logger.debug(f"MLB API returned {len(data.get('dates', []))} dates")
 
         games = []
         for date_data in data.get("dates", []):
@@ -113,42 +115,7 @@ def fetch_mlb_games():
                     game_info["outs"] = linescore.get("outs", 0)
                 games.append(game_info)
 
-        # If no games today, try yesterday
-        if not games:
-            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-            url = f"{MLB_API_BASE}/schedule/games/?sportId=1&date={yesterday}"
-            response = requests.get(url, timeout=10)
-            data = response.json()
-
-            for date_data in data.get("dates", []):
-                for game in date_data.get("games", [])[:6]:  # Limit to 6 games
-                    away_team = (
-                        game.get("teams", {})
-                        .get("away", {})
-                        .get("team", {})
-                        .get("name", "")
-                    )
-                    home_team = (
-                        game.get("teams", {})
-                        .get("home", {})
-                        .get("team", {})
-                        .get("name", "")
-                    )
-
-                    game_info = {
-                        "away_team": away_team,
-                        "home_team": home_team,
-                        "away_score": game.get("teams", {})
-                        .get("away", {})
-                        .get("score", 0),
-                        "home_score": game.get("teams", {})
-                        .get("home", {})
-                        .get("score", 0),
-                        "away_record": standings.get(away_team, ""),
-                        "home_record": standings.get(home_team, ""),
-                        "status": "Final",
-                    }
-                    games.append(game_info)
+        # Removed fallback to yesterday's games - return empty list if no games today
 
         return games  # Return all games
 
