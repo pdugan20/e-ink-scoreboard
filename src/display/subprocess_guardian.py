@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class SubprocessGuardian:
     """Manages subprocess execution with multiple safety mechanisms."""
 
-    # Memory thresholds (adjusted for Pi Zero with 512MB RAM)
+    # Memory thresholds (adjusted for Pi Zero 2 W with 512MB RAM)
     MIN_AVAILABLE_MEMORY_MB = 100  # Don't start if less than this available
     CRITICAL_MEMORY_MB = 80  # Abort if drops below this
 
@@ -33,11 +33,24 @@ class SubprocessGuardian:
     DEFAULT_TIMEOUT = 90
     KILL_GRACE_PERIOD = 5  # Seconds to wait after SIGTERM before SIGKILL
 
-    # System load thresholds (relaxed for Pi Zero)
-    MAX_LOAD_AVERAGE = 5.0  # Don't start if 1-min load avg exceeds this
+    # System load thresholds
+    # Dynamically adjusted based on CPU count for cross-platform compatibility
+    MAX_LOAD_AVERAGE = 5.0  # Default, will be adjusted based on CPU cores
 
     def __init__(self):
         self.active_processes = set()
+        # Adjust load threshold based on CPU count for cross-platform compatibility
+        try:
+            cpu_count = psutil.cpu_count() or 1
+            # Scale threshold with CPU count
+            # Pi Zero 2 W has 4 cores, Mac typically has 8+
+            if cpu_count > 2:
+                self.MAX_LOAD_AVERAGE = cpu_count * 1.5  # Allow 1.5x CPU count
+                logger.info(
+                    f"Adjusted load threshold for {cpu_count} CPUs: {self.MAX_LOAD_AVERAGE}"
+                )
+        except Exception:
+            pass  # Keep default
 
     def check_system_resources(self) -> Tuple[bool, str]:
         """Check if system has enough resources to safely run subprocess."""

@@ -44,12 +44,14 @@ CONFIG = {
 
 
 class EinkDisplayController:
-    def __init__(self, config=None):
+    def __init__(self, config=None, test_mode=False):
         self.config = config or CONFIG
 
         # Initialize modular components
         self.game_checker = GameChecker(self.config["web_server_url"])
-        self.screenshot_controller = ScreenshotController(self.config)
+        self.screenshot_controller = ScreenshotController(
+            self.config, test_mode=test_mode
+        )
         self.refresh_controller = RefreshController(
             self.config, self.game_checker, self.screenshot_controller
         )
@@ -189,8 +191,9 @@ def main():
         config["apply_dithering"] = True
         logger.info("Dithering enabled")
 
-    # Create controller
-    controller = EinkDisplayController(config)
+    # Create controller (test mode when using --once or --force)
+    test_mode = args.once or args.force
+    controller = EinkDisplayController(config, test_mode=test_mode)
 
     if args.once:
         # Single update - respect active game logic unless --force is specified

@@ -28,8 +28,9 @@ logger = logging.getLogger(__name__)
 class ScreenshotController:
     """Handles taking screenshots and processing images for e-ink display."""
 
-    def __init__(self, config):
+    def __init__(self, config, test_mode=False):
         self.config = config
+        self.test_mode = test_mode  # Skip resource checks in test mode
         self.is_mac = platform.system() == "Darwin"
         self.is_pi = platform.system() == "Linux" and self._is_raspberry_pi()
 
@@ -291,10 +292,11 @@ class ScreenshotController:
 
             # Run subprocess with guardian protection
             logger.info("Taking screenshot via guarded subprocess...")
+            # Skip resource checks in test mode (--once or --force)
             success, stdout, stderr = run_safe_subprocess(
                 ["python", worker_path, config_json],
                 timeout=150,  # Increased for slow Pi Zero
-                check_resources=True,
+                check_resources=not self.test_mode,  # Skip checks in test mode
                 critical_operation=True,  # Screenshots are critical
             )
 

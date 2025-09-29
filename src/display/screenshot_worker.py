@@ -111,6 +111,22 @@ def take_screenshot(config_json):
                 logger.warning("No game content found - waiting for JS")
                 page.wait_for_timeout(10000)
 
+            # Wait for screensaver background image to load if present
+            try:
+                screensaver_container = page.query_selector(".screensaver-container")
+                if screensaver_container:
+                    logger.info("Screensaver detected - waiting for background image")
+                    # Wait for the image to be loaded (signaled by data attribute)
+                    page.wait_for_selector(
+                        ".screensaver-container[data-image-loaded='true']",
+                        timeout=15000,
+                    )
+                    logger.info("Screensaver background image loaded")
+                    # Extra wait to ensure image is fully rendered
+                    page.wait_for_timeout(1000)
+            except Exception as e:
+                logger.warning(f"Screensaver image wait timeout: {e}")
+
             # Take screenshot
             page.screenshot(path=config["screenshot_path"], full_page=False)
 

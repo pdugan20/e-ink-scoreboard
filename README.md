@@ -137,8 +137,8 @@ python src/eink_display.py --url "http://localhost:5001/display?test=true" --onc
 # Generate dithered preview
 python src/eink_display.py --url "http://localhost:5001/display" --once --dithering
 
-# Test screensaver on e-ink display
-python src/eink_display.py --url "http://localhost:5001/display?screensaver=true" --once
+# Test screensaver (requires --force to bypass game check)
+python src/eink_display.py --url "http://localhost:5001/display?screensaver=true" --once --force
 ```
 
 ## Display Update Logic

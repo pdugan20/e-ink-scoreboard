@@ -23,14 +23,32 @@ export function renderScreensaver(articleData) {
 
   // Set background image if available
   if (articleData.image_url) {
-    screensaverEl.style.backgroundImage = `url(${articleData.image_url})`;
-    screensaverEl.style.backgroundSize = 'cover';
-    screensaverEl.style.backgroundPosition = 'center';
-    screensaverEl.style.backgroundRepeat = 'no-repeat';
+    // Preload the image first to ensure it's loaded before setting as background
+    /* global Image */
+    const img = new Image();
+    img.onload = function () {
+      screensaverEl.style.backgroundImage = `url(${articleData.image_url})`;
+      screensaverEl.style.backgroundSize = 'cover';
+      screensaverEl.style.backgroundPosition = 'center';
+      screensaverEl.style.backgroundRepeat = 'no-repeat';
+      // Mark as loaded for screenshot worker
+      screensaverEl.setAttribute('data-image-loaded', 'true');
+      console.log('Screensaver background image loaded');
+    };
+    img.onerror = function () {
+      console.error('Failed to load screensaver image:', articleData.image_url);
+      // Fallback to gradient on error
+      screensaverEl.style.background =
+        'linear-gradient(135deg, #005C5C 0%, #007777 100%)';
+      screensaverEl.setAttribute('data-image-loaded', 'true');
+    };
+    // Start loading the image
+    img.src = articleData.image_url;
   } else {
     // Fallback gradient background
     screensaverEl.style.background =
       'linear-gradient(135deg, #005C5C 0%, #007777 100%)';
+    screensaverEl.setAttribute('data-image-loaded', 'true');
   }
 
   // Add gradient overlay
