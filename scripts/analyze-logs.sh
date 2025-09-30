@@ -24,7 +24,7 @@ echo ""
 # Show recent errors
 echo "🚨 Recent Errors (last 50 lines):"
 echo "--------------------------------"
-tail -n 1000 "$LOG_FILE" | grep -iE "error|critical|exception|failed|timeout" | tail -n 50 || echo "No recent errors found"
+tail -n 1000 "$LOG_FILE" | grep -E " - ERROR - | - CRITICAL - | - WARNING - " | tail -n 50 || echo "No recent errors found"
 echo ""
 
 # Show memory snapshots
