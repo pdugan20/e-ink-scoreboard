@@ -9,10 +9,8 @@ This document provides practical examples for testing and using the E-Ink Sports
 Make sure the development server is running:
 
 ```bash
-cd ~/e-ink-scoreboard  # or your project directory
-source ~/.virtualenvs/pimoroni/bin/activate  # Raspberry Pi
-# OR
-source venv/bin/activate  # Mac/Development
+cd ~/sports-scores-plugin  # or your project directory
+source venv/bin/activate
 
 python src/dev_server.py --port 5001
 ```
@@ -248,7 +246,7 @@ Visit: `http://localhost:5001/` (includes hot reload and controls)
 ### 1. Screenshot Test
 
 ```bash
-source ~/.virtualenvs/pimoroni/bin/activate
+source venv/bin/activate
 python src/eink_display.py --once --url "http://localhost:5001/display"
 ```
 

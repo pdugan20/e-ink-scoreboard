@@ -119,7 +119,7 @@ sudo reboot
 
 ```bash
 # Fix ownership of project files
-sudo chown -R pi:pi /home/pi/eink-sports-scores/
+sudo chown -R pi:pi /home/pi/sports-scores-plugin/
 
 # Fix permissions for temp files
 sudo chmod 777 /tmp

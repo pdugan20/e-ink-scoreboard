@@ -9,6 +9,10 @@ Service templates are stored in the `services/` directory:
 - `services/sports-display.service` - Main display service that runs the e-ink display
 - `services/sports-watchdog.service` - Watchdog monitor service that ensures the display service stays healthy
 
+The web server service is created dynamically during installation:
+
+- `sports-server.service` - Web server that provides the display page and API endpoints
+
 ## Template Variables
 
 The service files use template placeholders that are replaced during installation:
@@ -70,6 +74,7 @@ sudo systemctl start sports-watchdog.service
 ### Starting Services
 
 ```bash
+sudo systemctl start sports-server.service
 sudo systemctl start sports-display.service
 sudo systemctl start sports-watchdog.service
 ```
@@ -79,11 +84,13 @@ sudo systemctl start sports-watchdog.service
 ```bash
 sudo systemctl stop sports-display.service
 sudo systemctl stop sports-watchdog.service
+sudo systemctl stop sports-server.service
 ```
 
 ### Checking Status
 
 ```bash
+sudo systemctl status sports-server.service
 sudo systemctl status sports-display.service
 sudo systemctl status sports-watchdog.service
 ```
@@ -92,16 +99,25 @@ sudo systemctl status sports-watchdog.service
 
 ```bash
 # Real-time logs
+sudo journalctl -u sports-server.service -f
 sudo journalctl -u sports-display.service -f
+sudo journalctl -u sports-watchdog.service -f
 
 # Recent logs
 sudo journalctl -u sports-display.service --since "1 hour ago"
-
-# Watchdog logs
-sudo journalctl -u sports-watchdog.service -f
+sudo journalctl -u sports-server.service --since "1 hour ago"
 ```
 
 ## Service Features
+
+### Sports Server Service
+
+- **Type**: simple
+- **Restart Policy**: Always restarts on failure
+- **Restart Delay**: 10 seconds
+- **Purpose**: Runs Flask web server on port 5001
+- **Provides**: API endpoints and display page
+- **Created**: Dynamically during installation (not a template file)
 
 ### Sports Display Service
 
@@ -111,6 +127,7 @@ sudo journalctl -u sports-watchdog.service -f
 - **Watchdog**: 180 seconds (systemd restarts if no heartbeat)
 - **Memory Limits**: 200M main, 100M swap
 - **Timeout**: 30 seconds for graceful shutdown
+- **Dependencies**: Requires sports-server.service
 
 ### Sports Watchdog Service
 

@@ -6,8 +6,8 @@ For automatic setup, use the installation script:
 
 ```bash
 # Clone the project
-git clone https://github.com/pdugan20/e-ink-scoreboard.git
-cd e-ink-scoreboard
+git clone https://github.com/pdugan20/sports-scores-plugin.git
+cd sports-scores-plugin
 
 # Run the installation script
 ./scripts/install.sh
@@ -42,16 +42,16 @@ The installation script creates default configuration files. You can customize t
 
 ```bash
 # Update display once
-python eink_display.py --once
+python src/eink_display.py --once
 
 # Update with custom interval (in seconds)
-python eink_display.py --interval 600  # 10 minutes
+python src/eink_display.py --interval 600  # 10 minutes
 
 # Use custom config file
-python eink_display.py --config my_config.json
+python src/eink_display.py --config my_config.json
 
 # Update with custom server URL
-python eink_display.py --url http://localhost:5002/display
+python src/eink_display.py --url http://localhost:5002/display
 ```
 
 ## Troubleshooting
