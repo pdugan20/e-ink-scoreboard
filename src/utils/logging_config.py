@@ -93,11 +93,11 @@ def setup_logging(config):
     level = getattr(logging, logging_config.get("level", "INFO").upper())
     root_logger.setLevel(level)
 
-    # Create rotating file handler
-    max_bytes = (
-        logging_config.get("max_log_size_mb", 50) * 1024 * 1024
+    # Create rotating file handler (default 0.5MB for low-memory devices)
+    max_bytes = int(
+        logging_config.get("max_log_size_mb", 0.5) * 1024 * 1024
     )  # Convert MB to bytes
-    backup_count = logging_config.get("backup_count", 5)
+    backup_count = logging_config.get("backup_count", 3)
 
     file_handler = logging.handlers.RotatingFileHandler(
         log_file, maxBytes=max_bytes, backupCount=backup_count

@@ -12,7 +12,7 @@ cd sports-scores-plugin
 # Run the installation script
 ./scripts/install.sh
 
-# Configure your preferences (optional)
+# Configure your preferences (teams, timezone, theme, static IP, etc.)
 ./scripts/configure.sh
 
 # Setup auto-startup services
@@ -31,6 +31,15 @@ sudo reboot
 - Installs your project dependencies
 - Sets up Playwright for high-quality screenshots
 - Creates log directories and sets up comprehensive logging
+
+**What the configure script does:**
+
+- Sets your favorite MLB teams
+- Configures timezone for game times
+- Chooses refresh interval
+- Selects display theme
+- Enables/disables news screensaver
+- **Optionally sets a static IP** (recommended for reliable SSH access)
 
 ---
 

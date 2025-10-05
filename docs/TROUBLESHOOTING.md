@@ -204,6 +204,28 @@ tail -f ~/logs/eink_display.log | grep -E 'ERROR|CRITICAL|RESOURCE_SNAPSHOT'
 - System memory analysis
 - Out-of-memory (OOM) kill detection
 
+### Download Logs to Your Computer
+
+To analyze logs locally or share them for troubleshooting:
+
+```bash
+# From your Mac/computer terminal (not on the Pi):
+
+# Download the full log file
+scp patdugan@192.168.5.182:~/logs/eink_display.log ~/Desktop/eink_display.log
+
+# Download only recent entries (last 1000 lines)
+ssh patdugan@192.168.5.182 "tail -1000 ~/logs/eink_display.log" > ~/Desktop/recent_logs.txt
+
+# Download only errors and warnings
+ssh patdugan@192.168.5.182 "grep -E 'ERROR|CRITICAL|WARNING|timeout|killed|oom' ~/logs/eink_display.log" > ~/Desktop/errors_only.txt
+
+# Download all rotated log files
+scp patdugan@192.168.5.182:~/logs/eink_display.log* ~/Desktop/
+```
+
+**Note:** Replace `192.168.5.182` with your Pi's actual IP address and `patdugan` with your username.
+
 ### View Service Logs
 
 ```bash

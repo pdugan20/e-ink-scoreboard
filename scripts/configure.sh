@@ -291,12 +291,89 @@ echo "✅ Set screensaver: $screensaver_display"
 update_js_config "src/static/js/config.js" "FEATURE_FLAGS" "{ SHOW_STANDINGS: false, EINK_OPTIMIZED_CONTRAST: true, SHOW_SCREENSAVER: $screensaver_enabled }"
 
 echo ""
+echo "🌐 Configure static IP address?"
+echo ""
+echo "Setting a static IP prevents the Pi from changing addresses after reboot,"
+echo "making SSH access more reliable."
+echo ""
+
+# Detect current IP and gateway
+current_ip=$(hostname -I | awk '{print $1}')
+current_gateway=$(ip route | grep default | awk '{print $3}' | head -1)
+current_interface=$(ip route | grep default | awk '{print $5}' | head -1)
+
+if [ -n "$current_ip" ] && [ -n "$current_gateway" ]; then
+    echo "Current IP: $current_ip"
+    echo "Gateway: $current_gateway"
+    echo "Interface: $current_interface"
+    echo ""
+    echo " 1) Set static IP using current address ($current_ip)"
+    echo " 2) Set static IP with custom address"
+    echo " 3) Skip - Keep using DHCP"
+    echo ""
+
+    read -p "Enter choice (1-3): " ip_choice
+
+    case $ip_choice in
+        1)
+            static_ip="$current_ip"
+            gateway="$current_gateway"
+            interface="$current_interface"
+            ;;
+        2)
+            echo ""
+            read -p "Enter static IP address (e.g., 192.168.5.152): " static_ip
+            read -p "Enter gateway (default: $current_gateway): " gateway
+            gateway=${gateway:-$current_gateway}
+            interface="$current_interface"
+            ;;
+        3)
+            echo "✅ Skipping static IP configuration"
+            static_ip=""
+            ;;
+        *)
+            echo "Invalid choice, skipping static IP"
+            static_ip=""
+            ;;
+    esac
+
+    if [ -n "$static_ip" ]; then
+        # Backup existing config
+        sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.backup 2>/dev/null || true
+
+        # Remove any existing static IP configuration for this interface
+        sudo sed -i "/^interface $interface/,/^$/d" /etc/dhcpcd.conf
+
+        # Add new static IP configuration
+        echo "" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+        echo "interface $interface" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+        echo "static ip_address=$static_ip/24" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+        echo "static routers=$gateway" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+        echo "static domain_name_servers=$gateway 8.8.8.8" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+
+        echo "✅ Set static IP: $static_ip (will apply after reboot)"
+    fi
+else
+    echo "⚠️  Could not detect network settings, skipping static IP configuration"
+fi
+
+echo ""
 echo "🎉 Configuration complete!"
 echo ""
 echo "Your settings have been applied to:"
 echo "- src/static/js/config.js (theme, timezone, favorite team, screensaver)"
 echo "- src/eink_config.json (refresh interval)"
+if [ -n "$static_ip" ]; then
+    echo "- /etc/dhcpcd.conf (static IP: $static_ip)"
+fi
 echo ""
 echo "Next steps:"
-echo "1. Test display: python src/eink_display.py --once"
-echo "2. Start services: sudo systemctl start sports-server.service sports-display.service"
+if [ -n "$static_ip" ]; then
+    echo "1. Reboot to apply network changes: sudo reboot"
+    echo "2. After reboot, SSH to: ssh $(whoami)@$static_ip"
+    echo "3. Test display: python src/eink_display.py --once"
+    echo "4. Start services: sudo systemctl start sports-server.service sports-display.service"
+else
+    echo "1. Test display: python src/eink_display.py --once"
+    echo "2. Start services: sudo systemctl start sports-server.service sports-display.service"
+fi
