@@ -212,19 +212,19 @@ To analyze logs locally or share them for troubleshooting:
 # From your Mac/computer terminal (not on the Pi):
 
 # Download the full log file
-scp patdugan@192.168.5.182:~/logs/eink_display.log ~/Desktop/eink_display.log
+scp pi@<PI_IP_ADDRESS>:~/logs/eink_display.log ~/Desktop/eink_display.log
 
 # Download only recent entries (last 1000 lines)
-ssh patdugan@192.168.5.182 "tail -1000 ~/logs/eink_display.log" > ~/Desktop/recent_logs.txt
+ssh pi@<PI_IP_ADDRESS> "tail -1000 ~/logs/eink_display.log" > ~/Desktop/recent_logs.txt
 
 # Download only errors and warnings
-ssh patdugan@192.168.5.182 "grep -E 'ERROR|CRITICAL|WARNING|timeout|killed|oom' ~/logs/eink_display.log" > ~/Desktop/errors_only.txt
+ssh pi@<PI_IP_ADDRESS> "grep -E 'ERROR|CRITICAL|WARNING|timeout|killed|oom' ~/logs/eink_display.log" > ~/Desktop/errors_only.txt
 
 # Download all rotated log files
-scp patdugan@192.168.5.182:~/logs/eink_display.log* ~/Desktop/
+scp pi@<PI_IP_ADDRESS>:~/logs/eink_display.log* ~/Desktop/
 ```
 
-**Note:** Replace `192.168.5.182` with your Pi's actual IP address and `patdugan` with your username.
+**Note:** Replace `<PI_IP_ADDRESS>` with your Pi's actual IP address (e.g., 192.168.1.100).
 
 ### View Service Logs
 
