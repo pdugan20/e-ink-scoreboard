@@ -45,8 +45,8 @@ yarn-error.log*
 .npm
 .yarn-integrity
 
-# Development
-test_*.py
+# Development (temporary test files in root)
+/test_*.py
 test_display_output.png
 
 # Logs

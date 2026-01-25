@@ -5,9 +5,9 @@ import sys
 
 EMOJI_PATTERN = re.compile(
     "["
-    "\U0001F300-\U0001F9FF"  # Emoticons
-    "\U00002600-\U000027BF"  # Miscellaneous Symbols
-    "\U0001F1E0-\U0001F1FF"  # Flags
+    "\U0001f300-\U0001f9ff"  # Emoticons
+    "\U00002600-\U000027bf"  # Miscellaneous Symbols
+    "\U0001f1e0-\U0001f1ff"  # Flags
     "✅❌⚠️📝🎉⭐🚀💡🔧📊🤖✓"  # Common emojis
     "]",
     flags=re.UNICODE,
