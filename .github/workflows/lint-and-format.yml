@@ -25,7 +25,7 @@ jobs:
         run: black --check .
 
       - name: Run Ruff
-        run: ruff check .
+        run: ruff check --fix --exit-non-zero-on-fix .
 
   javascript-checks:
     runs-on: ubuntu-latest
