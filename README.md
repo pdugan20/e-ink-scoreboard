@@ -1,5 +1,11 @@
 # E-Ink Scoreboard
 
+[![Tests](https://github.com/pdugan20/e-ink-scoreboard/actions/workflows/test.yml/badge.svg)](https://github.com/pdugan20/e-ink-scoreboard/actions/workflows/test.yml)
+[![Code Quality](https://github.com/pdugan20/e-ink-scoreboard/actions/workflows/lint-and-format.yml/badge.svg)](https://github.com/pdugan20/e-ink-scoreboard/actions/workflows/lint-and-format.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 Display live sports scores on your e-ink display with professional quality and real-time updates!
 
 ## Features
@@ -163,7 +169,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup and code quali
 make install        # Install all dependencies
 make install-hooks  # Install pre-commit hooks (recommended)
 make check          # Run all linters and formatters
+make test           # Run all tests
 ```
+
+### Testing
+
+Full test suite with 110 tests (100% pass rate):
+
+```bash
+make test           # Run all tests (Python + JavaScript)
+make test-coverage  # Run with coverage reports
+```
+
+See **[docs/TESTING.md](docs/TESTING.md)** for the complete testing guide.
 
 ### Code Quality
 

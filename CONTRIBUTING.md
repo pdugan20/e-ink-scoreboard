@@ -84,13 +84,35 @@ The following checks run automatically on commit:
 - ESLint (JavaScript)
 - markdownlint (Markdown)
 
+## Testing
+
+All code changes should include tests. See **[docs/TESTING.md](docs/TESTING.md)** for the complete testing guide.
+
+**Quick commands:**
+
+```bash
+make test           # Run all tests (Python + JavaScript)
+make test-coverage  # Run with coverage reports
+make test-python    # Run Python tests only
+make test-js        # Run JavaScript tests only
+```
+
+**Test requirements:**
+
+- All tests must pass before PR approval
+- Maintain or improve code coverage
+- Follow AAA pattern (Arrange-Act-Assert)
+- Use descriptive test names
+- Mock external dependencies
+
 ## CI Checks
 
 All PRs must pass GitHub Actions CI checks:
 
-- Python: Black --check, Ruff check
-- JavaScript: Prettier --check, ESLint
-- Markdown: markdownlint
+- **Tests**: Python (3.9, 3.10, 3.11), JavaScript, Integration
+- **Python**: Black --check, Ruff check
+- **JavaScript**: Prettier --check, ESLint
+- **Markdown**: markdownlint
 
 ## Quick Reference
 
