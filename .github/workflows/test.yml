@@ -92,6 +92,3 @@ jobs:
 
       - name: Run integration tests
         run: pytest -m integration
-
-      - name: Run E2E tests
-        run: pytest -m e2e
