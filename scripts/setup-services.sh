@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🔧 Setting up systemd services..."
+echo "[SETUP] Setting up systemd services..."
 
 # Get current user and project directory
 USER=$(whoami)
@@ -11,13 +11,13 @@ PROJECT_DIR=$(pwd)
 VENV_PATH="$HOME/.virtualenvs/pimoroni"
 
 # Make scripts executable
-echo "🔧 Making scripts executable..."
+echo "[SETUP] Making scripts executable..."
 chmod +x src/display/screenshot_worker.py 2>/dev/null || true
 chmod +x src/watchdog_monitor.py 2>/dev/null || true
 chmod +x scripts/*.sh 2>/dev/null || true
 
 # Create sports-server.service
-echo "📝 Creating web server service..."
+echo "[INFO] Creating web server service..."
 sudo tee /etc/systemd/system/sports-server.service > /dev/null <<EOF
 [Unit]
 Description=E-Ink Scoreboard Web Server
@@ -37,16 +37,16 @@ WantedBy=multi-user.target
 EOF
 
 # Copy sports-display.service file
-echo "📝 Installing display service..."
+echo "[INFO] Installing display service..."
 if [ -f "services/sports-display.service" ]; then
     # Replace template placeholders with actual values
     sed -e "s|{{USER}}|$USER|g" \
         -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
         -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
         services/sports-display.service | sudo tee /etc/systemd/system/sports-display.service > /dev/null
-    echo "✅ Service file installed with correct paths"
+    echo "[SUCCESS] Service file installed with correct paths"
 else
-    echo "⚠️ Warning: sports-display.service file not found in services directory"
+    echo "[WARN] Warning: sports-display.service file not found in services directory"
     echo "Creating basic service file..."
     sudo tee /etc/systemd/system/sports-display.service > /dev/null <<EOF
 [Unit]
@@ -82,16 +82,16 @@ EOF
 fi
 
 # Install watchdog monitor service
-echo "🐕 Installing watchdog monitor service..."
+echo " Installing watchdog monitor service..."
 if [ -f "services/sports-watchdog.service" ]; then
     # Replace template placeholders with actual values
     sed -e "s|{{USER}}|$USER|g" \
         -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
         -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
         services/sports-watchdog.service | sudo tee /etc/systemd/system/sports-watchdog.service > /dev/null
-    echo "✅ Watchdog service installed"
+    echo "[SUCCESS] Watchdog service installed"
 else
-    echo "⚠️ Creating basic watchdog service..."
+    echo "[WARN] Creating basic watchdog service..."
     sudo tee /etc/systemd/system/sports-watchdog.service > /dev/null <<EOF
 [Unit]
 Description=Sports Display Watchdog Monitor
@@ -112,14 +112,14 @@ EOF
 fi
 
 # Enable and start services
-echo "🚀 Enabling services..."
+echo " Enabling services..."
 sudo systemctl daemon-reload
 sudo systemctl enable sports-server.service
 sudo systemctl enable sports-display.service
 sudo systemctl enable sports-watchdog.service
 
 # Setup daily reboot for memory management
-echo "⏰ Setting up daily reboot schedule..."
+echo " Setting up daily reboot schedule..."
 CRON_JOB="0 4 * * * /sbin/shutdown -r now"
 CRON_COMMENT="# E-Ink Scoreboard: Daily reboot at 4 AM for memory management"
 
@@ -127,12 +127,12 @@ CRON_COMMENT="# E-Ink Scoreboard: Daily reboot at 4 AM for memory management"
 if ! (crontab -l 2>/dev/null | grep -q "E-Ink Scoreboard.*Daily reboot"); then
     # Add the cron job
     (crontab -l 2>/dev/null; echo "$CRON_COMMENT"; echo "$CRON_JOB") | crontab -
-    echo "✅ Daily reboot scheduled for 4:00 AM"
+    echo "[SUCCESS] Daily reboot scheduled for 4:00 AM"
 else
-    echo "✅ Daily reboot schedule already configured"
+    echo "[SUCCESS] Daily reboot schedule already configured"
 fi
 
-echo "✅ Services created and enabled!"
+echo "[SUCCESS] Services created and enabled!"
 echo ""
 echo "To start services now:"
 echo "  sudo systemctl start sports-server.service"

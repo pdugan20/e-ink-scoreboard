@@ -235,10 +235,10 @@ Pre-commit hooks run automatically before each commit. All PRs must pass GitHub 
 
 ### Current Features
 
-- ✅ **MLB Support** - Full MLB game scores, standings, and live updates
-- ✅ **NFL Support** - NFL game scores and schedules
-- ✅ **Team News Screensaver** - Automatic screensaver with team news articles
-- ✅ **Comprehensive Testing** - 110 tests with 100% pass rate
+- **MLB Support** - Full MLB game scores, standings, and live updates
+- **NFL Support** - NFL game scores and schedules
+- **Team News Screensaver** - Automatic screensaver with team news articles
+- **Comprehensive Testing** - 110 tests with 100% pass rate
 
 ### Planned Features
 

@@ -60,7 +60,7 @@ with open('src/eink_config.json', 'w') as f:
 "
 }
 
-echo "⚾️ Choose your favorite MLB teams (will appear first when playing):"
+echo " Choose your favorite MLB teams (will appear first when playing):"
 echo ""
 echo "American League:"
 echo " 1) None                          9) Mariners"
@@ -191,15 +191,15 @@ if [ ${#favorite_teams_array[@]} -gt 0 ]; then
         readable_display="${readable_display%, } and ${readable_teams_array[-1]}"
     fi
 
-    echo "✅ Set favorite teams: $readable_display"
+    echo "[SUCCESS] Set favorite teams: $readable_display"
     update_js_config "src/static/js/config.js" "favoriteTeams" "{ mlb: $favorite_teams_str, nfl: null, cfb: null }"
 else
-    echo "✅ No favorite teams selected"
+    echo "[SUCCESS] No favorite teams selected"
     update_js_config "src/static/js/config.js" "favoriteTeams" "{ mlb: null, nfl: null, cfb: null }"
 fi
 
 echo ""
-echo "🌍 Choose your timezone:"
+echo " Choose your timezone:"
 echo ""
 echo " 1) US/Eastern (New York)        5) US/Mountain (Denver)"
 echo " 2) US/Central (Chicago)         6) US/Pacific (Los Angeles)"
@@ -226,11 +226,11 @@ case $tz_choice in
     *) echo "Invalid choice, using US/Eastern"; timezone="TIMEZONES.EASTERN"; timezone_display="US/Eastern" ;;
 esac
 
-echo "✅ Set timezone: $timezone_display"
+echo "[SUCCESS] Set timezone: $timezone_display"
 update_js_config "src/static/js/config.js" "displayTimezone" "$timezone"
 
 echo ""
-echo "🕒 Choose refresh interval:"
+echo " Choose refresh interval:"
 echo ""
 echo " 1) 360 seconds (6 minutes) - Default, good for active game times"
 echo " 2) 900 seconds (15 minutes) - Balanced for general use"
@@ -246,11 +246,11 @@ case $interval_choice in
     *) echo "Invalid choice, using 6 minutes"; interval=360 ;;
 esac
 
-echo "✅ Set refresh interval: $interval seconds"
+echo "[SUCCESS] Set refresh interval: $interval seconds"
 update_json_config "refresh_interval" "$interval" "number"
 
 echo ""
-echo "🎨 Choose display theme:"
+echo " Choose display theme:"
 echo ""
 echo " 1) Default - Clean with colorful team logos"
 echo " 2) Team Colors - Dynamic backgrounds with both team's colors"
@@ -266,11 +266,11 @@ case $theme_choice in
     *) echo "Invalid choice, using default"; theme="THEMES.DEFAULT"; theme_display="Default" ;;
 esac
 
-echo "✅ Set theme: $theme_display"
+echo "[SUCCESS] Set theme: $theme_display"
 update_js_config "src/static/js/config.js" "currentTheme" "$theme"
 
 echo ""
-echo "📰 Enable team news screensaver?"
+echo " Enable team news screensaver?"
 echo ""
 echo "When no games are scheduled, the display can show news articles"
 echo "from your favorite team instead of a blank 'no games' message."
@@ -287,11 +287,11 @@ case $screensaver_choice in
     *) echo "Invalid choice, enabling screensaver"; screensaver_enabled="true"; screensaver_display="Enabled" ;;
 esac
 
-echo "✅ Set screensaver: $screensaver_display"
+echo "[SUCCESS] Set screensaver: $screensaver_display"
 update_js_config "src/static/js/config.js" "FEATURE_FLAGS" "{ SHOW_STANDINGS: false, EINK_OPTIMIZED_CONTRAST: true, SHOW_SCREENSAVER: $screensaver_enabled }"
 
 echo ""
-echo "🌐 Configure static IP address?"
+echo " Configure static IP address?"
 echo ""
 echo "Setting a static IP prevents the Pi from changing addresses after reboot,"
 echo "making SSH access more reliable."
@@ -328,7 +328,7 @@ if [ -n "$current_ip" ] && [ -n "$current_gateway" ]; then
             interface="$current_interface"
             ;;
         3)
-            echo "✅ Skipping static IP configuration"
+            echo "[SUCCESS] Skipping static IP configuration"
             static_ip=""
             ;;
         *)
@@ -351,14 +351,14 @@ if [ -n "$current_ip" ] && [ -n "$current_gateway" ]; then
         echo "static routers=$gateway" | sudo tee -a /etc/dhcpcd.conf > /dev/null
         echo "static domain_name_servers=$gateway 8.8.8.8" | sudo tee -a /etc/dhcpcd.conf > /dev/null
 
-        echo "✅ Set static IP: $static_ip (will apply after reboot)"
+        echo "[SUCCESS] Set static IP: $static_ip (will apply after reboot)"
     fi
 else
-    echo "⚠️  Could not detect network settings, skipping static IP configuration"
+    echo "[WARN]  Could not detect network settings, skipping static IP configuration"
 fi
 
 echo ""
-echo "🎉 Configuration complete!"
+echo " Configuration complete!"
 echo ""
 echo "Your settings have been applied to:"
 echo "- src/static/js/config.js (theme, timezone, favorite team, screensaver)"

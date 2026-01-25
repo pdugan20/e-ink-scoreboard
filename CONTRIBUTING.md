@@ -32,6 +32,13 @@ pre-commit run --all-files
 
 ## Code Quality Standards
 
+### General Rules
+
+- **No emojis** in code, scripts, or documentation
+- Use plain text alternatives: `[SUCCESS]`, `[ERROR]`, `[WARN]`, `[INFO]`
+- Exception: README badges (shield.io images) are allowed
+- Keep output clean and terminal-friendly
+
 ### Python
 
 - **Formatter:** Black (line length: 88)

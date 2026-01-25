@@ -57,3 +57,13 @@ repos:
     hooks:
       - id: markdownlint
         args: [--fix]
+
+  # Custom: Check for emojis
+  - repo: local
+    hooks:
+      - id: check-no-emoji
+        name: Check for emojis
+        entry: python .pre-commit-hooks/check-no-emoji.py
+        language: system
+        types: [text]
+        exclude: ^\.pre-commit-hooks/

@@ -10,9 +10,9 @@ The display uses smart update logic to minimize e-ink wear:
 
 **Automatic Updates:**
 
-- ✅ **New game day**: Updates once to show "Games start at X:XX"
-- ✅ **Games active**: Regular updates while games are in progress
-- ❌ **Games scheduled only**: Skips updates to preserve e-ink display
+- **New game day**: Updates once to show "Games start at X:XX"
+- **Games active**: Regular updates while games are in progress
+- **Games scheduled only**: Skips updates to preserve e-ink display
 
 **Update Schedule:**
 

@@ -192,7 +192,7 @@ if __name__ == "__main__":
     print(f"  - http://localhost:{args.port}/api/scores/MLB")
     print(f"  - http://localhost:{args.port}/api/scores/NFL")
     print(f"  - http://localhost:{args.port}/api/screensaver/MLB")
-    print("\n✨ Hot reload enabled:")
+    print("\nHot reload enabled:")
     print(
         "  - Edit src/preview.html, CSS in src/static/styles/, or JS in src/static/js/"
     )
