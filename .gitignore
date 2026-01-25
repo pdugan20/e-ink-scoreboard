@@ -54,3 +54,5 @@ test_display_output.png
 
 # Old custom hooks (archived)
 .githooks.backup/
+.coverage
+coverage.xml
