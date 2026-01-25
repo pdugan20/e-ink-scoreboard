@@ -102,6 +102,9 @@ Edit `src/eink_config.json` to customize:
 
 ```text
 src/                       # Core application files
+├── api/                   # API endpoints and data fetching
+├── display/               # Display controllers and logic
+├── services/              # Business logic services
 ├── assets/                # Images and logos
 │   └── logos/             # Team and league logos
 ├── static/                # CSS, JS, and static assets
@@ -109,6 +112,11 @@ src/                       # Core application files
 │   │   └── constants/     # Team data and constants
 │   └── styles/            # CSS stylesheets
 └── test-data/             # Test game data
+
+tests/                     # Test suite
+├── unit/                  # Unit tests (API, display logic)
+├── integration/           # Integration tests (Flask endpoints)
+└── js/                    # JavaScript tests (diamond rendering)
 
 scripts/                   # Installation and setup scripts
 ├── install.sh             # Raspberry Pi installation
@@ -118,8 +126,12 @@ scripts/                   # Installation and setup scripts
 docs/                      # Documentation
 ├── API.md                 # API endpoints and responses
 ├── API_EXAMPLES.md        # API testing examples and guides
+├── TESTING.md             # Testing guide and strategy
 ├── RASPBERRY_PI_SETUP.md  # Pi setup guide
-└── TROUBLESHOOTING.md     # Common issues and fixes
+├── TROUBLESHOOTING.md     # Common issues and fixes
+├── SERVICES.md            # Systemd service documentation
+├── TIMEOUT_ARCHITECTURE.md # Technical architecture details
+└── LOGGING_STYLE_GUIDE.md # Logging standards
 ```
 
 ## Commands
@@ -221,11 +233,17 @@ Pre-commit hooks run automatically before each commit. All PRs must pass GitHub 
 
 ## Roadmap
 
+### Current Features
+
+- ✅ **MLB Support** - Full MLB game scores, standings, and live updates
+- ✅ **NFL Support** - NFL game scores and schedules
+- ✅ **Team News Screensaver** - Automatic screensaver with team news articles
+- ✅ **Comprehensive Testing** - 110 tests with 100% pass rate
+
 ### Planned Features
 
 - **Expanded Team RSS Feeds** - News screensaver support for all 30 MLB teams
 - **Dark Mode Theme** - High-contrast dark theme optimized for e-ink displays
-- **NFL Support** - Full NFL game scores and schedules during football season
 - **College Football (CFB) Support** - Major college football games and conferences
 - **Additional E-ink Display Support** - Support for different display sizes and manufacturers
 - **Web Configuration** - Browser-based setup instead of command-line configuration
