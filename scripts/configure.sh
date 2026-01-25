@@ -10,19 +10,19 @@ echo "E-Ink Scoreboard Configuration"
 echo "====================================="
 echo ""
 
-# Function to update JavaScript config  
+# Function to update JavaScript config
 update_js_config() {
     local file="$1"
-    local key="$2" 
+    local key="$2"
     local value="$3"
-    
+
     # Use Python to safely update JavaScript config with proper escaping
     python3 -c """
 import re
 import sys
 
 file_path = sys.argv[1]
-key = sys.argv[2] 
+key = sys.argv[2]
 value = sys.argv[3]
 
 with open(file_path, 'r') as f:
@@ -179,7 +179,7 @@ if [ ${#favorite_teams_array[@]} -gt 0 ]; then
     # Join array elements with commas for JS config
     favorite_teams_str=$(printf "%s," "${favorite_teams_array[@]}")
     favorite_teams_str="[${favorite_teams_str%,}]"  # Remove trailing comma and wrap in brackets
-    
+
     # Create readable display text
     if [ ${#readable_teams_array[@]} -eq 1 ]; then
         readable_display="${readable_teams_array[0]}"
@@ -190,7 +190,7 @@ if [ ${#favorite_teams_array[@]} -gt 0 ]; then
         readable_display=$(printf "%s, " "${readable_teams_array[@]:0:$((${#readable_teams_array[@]}-1))}")
         readable_display="${readable_display%, } and ${readable_teams_array[-1]}"
     fi
-    
+
     echo "✅ Set favorite teams: $readable_display"
     update_js_config "src/static/js/config.js" "favoriteTeams" "{ mlb: $favorite_teams_str, nfl: null, cfb: null }"
 else
@@ -202,7 +202,7 @@ echo ""
 echo "🌍 Choose your timezone:"
 echo ""
 echo " 1) US/Eastern (New York)        5) US/Mountain (Denver)"
-echo " 2) US/Central (Chicago)         6) US/Pacific (Los Angeles)"  
+echo " 2) US/Central (Chicago)         6) US/Pacific (Los Angeles)"
 echo " 3) US/Arizona (Phoenix)         7) Canada/Eastern (Toronto)"
 echo " 4) US/Hawaii (Honolulu)         8) Other (enter manually)"
 echo ""
@@ -217,7 +217,7 @@ case $tz_choice in
     5) timezone="TIMEZONES.MOUNTAIN"; timezone_display="US/Mountain" ;;
     6) timezone="TIMEZONES.PACIFIC"; timezone_display="US/Pacific" ;;
     7) timezone="'America/Toronto'"; timezone_display="Canada/Eastern" ;;
-    8) 
+    8)
         echo ""
         read -p "Enter timezone (e.g., Europe/London): " custom_tz
         timezone="'$custom_tz'"

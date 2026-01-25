@@ -46,8 +46,8 @@ Display live sports scores on your e-ink display with professional quality and r
    ```
 
 3. **View in browser**:
-   - Live data: http://localhost:5001/display
-   - Test data: http://localhost:5001/display?test=true
+   - Live data: <http://localhost:5001/display>
+   - Test data: <http://localhost:5001/display?test=true>
 
 ### Raspberry Pi Deployment
 
@@ -94,7 +94,7 @@ Edit `src/eink_config.json` to customize:
 
 ## Project Structure
 
-```
+```text
 src/                       # Core application files
 ├── assets/                # Images and logos
 │   └── logos/             # Team and league logos
@@ -153,39 +153,36 @@ The system uses intelligent update logic to minimize e-ink wear:
 
 ## Development
 
-### Code Quality Checks
+### Setup for Contributors
 
-#### Automatic Checks (GitHub Actions)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup and code quality guidelines.
 
-All pushes and PRs are automatically checked for code quality using Black, Ruff, Prettier, and ESLint.
+**Quick start:**
 
-#### Local Development Setup
+```bash
+make install        # Install all dependencies
+make install-hooks  # Install pre-commit hooks (recommended)
+make check          # Run all linters and formatters
+```
 
-1. **Enable pre-commit hooks** (recommended):
+### Code Quality
 
-   ```bash
-   ./scripts/setup-hooks.sh
-   ```
+All code is automatically checked by:
 
-   This will automatically run all checks before each commit.
+- **Python**: Black (formatter), Ruff (linter)
+- **JavaScript**: Prettier (formatter), ESLint (linter)
+- **Markdown**: markdownlint
 
-2. **Manual checks**:
-   ```bash
-   ./scripts/check-all.sh  # Run all checks
-   black .                 # Format Python code
-   ruff check --fix .      # Fix Python linting issues
-   npx prettier --write .  # Format JS/TS/JSON files
-   npx eslint --fix .      # Fix JavaScript linting issues
-   ```
+Pre-commit hooks run automatically before each commit. All PRs must pass GitHub Actions CI checks.
 
-- **Preview**: http://localhost:5001/ (dev controls)
-- **Clean display**: http://localhost:5001/display (screenshot target)
-- **Test data**: http://localhost:5001/display?test=true (sample data)
-- **Test screensaver**: http://localhost:5001/display?screensaver=true (force screensaver mode)
+### Development Server
+
+- **Preview**: <http://localhost:5001/> (dev controls)
+- **Clean display**: <http://localhost:5001/display> (screenshot target)
+- **Test data**: <http://localhost:5001/display?test=true> (sample data)
+- **Test screensaver**: <http://localhost:5001/display?screensaver=true> (force screensaver mode)
 - **Hot reload**: Auto-refresh on file changes
 - **Live data**: Fetch button to get current MLB scores
-
-**Configuration**: Code quality settings are defined in `pyproject.toml`
 
 ## Hardware Requirements
 

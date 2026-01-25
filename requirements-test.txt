@@ -1,0 +1,30 @@
+# Testing dependencies for Python
+# Install with: pip install -r requirements-test.txt
+
+# Core testing framework
+pytest>=7.4.0
+pytest-cov>=4.1.0                  # Coverage reporting
+pytest-xdist>=3.3.0                # Parallel test execution
+
+# Flask testing
+pytest-flask>=1.2.0                # Flask-specific test utilities
+
+# Mocking and fixtures
+pytest-mock>=3.11.0                # Enhanced mocking support
+requests-mock>=1.11.0              # HTTP request mocking
+responses>=0.23.0                  # Alternative HTTP mocking
+freezegun>=1.2.2                   # Time/date mocking
+
+# Async support (if needed)
+pytest-asyncio>=0.21.0             # Async test support
+
+# Code quality in tests
+pytest-randomly>=3.13.0            # Randomize test order
+pytest-timeout>=2.1.0              # Test timeout support
+
+# Better output
+pytest-sugar>=0.9.7                # Better test output formatting
+pytest-html>=3.2.0                 # HTML test reports
+
+# Coverage tools
+coverage[toml]>=7.3.0              # Coverage with pyproject.toml support

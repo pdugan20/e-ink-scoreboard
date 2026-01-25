@@ -177,24 +177,60 @@ export function renderGames(games, league = LEAGUES.MLB) {
                 <div class="teams-and-scores">
                     <div class="team-row">
                         <div class="team-info">
-                            ${awayLogo ? `<img src="${awayLogo}" alt="${awayTeamMapped}" class="team-logo">` : ''}
+                            ${
+                              awayLogo
+                                ? `<img src="${awayLogo}" alt="${awayTeamMapped}" class="team-logo">`
+                                : ''
+                            }
                             <div class="team-details">
-                                <div class="team-name">${awayTeamMapped} ${FEATURE_FLAGS.SHOW_STANDINGS && game.away_record ? `<span class="team-record">${game.away_record}</span>` : ''}</div>
+                                <div class="team-name">${awayTeamMapped} ${
+                                  FEATURE_FLAGS.SHOW_STANDINGS &&
+                                  game.away_record
+                                    ? `<span class="team-record">${game.away_record}</span>`
+                                    : ''
+                                }</div>
                             </div>
                         </div>
-                        ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${awayLosing ? ' losing-score' : ''}">${game.away_score}</div>`}
+                        ${
+                          isScheduled
+                            ? '<div class="score-placeholder"></div>'
+                            : `<div class="score${
+                                awayLosing ? ' losing-score' : ''
+                              }">${game.away_score}</div>`
+                        }
                     </div>
                     <div class="team-row">
                         <div class="team-info">
-                            ${homeLogo ? `<img src="${homeLogo}" alt="${homeTeamMapped}" class="team-logo">` : ''}
+                            ${
+                              homeLogo
+                                ? `<img src="${homeLogo}" alt="${homeTeamMapped}" class="team-logo">`
+                                : ''
+                            }
                             <div class="team-details">
-                                <div class="team-name">${homeTeamMapped} ${FEATURE_FLAGS.SHOW_STANDINGS && game.home_record ? `<span class="team-record">${game.home_record}</span>` : ''}</div>
+                                <div class="team-name">${homeTeamMapped} ${
+                                  FEATURE_FLAGS.SHOW_STANDINGS &&
+                                  game.home_record
+                                    ? `<span class="team-record">${game.home_record}</span>`
+                                    : ''
+                                }</div>
                             </div>
                         </div>
-                        ${isScheduled ? '<div class="score-placeholder"></div>' : `<div class="score${homeLosing ? ' losing-score' : ''}">${game.home_score}</div>`}
+                        ${
+                          isScheduled
+                            ? '<div class="score-placeholder"></div>'
+                            : `<div class="score${
+                                homeLosing ? ' losing-score' : ''
+                              }">${game.home_score}</div>`
+                        }
                     </div>
                 </div>
-                ${generateBaseballDiamondComponent(game, themeManager.shouldUseDynamicDiamond(shouldApplyDynamicColors), convertTimeToTimezone(formatGameStatus(game.status)))}
+                ${generateBaseballDiamondComponent(
+                  game,
+                  themeManager.shouldUseDynamicDiamond(
+                    shouldApplyDynamicColors
+                  ),
+                  convertTimeToTimezone(formatGameStatus(game.status))
+                )}
             </div>
         `;
 

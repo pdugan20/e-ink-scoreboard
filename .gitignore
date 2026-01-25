@@ -51,3 +51,6 @@ test_display_output.png
 
 # Logs
 *.log
+
+# Old custom hooks (archived)
+.githooks.backup/

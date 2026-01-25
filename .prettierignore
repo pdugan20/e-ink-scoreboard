@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+venv/
+.venv/
+*.egg-info/
+
+# Build outputs
+build/
+dist/
+*.pyc
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+
+# Package locks (auto-generated)
+package-lock.json
+poetry.lock
+
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Screenshots and images (binary files)
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp

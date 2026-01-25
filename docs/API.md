@@ -36,7 +36,7 @@ All responses return `application/json` unless otherwise specified.
 
 **Description:** Fetches live MLB game data including scores, standings, and game status for today. If no games today, returns yesterday's completed games.
 
-#### Response Format
+#### MLB Response Format
 
 ```json
 [
@@ -59,7 +59,7 @@ All responses return `application/json` unless otherwise specified.
 ]
 ```
 
-#### Field Descriptions
+#### MLB Field Descriptions
 
 | Field         | Type           | Description             | Notes                       |
 | ------------- | -------------- | ----------------------- | --------------------------- |
@@ -84,7 +84,7 @@ All responses return `application/json` unless otherwise specified.
 | `"7:30 PM ET"`  | Scheduled game start time           |
 | `"In Progress"` | Live game, no inning info available |
 
-#### Error Response
+#### MLB Error Response
 
 ```json
 {
@@ -98,7 +98,7 @@ All responses return `application/json` unless otherwise specified.
 
 **Description:** Fetches live NFL game data for the current week, limited to 6 games.
 
-#### Response Format
+#### NFL Response Format
 
 ```json
 [
@@ -112,7 +112,7 @@ All responses return `application/json` unless otherwise specified.
 ]
 ```
 
-#### Field Descriptions
+#### NFL Field Descriptions
 
 | Field        | Type    | Description                     |
 | ------------ | ------- | ------------------------------- |
@@ -145,7 +145,7 @@ All responses return `application/json` unless otherwise specified.
 
 **Description:** Fetches a random recent news article for the user's configured favorite team in the specified league.
 
-#### Response Format
+#### Screensaver Response Format
 
 ```json
 {
@@ -159,7 +159,7 @@ All responses return `application/json` unless otherwise specified.
 }
 ```
 
-#### Field Descriptions
+#### Screensaver Field Descriptions
 
 | Field         | Type           | Description                                 |
 | ------------- | -------------- | ------------------------------------------- |
@@ -171,7 +171,7 @@ All responses return `application/json` unless otherwise specified.
 | `team`        | string         | Team name the article is about              |
 | `type`        | string         | Always "screensaver"                        |
 
-#### Error Response
+#### Screensaver Error Response
 
 ```json
 {
@@ -213,7 +213,7 @@ Returns HTML content optimized for e-ink displays with inline styles and JavaScr
 
 **Description:** Development endpoint that checks if source files have been modified for hot reload functionality.
 
-#### Response Format
+#### Hot Reload Response Format
 
 ```json
 {

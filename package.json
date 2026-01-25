@@ -8,11 +8,19 @@
     "lint": "eslint src/static/js/**/*.js",
     "lint:fix": "eslint src/static/js/**/*.js --fix",
     "format": "prettier --write src/static/js/**/*.js",
-    "format:check": "prettier --check src/static/js/**/*.js"
+    "format:check": "prettier --check src/static/js/**/*.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "eslint": "^8.0.0",
     "prettier": "^3.0.0",
-    "@eslint/js": "^8.0.0"
+    "@eslint/js": "^8.0.0",
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "jsdom": "^23.0.0"
   }
 }

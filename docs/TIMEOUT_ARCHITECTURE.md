@@ -90,7 +90,7 @@ Without timeouts, a hung browser could freeze the entire system.
 
 ## Timeout Flow Example
 
-```
+```text
 Time    Event
 ----    -----
 0s      Parent launches worker subprocess
@@ -107,7 +107,7 @@ Time    Event
 
 ## Failed Scenario Example
 
-```
+```text
 Time    Event
 ----    -----
 0s      Parent launches worker subprocess
@@ -164,10 +164,12 @@ If a screenshot fails:
 ### Symptoms of Timeout Problems
 
 1. **"Worker process timeout" errors**
+
    - Worker is timing out before completion
    - Increase worker timeout (but keep less than parent)
 
 2. **"Force killed 4 browser processes" repeatedly**
+
    - Browsers not closing properly
    - Check browser cleanup logic
 

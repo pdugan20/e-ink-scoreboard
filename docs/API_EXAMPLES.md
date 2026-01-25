@@ -19,7 +19,7 @@ python src/dev_server.py --port 5001
 
 ### 1. MLB Scores
 
-#### Basic Request
+#### MLB Basic Request
 
 ```bash
 curl "http://localhost:5001/api/scores/MLB"
@@ -77,7 +77,7 @@ curl "http://localhost:5001/api/scores/MLB"
 
 ### 2. NFL Scores
 
-#### Basic Request
+#### NFL Basic Request
 
 ```bash
 curl "http://localhost:5001/api/scores/NFL"
@@ -106,7 +106,7 @@ curl "http://localhost:5001/api/scores/NFL"
 
 ### 3. Screensaver API
 
-#### Basic Request
+#### Screensaver Basic Request
 
 ```bash
 curl "http://localhost:5001/api/screensaver/MLB"
@@ -318,11 +318,13 @@ wait
 ### Common Issues
 
 1. **Empty Response `[]`**
+
    - No games scheduled today
    - External API unavailable
    - Network connectivity issues
 
 2. **JSON Parse Errors**
+
    - External API returned non-JSON
    - Network timeout occurred
    - Check server logs for details
@@ -336,28 +338,28 @@ wait
 
 1. **Test External APIs Directly:**
 
-```bash
-# Test MLB API directly
-curl "https://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&date=$(date +%Y-%m-%d)"
+   ```bash
+   # Test MLB API directly
+   curl "https://statsapi.mlb.com/api/v1/schedule/games/?sportId=1&date=$(date +%Y-%m-%d)"
 
-# Test ESPN NFL API
-curl "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
-```
+   # Test ESPN NFL API
+   curl "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+   ```
 
 2. **Check Configuration:**
 
-```bash
-# Verify favorite teams configuration
-cat src/static/js/config.js
+   ```bash
+   # Verify favorite teams configuration
+   cat src/static/js/config.js
 
-# Check RSS feed config (if it exists)
-ls -la config/team-rss-feeds.json
-```
+   # Check RSS feed config (if it exists)
+   ls -la config/team-rss-feeds.json
+   ```
 
 3. **Monitor Server Logs:**
 
-```bash
-# Development server shows logs in terminal
-# Production: check systemd logs
-sudo journalctl -u sports-server.service --since "1 hour ago"
-```
+   ```bash
+   # Development server shows logs in terminal
+   # Production: check systemd logs
+   sudo journalctl -u sports-server.service --since "1 hour ago"
+   ```
