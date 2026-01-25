@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 
 import psutil
 import requests
+
 from config.memory_config import MEMORY_STARTUP_WAIT_MB
 from utils.logging_config import log_resource_snapshot
 
@@ -229,7 +230,7 @@ class RefreshController:
                             # Add a small buffer (1 minute) to ensure we're past midnight
                             sleep_seconds = seconds_until_tomorrow + 60
                             logger.info(
-                                f"Sleeping for {sleep_seconds/3600:.1f} hours until next day ({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
+                                f"Sleeping for {sleep_seconds / 3600:.1f} hours until next day ({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
                             )
                             time.sleep(sleep_seconds)
                             continue  # Skip the regular sleep interval and restart the loop

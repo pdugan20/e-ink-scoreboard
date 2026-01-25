@@ -9,12 +9,13 @@ import glob
 import logging
 import os
 
+from flask import Flask, jsonify
+from flask_cors import CORS
+
 # Import our modular API components
 from api.scores_api import fetch_mlb_games, fetch_nfl_games
 from api.screensaver_api import get_screensaver_data
 from api.static_files import setup_static_routes
-from flask import Flask, jsonify
-from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for development

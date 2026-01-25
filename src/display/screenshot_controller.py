@@ -8,19 +8,19 @@ import time
 from contextlib import contextmanager
 
 import psutil
+from PIL import Image
+
 from config.memory_config import (
     BROWSER_JS_HEAP_MB,
     MEMORY_MINIMUM_MB,
     MEMORY_RECOMMENDED_MB,
 )
-from PIL import Image
+from display.browser_cleanup import BrowserCleanup
 from utils.logging_config import (
     log_after_screenshot,
     log_before_screenshot,
     log_browser_cleanup,
 )
-
-from display.browser_cleanup import BrowserCleanup
 
 logger = logging.getLogger(__name__)
 

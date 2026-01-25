@@ -5,7 +5,7 @@
 repos:
   # Standard pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -27,7 +27,7 @@ repos:
 
   # Python: Ruff linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.15
+    rev: v0.14.14
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -35,7 +35,7 @@ repos:
 
   # JavaScript/TypeScript: Prettier formatter
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         types_or: [javascript, json, yaml, markdown]
@@ -43,7 +43,7 @@ repos:
 
   # JavaScript: ESLint
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.56.0
+    rev: v10.0.0-rc.1
     hooks:
       - id: eslint
         files: ^src/static/js/.*\.js$
@@ -53,7 +53,7 @@ repos:
 
   # Markdown: markdownlint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.39.0
+    rev: v0.47.0
     hooks:
       - id: markdownlint
         args: [--fix]

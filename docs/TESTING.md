@@ -370,7 +370,6 @@ make check
 Two workflows run on every push and PR:
 
 1. **Tests** (`.github/workflows/test.yml`):
-
    - Python tests (matrix: 3.9, 3.10, 3.11)
    - JavaScript tests
    - Integration tests

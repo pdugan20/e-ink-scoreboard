@@ -318,13 +318,11 @@ wait
 ### Common Issues
 
 1. **Empty Response `[]`**
-
    - No games scheduled today
    - External API unavailable
    - Network connectivity issues
 
 2. **JSON Parse Errors**
-
    - External API returned non-JSON
    - Network timeout occurred
    - Check server logs for details

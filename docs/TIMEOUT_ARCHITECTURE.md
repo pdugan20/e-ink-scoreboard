@@ -164,12 +164,10 @@ If a screenshot fails:
 ### Symptoms of Timeout Problems
 
 1. **"Worker process timeout" errors**
-
    - Worker is timing out before completion
    - Increase worker timeout (but keep less than parent)
 
 2. **"Force killed 4 browser processes" repeatedly**
-
    - Browsers not closing properly
    - Check browser cleanup logic
 
