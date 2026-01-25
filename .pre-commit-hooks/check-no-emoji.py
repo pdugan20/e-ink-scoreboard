@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check for emojis in files."""
+
 import re
 import sys
 

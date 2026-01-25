@@ -92,7 +92,8 @@ class TestWaitForMemoryOnStartup:
         # Simulate time passing (5 minutes = 300 seconds)
         # First call: start_time = 0
         # Second call: check in while loop = 301 (past timeout)
-        mock_time.side_effect = [0, 301]
+        # Additional calls from logger.warning() timestamp creation
+        mock_time.side_effect = [0, 301, 301, 301, 301]
 
         controller = RefreshController({}, Mock(), Mock())
 
@@ -101,7 +102,7 @@ class TestWaitForMemoryOnStartup:
 
         # Assert - Should exit due to timeout without checking memory
         # The while condition fails immediately, so virtual_memory is never called
-        assert mock_time.call_count == 2
+        assert mock_time.call_count >= 2  # At least 2 calls for the timing logic
 
     @patch("src.display.refresh_controller.psutil.virtual_memory")
     def test_memory_check_error_proceeds_anyway(self, mock_virtual_memory):
