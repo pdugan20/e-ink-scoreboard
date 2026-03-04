@@ -1,70 +1,80 @@
 version: 2
 updates:
-  # Python dependencies
-  - package-ecosystem: 'pip'
-    directory: '/'
+  - package-ecosystem: "pip"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '09:00'
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
     open-pull-requests-limit: 10
-    reviewers:
-      - 'pdugan20'
+    commit-message:
+      prefix: "deps"
+      include: "scope"
     labels:
-      - 'dependencies'
-      - 'python'
+      - "dependencies"
+      - "python"
+    assignees:
+      - "pdugan20"
+    reviewers:
+      - "pdugan20"
     groups:
-      # Group patch and minor updates together
-      python-minor-patch:
+      python-dependencies:
         update-types:
-          - 'minor'
-          - 'patch'
-        patterns:
-          - '*'
-      # Major updates get individual PRs
-      python-major:
-        update-types:
-          - 'major'
+          - "minor"
+          - "patch"
 
-  # JavaScript dependencies
-  - package-ecosystem: 'npm'
-    directory: '/'
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '09:00'
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
     open-pull-requests-limit: 10
-    reviewers:
-      - 'pdugan20'
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
     labels:
-      - 'dependencies'
-      - 'javascript'
+      - "dependencies"
+      - "npm"
+    assignees:
+      - "pdugan20"
+    reviewers:
+      - "pdugan20"
     groups:
-      # Group development dependencies
-      npm-dev-dependencies:
-        dependency-type: 'development'
+      dev-dependencies:
+        dependency-type: "development"
         update-types:
-          - 'minor'
-          - 'patch'
-      # Major updates get individual PRs
-      npm-major:
+          - "minor"
+          - "patch"
+      production-dependencies:
+        dependency-type: "production"
         update-types:
-          - 'major'
+          - "minor"
+          - "patch"
 
-  # GitHub Actions
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '09:00'
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "America/New_York"
     open-pull-requests-limit: 5
-    reviewers:
-      - 'pdugan20'
+    commit-message:
+      prefix: "ci"
     labels:
-      - 'dependencies'
-      - 'github-actions'
+      - "dependencies"
+      - "github-actions"
+    assignees:
+      - "pdugan20"
+    reviewers:
+      - "pdugan20"
     groups:
-      github-actions-updates:
-        patterns:
-          - '*'
+      github-actions:
+        patterns: ["*"]
+        update-types:
+          - "minor"
+          - "patch"
