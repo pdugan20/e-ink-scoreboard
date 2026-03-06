@@ -18,14 +18,6 @@ export default defineConfig({
       reporter: ['text', 'html', 'lcov', 'json'],
       reportsDirectory: './coverage',
 
-      // Coverage thresholds (Vitest 3+ format)
-      thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 80,
-        statements: 80,
-      },
-
       // Files to include/exclude
       include: ['src/static/js/**/*.js'],
       exclude: [

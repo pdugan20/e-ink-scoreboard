@@ -120,8 +120,8 @@ To remove all services and clean up:
 
 After installation, the scoreboard is discoverable on your local network at:
 
-- **http://scoreboard.local:5001** -- main display
-- **http://scoreboard.local:5001/settings** -- configuration panel
+- **<http://scoreboard.local:5001>** -- main display
+- **<http://scoreboard.local:5001/settings>** -- configuration panel
 
 This works automatically on macOS, iOS, and Linux. For **Windows**, mDNS
 requires one of the following:

@@ -78,7 +78,7 @@ edit config files directly:
 **`src/eink_config.json`** (backend):
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| ------- | ------- | ----------- |
 | `refresh_interval` | 360 | Seconds between updates (6 min) |
 | `display_width` | 800 | Display width in pixels |
 | `display_height` | 480 | Display height in pixels |
@@ -86,7 +86,7 @@ edit config files directly:
 **`src/static/js/config.js`** (frontend):
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| ------- | ------- | ----------- |
 | `favoriteTeams` | `null` | MLB teams to highlight when playing |
 | `displayTimezone` | `TIMEZONES.EASTERN` | Timezone for game times |
 | `currentTheme` | `THEMES.DEFAULT` | Display theme |
