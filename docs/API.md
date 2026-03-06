@@ -8,7 +8,12 @@ When running locally: `http://localhost:5001`
 
 ## Authentication
 
-No authentication required for any endpoints.
+Read endpoints are public. Write endpoints (`POST /api/config`, `POST /api/services/restart`,
+`POST /api/wifi/connect`) require authentication when an admin password is configured.
+
+Authentication is optional. When `src/.admin_password` exists, write endpoints and the
+`/settings` page require login via `/login`. CSRF tokens are required on all POST requests
+when auth is enabled (sent via `X-CSRF-Token` header).
 
 ## Content Types
 
@@ -23,6 +28,16 @@ All responses return `application/json` unless otherwise specified.
 | `/api/scores/MLB`           | GET    | Fetch live MLB game scores and standings |
 | `/api/scores/NFL`           | GET    | Fetch live NFL game scores               |
 | `/api/screensaver/<league>` | GET    | Fetch team news article for screensaver  |
+| `/api/config`               | GET    | Read current scoreboard configuration    |
+| `/api/config`               | POST   | Update scoreboard configuration          |
+| `/api/config/status`        | GET    | Server uptime and screenshot age         |
+| `/api/services/status`      | GET    | Status of all systemd services           |
+| `/api/services/restart`     | POST   | Restart a scoreboard service             |
+| `/api/wifi/status`          | GET    | Current WiFi connection info             |
+| `/api/wifi/networks`        | GET    | Scan available WiFi networks             |
+| `/api/wifi/connect`         | POST   | Connect to a WiFi network                |
+| `/settings`                 | GET    | Web configuration panel                  |
+| `/login`                    | GET    | Admin login page (when auth enabled)     |
 | `/display`                  | GET    | HTML display page for e-ink rendering    |
 | `/check-updates`            | GET    | Development endpoint for hot reload      |
 
@@ -218,6 +233,143 @@ Returns HTML content optimized for e-ink displays with inline styles and JavaScr
 ```json
 {
   "changed": true
+}
+```
+
+---
+
+## Configuration API
+
+### Read Configuration
+
+**Endpoint:** `GET /api/config`
+
+**Description:** Returns the merged configuration from both `eink_config.json` and `config.js`, plus available options for teams, timezones, and themes.
+
+```json
+{
+  "refresh_interval": 360,
+  "favorite_teams": ["Seattle Mariners"],
+  "timezone": "America/Los_Angeles",
+  "theme": "default",
+  "show_screensaver": true,
+  "eink_optimized_contrast": true,
+  "available_teams": ["Arizona Diamondbacks", "..."],
+  "available_timezones": ["America/New_York", "..."],
+  "available_themes": ["default", "team_colors", "mlb_scoreboard"]
+}
+```
+
+### Update Configuration
+
+**Endpoint:** `POST /api/config`
+
+**Description:** Accepts partial updates. Writes to `eink_config.json` and/or `config.js` as appropriate. Requires authentication when enabled.
+
+**Request Body:**
+
+```json
+{
+  "favorite_teams": ["Seattle Mariners", "New York Yankees"],
+  "timezone": "America/New_York",
+  "theme": "team_colors",
+  "refresh_interval": 900,
+  "show_screensaver": false
+}
+```
+
+### System Status
+
+**Endpoint:** `GET /api/config/status`
+
+**Description:** Returns server uptime and screenshot age.
+
+```json
+{
+  "server_uptime": 3600,
+  "screenshot_age": 120,
+  "services": {
+    "sports-server": "active",
+    "sports-display": "active",
+    "sports-watchdog": "active"
+  }
+}
+```
+
+---
+
+## Service Management API
+
+### Service Status
+
+**Endpoint:** `GET /api/services/status`
+
+**Description:** Returns detailed status of all three systemd services.
+
+### Restart Service
+
+**Endpoint:** `POST /api/services/restart`
+
+**Description:** Restarts an allowed scoreboard service. Only `sports-display` and `sports-watchdog` can be restarted (whitelisted). Requires authentication when enabled.
+
+**Request Body:**
+
+```json
+{
+  "service": "sports-display"
+}
+```
+
+---
+
+## WiFi Management API
+
+### WiFi Status
+
+**Endpoint:** `GET /api/wifi/status`
+
+**Description:** Returns current WiFi connection info. Returns 503 if `nmcli` is not available.
+
+```json
+{
+  "connected": true,
+  "network": "HomeWifi",
+  "device": "wlan0",
+  "ip_address": "192.168.1.100"
+}
+```
+
+### Scan Networks
+
+**Endpoint:** `GET /api/wifi/networks`
+
+**Description:** Triggers a WiFi rescan and returns available networks sorted by signal strength.
+
+```json
+{
+  "networks": [
+    {
+      "ssid": "HomeWifi",
+      "signal": 85,
+      "security": "WPA2",
+      "active": true
+    }
+  ]
+}
+```
+
+### Connect to Network
+
+**Endpoint:** `POST /api/wifi/connect`
+
+**Description:** Connects to a WiFi network. Requires authentication when enabled.
+
+**Request Body:**
+
+```json
+{
+  "ssid": "NetworkName",
+  "password": "wifi-password"
 }
 ```
 

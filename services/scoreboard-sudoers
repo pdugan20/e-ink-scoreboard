@@ -1,0 +1,15 @@
+# Sudoers rules for E-Ink Scoreboard web configuration panel
+#
+# Allows the scoreboard user to restart/status scoreboard services
+# from the web UI without a password prompt.
+#
+# Install with: sudo cp services/scoreboard-sudoers /etc/sudoers.d/scoreboard
+# Template variables ({{USER}}) are replaced by setup-services.sh
+
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sports-display.service
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sports-watchdog.service
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl status sports-display.service
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl status sports-watchdog.service
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl status sports-server.service
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/nmcli dev wifi connect *
+{{USER}} ALL=(ALL) NOPASSWD: /usr/sbin/reboot

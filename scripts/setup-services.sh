@@ -1,7 +1,30 @@
 #!/bin/bash
 # Setup systemd services for E-Ink Scoreboard
+#
+# Usage:
+#   ./scripts/setup-services.sh          # Install and enable services
+#   ./scripts/setup-services.sh --help   # Show usage
 
 set -e
+
+# Handle --help flag
+if [ "${1:-}" = "--help" ]; then
+    echo "E-Ink Scoreboard - Service Setup Script"
+    echo ""
+    echo "Usage: ./scripts/setup-services.sh"
+    echo ""
+    echo "Creates and enables systemd services:"
+    echo "  - sports-server.service   (Flask web server on port 5001)"
+    echo "  - sports-display.service  (E-ink display controller)"
+    echo "  - sports-watchdog.service (Process monitor)"
+    echo ""
+    echo "Also sets up a daily reboot cron job at 4:00 AM for"
+    echo "memory management."
+    echo ""
+    echo "This script is safe to re-run -- existing services will"
+    echo "be updated in place."
+    exit 0
+fi
 
 echo "[SETUP] Setting up systemd services..."
 
@@ -17,7 +40,11 @@ chmod +x src/watchdog_monitor.py 2>/dev/null || true
 chmod +x scripts/*.sh 2>/dev/null || true
 
 # Create sports-server.service
-echo "[INFO] Creating web server service..."
+if [ -f /etc/systemd/system/sports-server.service ]; then
+    echo "[INFO] Updating existing web server service..."
+else
+    echo "[INFO] Creating web server service..."
+fi
 sudo tee /etc/systemd/system/sports-server.service > /dev/null <<EOF
 [Unit]
 Description=E-Ink Scoreboard Web Server
@@ -28,23 +55,28 @@ Type=simple
 User=$USER
 WorkingDirectory=$PROJECT_DIR
 Environment=PATH=$VENV_PATH/bin
-ExecStart=$VENV_PATH/bin/python src/dev_server.py --port 5001
+ExecStart=$VENV_PATH/bin/python src/dev_server.py --port 5001 --production
 Restart=always
 RestartSec=10
+MemoryMax=150M
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 # Copy sports-display.service file
-echo "[INFO] Installing display service..."
+if [ -f /etc/systemd/system/sports-display.service ]; then
+    echo "[INFO] Updating existing display service..."
+else
+    echo "[INFO] Installing display service..."
+fi
 if [ -f "services/sports-display.service" ]; then
     # Replace template placeholders with actual values
     sed -e "s|{{USER}}|$USER|g" \
         -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
         -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
         services/sports-display.service | sudo tee /etc/systemd/system/sports-display.service > /dev/null
-    echo "[SUCCESS] Service file installed with correct paths"
+    echo "[SUCCESS] Display service installed with correct paths"
 else
     echo "[WARN] Warning: sports-display.service file not found in services directory"
     echo "Creating basic service file..."
@@ -69,7 +101,7 @@ RestartSec=30
 WatchdogSec=180
 
 # Resource limits
-MemoryLimit=200M
+MemoryMax=200M
 MemorySwapMax=100M
 
 # Kill timeout
@@ -82,7 +114,11 @@ EOF
 fi
 
 # Install watchdog monitor service
-echo " Installing watchdog monitor service..."
+if [ -f /etc/systemd/system/sports-watchdog.service ]; then
+    echo "[INFO] Updating existing watchdog service..."
+else
+    echo "[INFO] Installing watchdog monitor service..."
+fi
 if [ -f "services/sports-watchdog.service" ]; then
     # Replace template placeholders with actual values
     sed -e "s|{{USER}}|$USER|g" \
@@ -111,15 +147,34 @@ WantedBy=multi-user.target
 EOF
 fi
 
-# Enable and start services
-echo " Enabling services..."
+# Reload systemd to pick up any changes
 sudo systemctl daemon-reload
+
+# Enable services
+echo "[INFO] Enabling services..."
 sudo systemctl enable sports-server.service
 sudo systemctl enable sports-display.service
 sudo systemctl enable sports-watchdog.service
 
+# Install sudoers rule for web config panel service management
+echo "[INFO] Installing sudoers rule for web config panel..."
+if [ -f "services/scoreboard-sudoers" ]; then
+    sed -e "s|{{USER}}|$USER|g" \
+        services/scoreboard-sudoers | sudo tee /etc/sudoers.d/scoreboard > /dev/null
+    sudo chmod 0440 /etc/sudoers.d/scoreboard
+    # Validate the sudoers file
+    if sudo visudo -c -f /etc/sudoers.d/scoreboard &>/dev/null; then
+        echo "[SUCCESS] Sudoers rule installed (web panel can restart services)"
+    else
+        echo "[ERROR] Invalid sudoers rule -- removing to prevent lockout"
+        sudo rm -f /etc/sudoers.d/scoreboard
+    fi
+else
+    echo "[WARN] Sudoers template not found, skipping"
+fi
+
 # Setup daily reboot for memory management
-echo " Setting up daily reboot schedule..."
+echo "[INFO] Setting up daily reboot schedule..."
 CRON_JOB="0 4 * * * /sbin/shutdown -r now"
 CRON_COMMENT="# E-Ink Scoreboard: Daily reboot at 4 AM for memory management"
 
@@ -132,6 +187,7 @@ else
     echo "[SUCCESS] Daily reboot schedule already configured"
 fi
 
+echo ""
 echo "[SUCCESS] Services created and enabled!"
 echo ""
 echo "To start services now:"

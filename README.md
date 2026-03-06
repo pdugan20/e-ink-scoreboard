@@ -1,7 +1,7 @@
 # E-Ink Scoreboard
 
 [![CI](https://github.com/pdugan20/e-ink-scoreboard/workflows/CI/badge.svg)](https://github.com/pdugan20/e-ink-scoreboard/actions)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
 
 Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh and team news screensaver.
@@ -12,8 +12,11 @@ Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh and team
 - **Team News Screensaver** - Displays team news when no games are scheduled
 - **Clean Layout** - Optimized for 800x480 e-ink displays, up to 15 games in a 3x5 grid
 - **Auto-refresh** - Configurable refresh interval with power-saving logic
+- **Web Settings Panel** - Configure teams, timezone, theme, and more from any browser
+- **WiFi Management** - Scan and switch WiFi networks from the settings page
+- **Local Network Discovery** - Access at `scoreboard.local:5001` via mDNS
 - **Mac Testing** - Full development environment with live preview
-- **Raspberry Pi Ready** - Complete deployment guide
+- **Raspberry Pi Ready** - Complete deployment guide with one-command setup
 
 ## Quick Start
 
@@ -59,19 +62,35 @@ python src/eink_display.py --once --dithering  # Generate dithered preview
 
 - `/api/scores/MLB` - Live game scores
 - `/api/screensaver/MLB` - Team news articles
+- `/api/config` - Read/write scoreboard configuration (GET/POST)
+- `/api/services/status` - Service health and uptime
+- `/api/wifi/networks` - Scan available WiFi networks
 - `/display` - E-ink optimized display page
+- `/settings` - Web configuration panel
 
 See [docs/API.md](docs/API.md) for full API reference and [docs/API_EXAMPLES.md](docs/API_EXAMPLES.md) for examples.
 
 ## Configuration
 
-Edit `src/eink_config.json`:
+Open `http://scoreboard.local:5001/settings` to configure via web browser, or
+edit config files directly:
+
+**`src/eink_config.json`** (backend):
 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `refresh_interval` | 360 | Seconds between updates (6 min) |
 | `display_width` | 800 | Display width in pixels |
 | `display_height` | 480 | Display height in pixels |
+
+**`src/static/js/config.js`** (frontend):
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `favoriteTeams` | `null` | MLB teams to highlight when playing |
+| `displayTimezone` | `TIMEZONES.EASTERN` | Timezone for game times |
+| `currentTheme` | `THEMES.DEFAULT` | Display theme |
+| `FEATURE_FLAGS.SHOW_SCREENSAVER` | `true` | Show team news when no games |
 
 ## Project Structure
 

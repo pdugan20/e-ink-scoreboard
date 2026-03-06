@@ -35,6 +35,9 @@ make clean             # Remove cache files
 ```text
 src/
 ├── api/                    # Flask API endpoints
+│   ├── auth.py             # Optional admin auth (login, sessions, CSRF)
+│   ├── config_api.py       # /api/config - settings read/write
+│   ├── wifi_api.py         # /api/wifi - network scanning/connecting
 │   ├── scores_api.py       # /api/scores/MLB - live game scores
 │   ├── screensaver_api.py  # /api/screensaver/MLB - team news
 │   └── static_files.py     # Static file serving
@@ -42,7 +45,13 @@ src/
 │   ├── game_checker.py     # Checks for active games
 │   ├── refresh_controller.py # Update scheduling logic
 │   ├── screenshot_controller.py # Playwright screenshot capture
+│   ├── screenshot_worker.py # Screenshot capture subprocess
+│   ├── display_worker.py   # E-ink display update subprocess
+│   ├── subprocess_guardian.py # Subprocess lifecycle management
 │   └── browser_cleanup.py  # Browser process cleanup
+├── templates/              # Jinja2 templates
+│   ├── settings.html       # Web settings page (HTMX)
+│   └── login.html          # Admin login page
 ├── services/               # Business logic
 │   └── screensaver_service.py # News article fetching
 ├── config/                 # Configuration
@@ -53,6 +62,7 @@ src/
 │   └── styles/             # CSS stylesheets
 ├── dev_server.py           # Flask development server
 ├── eink_display.py         # Main display entry point
+├── watchdog_monitor.py     # Process health monitoring
 └── eink_config.json        # Runtime configuration
 
 tests/
@@ -61,19 +71,21 @@ tests/
 └── js/                     # JavaScript tests (Vitest)
 
 scripts/                    # Raspberry Pi setup scripts
-services/                   # Systemd service definitions
+services/                   # Systemd service and config templates
 ```
 
 ## Architecture
 
-- **Backend**: Flask web server serving scores API and HTML display page
+- **Backend**: Flask web server serving scores API, config API, and HTML pages
 - **Frontend**: Vanilla JavaScript rendering game cards on an HTML page
+- **Settings**: Web config panel at `/settings` using Jinja2 + HTMX (no build step)
 - **Display**: Playwright captures screenshots of the HTML page, sends to e-ink display
 - **Data**: MLB scores fetched from external API, rendered as game cards in a 3x5 grid
+- **Discovery**: Avahi/mDNS advertises `scoreboard.local` on the local network
 
 ## Code Style
 
-- **Python**: Black (88 char, py38 target), Ruff (linter), double quotes
+- **Python**: Black (88 char, py311 target), Ruff (linter), double quotes
 - **JavaScript**: Prettier, ESLint, ES modules
 - **Markdown**: markdownlint
 - Pre-commit hooks enforce all formatting rules
@@ -90,4 +102,6 @@ services/                   # Systemd service definitions
 - Display updates use intelligent scheduling: skip updates when no games active
 - Mac development uses `requirements-dev.txt` (excludes Pi hardware packages)
 - Raspberry Pi uses `requirements.txt` (includes `inky`, `spidev`, `gpiod`)
-- Configuration lives in `src/eink_config.json` (refresh interval, display dimensions)
+- Configuration lives in two files: `src/eink_config.json` (backend) and `src/static/js/config.js` (frontend)
+- Web settings panel reads/writes both config files via `/api/config`
+- Authentication is optional: when `src/.admin_password` exists, write endpoints require login

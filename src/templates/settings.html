@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Ink Scoreboard Settings</title>
+    <link rel="stylesheet" href="/static/styles/variables.css" />
+    <link rel="stylesheet" href="/static/styles/settings.css" />
+    <script
+      src="https://unpkg.com/htmx.org@2.0.4"
+      integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="settings-container">
+      <header class="settings-header">
+        <h1>Scoreboard Settings</h1>
+        <div class="header-links">
+          {% if auth_enabled() %}
+          <a href="/logout" class="back-link">Logout</a>
+          {% endif %}
+          <a href="/" class="back-link">View Display</a>
+        </div>
+      </header>
+
+      <div id="toast" class="toast"></div>
+
+      <form
+        id="settings-form"
+        hx-post="/api/config"
+        hx-trigger="submit"
+        hx-swap="none"
+      >
+        <!-- Favorite Teams -->
+        <section class="setting-group">
+          <h2>Favorite Teams</h2>
+          <p class="setting-description">
+            Selected teams appear first when they are playing.
+          </p>
+          <div class="team-grid" id="team-grid">
+            {% for team in config.available_teams %}
+            <label class="team-checkbox">
+              <input
+                type="checkbox"
+                name="favorite_teams"
+                value="{{ team }}"
+                {% if team in config.favorite_teams %}checked{% endif %}
+              />
+              <span class="team-label">{{ team }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </section>
+
+        <!-- Timezone -->
+        <section class="setting-group">
+          <h2>Timezone</h2>
+          <select name="timezone" class="setting-select">
+            {% for tz in config.available_timezones %}
+            <option value="{{ tz }}" {% if tz == config.timezone %}selected{% endif %}>
+              {{ tz }}
+            </option>
+            {% endfor %}
+          </select>
+        </section>
+
+        <!-- Theme -->
+        <section class="setting-group">
+          <h2>Display Theme</h2>
+          <div class="theme-options">
+            {% for theme in config.available_themes %}
+            <label class="theme-radio">
+              <input
+                type="radio"
+                name="theme"
+                value="{{ theme }}"
+                {% if theme == config.theme %}checked{% endif %}
+              />
+              <span class="theme-label">
+                {% if theme == 'default' %}Default
+                {% elif theme == 'team_colors' %}Team Colors
+                {% elif theme == 'mlb_scoreboard' %}MLB Scoreboard
+                {% endif %}
+              </span>
+              <span class="theme-description">
+                {% if theme == 'default' %}Clean with colorful team logos
+                {% elif theme == 'team_colors' %}Dynamic backgrounds with team colors
+                {% elif theme == 'mlb_scoreboard' %}Classic scoreboard appearance
+                {% endif %}
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+        </section>
+
+        <!-- Refresh Interval -->
+        <section class="setting-group">
+          <h2>Refresh Interval</h2>
+          <p class="setting-description">
+            How often the display updates. Shorter intervals use more resources.
+          </p>
+          <select name="refresh_interval" class="setting-select">
+            <option value="360" {% if config.refresh_interval == 360 %}selected{% endif %}>
+              6 minutes (recommended for game time)
+            </option>
+            <option value="900" {% if config.refresh_interval == 900 %}selected{% endif %}>
+              15 minutes (balanced)
+            </option>
+            <option value="1800" {% if config.refresh_interval == 1800 %}selected{% endif %}>
+              30 minutes (preserves display life)
+            </option>
+          </select>
+        </section>
+
+        <!-- Toggles -->
+        <section class="setting-group">
+          <h2>Features</h2>
+          <label class="toggle-row">
+            <span class="toggle-label">
+              <strong>Team News Screensaver</strong>
+              <span class="toggle-description">
+                Show news articles when no games are scheduled
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              name="show_screensaver"
+              class="toggle-input"
+              {% if config.show_screensaver %}checked{% endif %}
+            />
+            <span class="toggle-switch"></span>
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-label">
+              <strong>E-Ink Contrast Optimization</strong>
+              <span class="toggle-description">
+                Enhance contrast for e-ink display readability
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              name="eink_optimized_contrast"
+              class="toggle-input"
+              {% if config.eink_optimized_contrast %}checked{% endif %}
+            />
+            <span class="toggle-switch"></span>
+          </label>
+        </section>
+
+        <!-- Submit -->
+        <div class="settings-actions">
+          <button type="submit" class="btn-save" id="save-btn">
+            Save Settings
+          </button>
+          <span class="save-indicator" id="save-indicator"></span>
+        </div>
+      </form>
+
+      <!-- Status Panel -->
+      <section
+        class="setting-group status-panel"
+        hx-get="/api/config/status"
+        hx-trigger="load, every 10s"
+        hx-swap="innerHTML"
+        hx-target="#status-content"
+      >
+        <h2>System Status</h2>
+        <div id="status-content">Loading...</div>
+      </section>
+
+      <!-- Service Controls -->
+      <section class="setting-group">
+        <h2>Service Controls</h2>
+        <p class="setting-description">
+          Restart the display service to apply configuration changes immediately.
+        </p>
+        <div class="service-actions">
+          <button
+            type="button"
+            class="btn-restart"
+            id="restart-display-btn"
+            onclick="restartService('sports-display')"
+          >
+            Restart Display
+          </button>
+          <button
+            type="button"
+            class="btn-restart btn-restart-secondary"
+            id="restart-watchdog-btn"
+            onclick="restartService('sports-watchdog')"
+          >
+            Restart Watchdog
+          </button>
+        </div>
+      </section>
+
+      <!-- WiFi Management -->
+      <section class="setting-group" id="wifi-section">
+        <h2>WiFi Network</h2>
+        <div id="wifi-status">
+          <p class="setting-description">Loading connection info...</p>
+        </div>
+        <div id="wifi-networks" style="display: none">
+          <div id="wifi-network-list" class="wifi-list"></div>
+        </div>
+        <div class="service-actions" style="margin-top: 12px">
+          <button
+            type="button"
+            class="btn-restart"
+            id="wifi-scan-btn"
+            onclick="scanWifiNetworks()"
+          >
+            Scan Networks
+          </button>
+        </div>
+
+        <!-- Connect dialog -->
+        <div id="wifi-connect-dialog" class="wifi-dialog" style="display: none">
+          <div class="wifi-dialog-content">
+            <h3>Connect to <span id="wifi-connect-ssid"></span></h3>
+            <input
+              type="password"
+              id="wifi-connect-password"
+              class="login-input"
+              placeholder="WiFi Password"
+              style="width: 100%; margin: 12px 0"
+            />
+            <div class="service-actions">
+              <button
+                type="button"
+                class="btn-save"
+                onclick="connectToWifi()"
+                id="wifi-connect-btn"
+              >
+                Connect
+              </button>
+              <button
+                type="button"
+                class="btn-restart btn-restart-secondary"
+                onclick="closeWifiDialog()"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // WiFi management
+      var _wifiSelectedSsid = '';
+
+      function loadWifiStatus() {
+        fetch('/api/wifi/status')
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            var el = document.getElementById('wifi-status');
+            if (data.error) {
+              el.innerHTML =
+                '<p class="setting-description">WiFi management not available (nmcli not found)</p>';
+              document.getElementById('wifi-scan-btn').style.display = 'none';
+              return;
+            }
+            if (data.connected) {
+              el.innerHTML =
+                '<div class="status-grid">' +
+                '<div class="status-item">' +
+                '<span class="status-label">Network</span>' +
+                '<span class="status-value"><span class="status-dot active"></span>' +
+                data.network +
+                '</span></div>' +
+                '<div class="status-item">' +
+                '<span class="status-label">IP Address</span>' +
+                '<span class="status-value">' +
+                (data.ip_address || 'Unknown') +
+                '</span></div></div>';
+            } else {
+              el.innerHTML =
+                '<p class="setting-description"><span class="status-dot"></span> Not connected to WiFi</p>';
+            }
+          })
+          .catch(function () {
+            document.getElementById('wifi-status').innerHTML =
+              '<p class="setting-description">Could not load WiFi status</p>';
+          });
+      }
+
+      function scanWifiNetworks() {
+        var btn = document.getElementById('wifi-scan-btn');
+        btn.disabled = true;
+        btn.textContent = 'Scanning...';
+
+        var listDiv = document.getElementById('wifi-networks');
+        var listContent = document.getElementById('wifi-network-list');
+
+        fetch('/api/wifi/networks')
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            if (data.error) {
+              listContent.innerHTML =
+                '<p class="setting-description">' + data.error + '</p>';
+              listDiv.style.display = 'block';
+              return;
+            }
+            var html = '';
+            data.networks.forEach(function (net) {
+              var activeClass = net.active ? ' wifi-item-active' : '';
+              var signalBars =
+                net.signal >= 70 ? '|||' : net.signal >= 40 ? '||' : '|';
+              html +=
+                '<div class="wifi-item' +
+                activeClass +
+                '" onclick="showWifiDialog(\'' +
+                net.ssid.replace(/'/g, "\\'") +
+                '\')">' +
+                '<span class="wifi-ssid">' +
+                (net.active ? '<span class="status-dot active"></span> ' : '') +
+                net.ssid +
+                '</span>' +
+                '<span class="wifi-meta">' +
+                '<span class="wifi-signal">' +
+                signalBars +
+                ' ' +
+                net.signal +
+                '%</span>' +
+                '<span class="wifi-security">' +
+                net.security +
+                '</span>' +
+                '</span></div>';
+            });
+            if (!data.networks.length) {
+              html = '<p class="setting-description">No networks found</p>';
+            }
+            listContent.innerHTML = html;
+            listDiv.style.display = 'block';
+          })
+          .catch(function () {
+            listContent.innerHTML =
+              '<p class="setting-description">Scan failed</p>';
+            listDiv.style.display = 'block';
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = 'Scan Networks';
+          });
+      }
+
+      function showWifiDialog(ssid) {
+        _wifiSelectedSsid = ssid;
+        document.getElementById('wifi-connect-ssid').textContent = ssid;
+        document.getElementById('wifi-connect-password').value = '';
+        document.getElementById('wifi-connect-dialog').style.display = 'block';
+        document.getElementById('wifi-connect-password').focus();
+      }
+
+      function closeWifiDialog() {
+        document.getElementById('wifi-connect-dialog').style.display = 'none';
+        _wifiSelectedSsid = '';
+      }
+
+      function connectToWifi() {
+        var password = document.getElementById('wifi-connect-password').value;
+        var btn = document.getElementById('wifi-connect-btn');
+        btn.disabled = true;
+        btn.textContent = 'Connecting...';
+
+        fetch('/api/wifi/connect', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '{{ csrf_token() }}',
+          },
+          body: JSON.stringify({ ssid: _wifiSelectedSsid, password: password }),
+        })
+          .then(function (response) {
+            return response.json().then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            var toast = document.getElementById('toast');
+            if (result.ok) {
+              toast.textContent = 'Connected to ' + _wifiSelectedSsid;
+              toast.className = 'toast show success';
+              closeWifiDialog();
+              loadWifiStatus();
+            } else {
+              toast.textContent =
+                'Failed: ' + (result.data.error || 'Unknown error');
+              toast.className = 'toast show error';
+            }
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .catch(function () {
+            var toast = document.getElementById('toast');
+            toast.textContent = 'Network error';
+            toast.className = 'toast show error';
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = 'Connect';
+          });
+      }
+
+      // Load WiFi status on page load
+      loadWifiStatus();
+
+      // Restart a service via the API
+      function restartService(serviceName) {
+        var btn = document.getElementById(
+          'restart-' + serviceName.replace('sports-', '') + '-btn'
+        );
+        var originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Restarting...';
+
+        fetch('/api/services/restart', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '{{ csrf_token() }}',
+          },
+          body: JSON.stringify({ service: serviceName }),
+        })
+          .then(function (response) {
+            return response.json().then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            var toast = document.getElementById('toast');
+            if (result.ok) {
+              toast.textContent = serviceName + ' restarted';
+              toast.className = 'toast show success';
+            } else {
+              toast.textContent =
+                'Failed: ' + (result.data.error || 'Unknown error');
+              toast.className = 'toast show error';
+            }
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .catch(function () {
+            var toast = document.getElementById('toast');
+            toast.textContent = 'Network error restarting service';
+            toast.className = 'toast show error';
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = originalText;
+          });
+      }
+
+      // Handle HTMX form submission
+      document.body.addEventListener('htmx:configRequest', function (event) {
+        // Convert form data to JSON for the API
+        if (event.detail.path === '/api/config') {
+          event.detail.headers['Content-Type'] = 'application/json';
+          event.detail.headers['X-CSRF-Token'] = '{{ csrf_token() }}';
+
+          const form = document.getElementById('settings-form');
+          const formData = new FormData(form);
+          const data = {};
+
+          // Favorite teams (checkboxes)
+          data.favorite_teams = formData.getAll('favorite_teams');
+
+          // Timezone
+          data.timezone = formData.get('timezone');
+
+          // Theme
+          data.theme = formData.get('theme');
+
+          // Refresh interval
+          data.refresh_interval = parseInt(formData.get('refresh_interval'));
+
+          // Boolean toggles (unchecked checkboxes don't appear in FormData)
+          data.show_screensaver = form.querySelector(
+            '[name="show_screensaver"]'
+          ).checked;
+          data.eink_optimized_contrast = form.querySelector(
+            '[name="eink_optimized_contrast"]'
+          ).checked;
+
+          event.detail.body = JSON.stringify(data);
+        }
+      });
+
+      // Show toast on success/error
+      document.body.addEventListener('htmx:afterRequest', function (event) {
+        if (event.detail.pathInfo.requestPath === '/api/config') {
+          const toast = document.getElementById('toast');
+          if (event.detail.successful) {
+            toast.textContent = 'Settings saved';
+            toast.className = 'toast show success';
+          } else {
+            toast.textContent = 'Error saving settings';
+            toast.className = 'toast show error';
+          }
+          setTimeout(function () {
+            toast.className = 'toast';
+          }, 3000);
+        }
+      });
+
+      // Format status response
+      document.body.addEventListener('htmx:beforeSwap', function (event) {
+        if (
+          event.detail.pathInfo &&
+          event.detail.pathInfo.requestPath === '/api/config/status'
+        ) {
+          try {
+            const data = JSON.parse(event.detail.xhr.responseText);
+            let html = '<div class="status-grid">';
+
+            // Uptime
+            const uptime = data.server_uptime || 0;
+            const hours = Math.floor(uptime / 3600);
+            const minutes = Math.floor((uptime % 3600) / 60);
+            html +=
+              '<div class="status-item">' +
+              '<span class="status-label">Server Uptime</span>' +
+              '<span class="status-value">' +
+              hours +
+              'h ' +
+              minutes +
+              'm</span>' +
+              '</div>';
+
+            // Screenshot age
+            if (data.screenshot_age !== null) {
+              const ageMin = Math.floor(data.screenshot_age / 60);
+              html +=
+                '<div class="status-item">' +
+                '<span class="status-label">Last Refresh</span>' +
+                '<span class="status-value">' +
+                ageMin +
+                ' min ago</span>' +
+                '</div>';
+            }
+
+            // Services
+            if (data.services) {
+              for (const [name, status] of Object.entries(data.services)) {
+                const dot =
+                  status === 'active' ? 'status-dot active' : 'status-dot';
+                html +=
+                  '<div class="status-item">' +
+                  '<span class="status-label">' +
+                  name +
+                  '</span>' +
+                  '<span class="status-value"><span class="' +
+                  dot +
+                  '"></span>' +
+                  status +
+                  '</span>' +
+                  '</div>';
+              }
+            }
+
+            html += '</div>';
+            event.detail.serverResponse = html;
+          } catch (e) {
+            // Leave as-is if JSON parse fails
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -9,16 +9,47 @@ import glob
 import logging
 import os
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 
 # Import our modular API components
+from api.auth import (
+    auth_bp,
+    auth_enabled,
+    generate_csrf_token,
+    is_authenticated,
+    login_required,
+)
+from api.config_api import config_bp
 from api.scores_api import fetch_mlb_games, fetch_nfl_games
 from api.screensaver_api import get_screensaver_data
 from api.static_files import setup_static_routes
+from api.wifi_api import wifi_bp
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 CORS(app)  # Enable CORS for development
+
+# Secret key for sessions -- generated per install, stored in .flask_secret
+_secret_file = os.path.join(os.path.dirname(__file__), ".flask_secret")
+try:
+    with open(_secret_file) as f:
+        app.secret_key = f.read().strip()
+except FileNotFoundError:
+    import secrets
+
+    app.secret_key = secrets.token_hex(32)
+    with open(_secret_file, "w") as f:
+        f.write(app.secret_key)
+
+# Register API blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(config_bp)
+app.register_blueprint(wifi_bp)
+
+# Make auth helpers available in templates
+app.jinja_env.globals["csrf_token"] = generate_csrf_token
+app.jinja_env.globals["auth_enabled"] = auth_enabled
+app.jinja_env.globals["is_authenticated"] = is_authenticated
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -126,6 +157,39 @@ def index():
         return "src/preview.html not found", 404
 
 
+@app.route("/settings")
+@login_required
+def settings():
+    """Serve the settings page"""
+    try:
+        from api.config_api import (
+            MLB_TEAMS,
+            THEME_MAP,
+            TIMEZONE_MAP,
+            read_eink_config,
+            read_js_config,
+        )
+
+        js_config = read_js_config()
+        eink_config = read_eink_config()
+
+        config = {
+            "refresh_interval": eink_config.get("refresh_interval", 360),
+            "favorite_teams": js_config.get("favorite_teams", []),
+            "timezone": js_config.get("timezone", "America/New_York"),
+            "theme": js_config.get("theme", "default"),
+            "show_screensaver": js_config.get("show_screensaver", True),
+            "eink_optimized_contrast": js_config.get("eink_optimized_contrast", True),
+            "available_teams": MLB_TEAMS,
+            "available_timezones": list(TIMEZONE_MAP.keys()),
+            "available_themes": list(THEME_MAP.keys()),
+        }
+        return render_template("settings.html", config=config)
+    except Exception as e:
+        logger.error(f"Error loading settings page: {e}")
+        return f"Error loading settings: {e}", 500
+
+
 @app.route("/display")
 def display():
     """Serve clean display HTML for screenshots (no dev UI)"""
@@ -176,42 +240,53 @@ if __name__ == "__main__":
     parser.add_argument(
         "--port", type=int, default=5001, help="Port to run the server on"
     )
+    parser.add_argument(
+        "--production",
+        action="store_true",
+        help="Run in production mode (debug=False, no hot-reload)",
+    )
     args = parser.parse_args()
 
     # Setup static file routes
     setup_static_routes(app)
 
-    # Initialize file timestamps
-    for filepath in get_files_to_watch():
-        if os.path.exists(filepath):
-            file_timestamps[filepath] = get_file_timestamp(filepath)
+    if args.production:
+        # Production mode: no debug, no hot-reload
+        print(f"\nE-Ink Scoreboard Server (production) on port {args.port}")
+        app.run(debug=False, port=args.port, host="0.0.0.0", use_reloader=False)
+    else:
+        # Development mode: debug + hot-reload
+        # Initialize file timestamps
+        for filepath in get_files_to_watch():
+            if os.path.exists(filepath):
+                file_timestamps[filepath] = get_file_timestamp(filepath)
 
-    print("\nE-Ink Scoreboard Dev Server (Hot Reload)")
-    print("=" * 50)
-    print(f"Open in browser: http://localhost:{args.port}")
-    print("API endpoints:")
-    print(f"  - http://localhost:{args.port}/api/scores/MLB")
-    print(f"  - http://localhost:{args.port}/api/scores/NFL")
-    print(f"  - http://localhost:{args.port}/api/screensaver/MLB")
-    print("\nHot reload enabled:")
-    print(
-        "  - Edit src/preview.html, CSS in src/static/styles/, or JS in src/static/js/"
-    )
-    print("  - Browser will auto-refresh on save")
-    print("=" * 50)
-    print("\nPress Ctrl+C to stop\n")
+        print("\nE-Ink Scoreboard Dev Server (Hot Reload)")
+        print("=" * 50)
+        print(f"Open in browser: http://localhost:{args.port}")
+        print(f"Settings page:   http://localhost:{args.port}/settings")
+        print("API endpoints:")
+        print(f"  - http://localhost:{args.port}/api/scores/MLB")
+        print(f"  - http://localhost:{args.port}/api/scores/NFL")
+        print(f"  - http://localhost:{args.port}/api/screensaver/MLB")
+        print(f"  - http://localhost:{args.port}/api/config")
+        print("\nHot reload enabled:")
+        print(
+            "  - Edit src/preview.html, CSS in src/static/styles/, or JS in src/static/js/"
+        )
+        print("  - Browser will auto-refresh on save")
+        print("=" * 50)
+        print("\nPress Ctrl+C to stop\n")
 
-    # Suppress werkzeug INFO logs for check-updates endpoint only
-    import logging
+        # Suppress werkzeug INFO logs for check-updates endpoint only
+        import logging
 
-    werkzeug_logger = logging.getLogger("werkzeug")
+        werkzeug_logger = logging.getLogger("werkzeug")
 
-    class SuppressCheckUpdates(logging.Filter):
-        def filter(self, record):
-            return "GET /check-updates HTTP" not in record.getMessage()
+        class SuppressCheckUpdates(logging.Filter):
+            def filter(self, record):
+                return "GET /check-updates HTTP" not in record.getMessage()
 
-    werkzeug_logger.addFilter(SuppressCheckUpdates())
+        werkzeug_logger.addFilter(SuppressCheckUpdates())
 
-    app.run(
-        debug=True, port=args.port, use_reloader=False
-    )  # Disable Flask's reloader since we have our own
+        app.run(debug=True, port=args.port, use_reloader=False)

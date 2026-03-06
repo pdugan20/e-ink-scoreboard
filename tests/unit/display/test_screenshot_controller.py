@@ -56,7 +56,6 @@ class TestScreenshotControllerInit:
         assert controller.test_mode is True
         assert controller.is_mac is True
         assert controller.is_pi is False
-        assert controller.inky is None
 
     @patch("src.display.screenshot_controller.platform.system")
     @patch.object(ScreenshotController, "_is_raspberry_pi")
@@ -73,18 +72,14 @@ class TestScreenshotControllerInit:
         # Assert
         assert controller.is_mac is False
         assert controller.is_pi is False
-        assert controller.inky is None
 
     @patch("src.display.screenshot_controller.platform.system")
     @patch.object(ScreenshotController, "_is_raspberry_pi")
-    @patch.object(ScreenshotController, "_initialize_inky_display")
-    def test_init_on_raspberry_pi(self, mock_init_inky, mock_is_pi, mock_platform):
+    def test_init_on_raspberry_pi(self, mock_is_pi, mock_platform):
         """Test initialization on Raspberry Pi"""
         # Arrange
         mock_platform.return_value = "Linux"
         mock_is_pi.return_value = True
-        mock_inky = Mock()
-        mock_init_inky.return_value = mock_inky
         config = {"web_server_url": "http://localhost:5000/display"}
 
         # Act
@@ -93,8 +88,6 @@ class TestScreenshotControllerInit:
         # Assert
         assert controller.is_mac is False
         assert controller.is_pi is True
-        assert controller.inky == mock_inky
-        mock_init_inky.assert_called_once()
 
 
 @pytest.mark.unit
@@ -102,14 +95,10 @@ class TestIsRaspberryPi:
     """Tests for _is_raspberry_pi method"""
 
     @patch("src.display.screenshot_controller.platform.system")
-    @patch.object(ScreenshotController, "_initialize_inky_display")
-    def test_is_raspberry_pi_true_with_raspberry_pi_string(
-        self, mock_init_inky, mock_platform
-    ):
+    def test_is_raspberry_pi_true_with_raspberry_pi_string(self, mock_platform):
         """Test detection when cpuinfo contains 'Raspberry Pi'"""
         # Arrange
         mock_platform.return_value = "Linux"
-        mock_init_inky.return_value = Mock()  # Mock the Inky display
         cpuinfo_content = """
         processor	: 0
         model name	: ARMv7 Processor rev 4 (v7l)
@@ -126,15 +115,12 @@ class TestIsRaspberryPi:
 
         # Assert - Check that it was detected as Raspberry Pi during init
         assert controller.is_pi is True
-        mock_init_inky.assert_called_once()
 
     @patch("src.display.screenshot_controller.platform.system")
-    @patch.object(ScreenshotController, "_initialize_inky_display")
-    def test_is_raspberry_pi_true_with_bcm_string(self, mock_init_inky, mock_platform):
+    def test_is_raspberry_pi_true_with_bcm_string(self, mock_platform):
         """Test detection when cpuinfo contains 'BCM'"""
         # Arrange
         mock_platform.return_value = "Linux"
-        mock_init_inky.return_value = Mock()  # Mock the Inky display
         cpuinfo_content = """
         processor	: 0
         Hardware	: BCM2835
@@ -147,7 +133,6 @@ class TestIsRaspberryPi:
 
         # Assert - Check that it was detected as Raspberry Pi during init
         assert controller.is_pi is True
-        mock_init_inky.assert_called_once()
 
     @patch("src.display.screenshot_controller.platform.system")
     def test_is_raspberry_pi_false_on_regular_linux(self, mock_platform):
@@ -181,6 +166,53 @@ class TestIsRaspberryPi:
 
         # Assert
         assert controller._is_raspberry_pi() is False
+
+
+@pytest.mark.unit
+class TestUpdateDisplaySubprocess:
+    """Tests for _update_display_subprocess method"""
+
+    @patch("src.display.screenshot_controller.platform.system")
+    @patch.object(ScreenshotController, "_is_raspberry_pi")
+    def test_update_display_routes_to_subprocess_on_pi(self, mock_is_pi, mock_platform):
+        """Test that update_display delegates to subprocess on Pi"""
+        # Arrange
+        mock_platform.return_value = "Linux"
+        mock_is_pi.return_value = True
+        config = {
+            "web_server_url": "http://localhost:5000/display",
+            "screenshot_path": "/tmp/test.png",
+            "apply_dithering": False,
+            "dither_saturation": 0.8,
+        }
+        controller = ScreenshotController(config)
+        mock_img = Mock()
+
+        with patch.object(
+            controller, "_update_display_subprocess", return_value=True
+        ) as mock_subprocess:
+            # Act
+            result = controller.update_display(mock_img)
+
+        # Assert
+        assert result is True
+        mock_subprocess.assert_called_once_with(mock_img)
+
+    @patch("src.display.screenshot_controller.platform.system")
+    def test_update_display_saves_file_on_mac(self, mock_platform):
+        """Test that update_display saves file on Mac"""
+        # Arrange
+        mock_platform.return_value = "Darwin"
+        config = {"web_server_url": "http://localhost:5000/display"}
+        controller = ScreenshotController(config, test_mode=True)
+        mock_img = Mock()
+
+        # Act
+        result = controller.update_display(mock_img)
+
+        # Assert
+        assert result is True
+        mock_img.save.assert_called_once_with("test_display_output.png")
 
 
 @pytest.mark.unit

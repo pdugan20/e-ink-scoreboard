@@ -6,13 +6,13 @@ For automatic setup, use the installation script:
 
 ```bash
 # Clone the project
-git clone https://github.com/pdugan20/sports-scores-plugin.git
-cd sports-scores-plugin
+git clone https://github.com/pdugan20/e-ink-scoreboard.git
+cd e-ink-scoreboard
 
 # Run the installation script
 ./scripts/install.sh
 
-# Configure your preferences (teams, timezone, theme, static IP, etc.)
+# Configure your preferences (teams, timezone, theme, etc.)
 ./scripts/configure.sh
 
 # Setup auto-startup services
@@ -20,6 +20,14 @@ cd sports-scores-plugin
 
 # Reboot to apply hardware changes
 sudo reboot
+```
+
+Or run all steps at once:
+
+```bash
+git clone https://github.com/pdugan20/e-ink-scoreboard.git
+cd e-ink-scoreboard
+./scripts/setup.sh
 ```
 
 **What the install script does:**
@@ -31,6 +39,7 @@ sudo reboot
 - Installs your project dependencies
 - Sets up Playwright for high-quality screenshots
 - Creates log directories and sets up comprehensive logging
+- Sets up mDNS so the scoreboard is accessible at `scoreboard.local`
 
 **What the configure script does:**
 
@@ -39,7 +48,7 @@ sudo reboot
 - Chooses refresh interval
 - Selects display theme
 - Enables/disables news screensaver
-- **Optionally sets a static IP** (recommended for reliable SSH access)
+- Optionally sets an admin password for the web settings panel
 
 ---
 
@@ -70,15 +79,58 @@ For detailed troubleshooting steps, see **[docs/TROUBLESHOOTING.md](TROUBLESHOOT
 Quick diagnostics:
 
 ```bash
+# Verify installation
+./scripts/verify-installation.sh
+
+# Generate full system diagnostics report
+./scripts/diagnostics.sh
+
 # Check services status
 sudo systemctl status sports-server.service sports-display.service
 
 # View recent logs
 sudo journalctl -u sports-display.service --since "10 minutes ago"
+tail -f ~/logs/eink_display.log
 
 # Test display update
 python src/eink_display.py --once
 ```
+
+## Upgrading
+
+To update an existing installation to the latest version:
+
+```bash
+./scripts/upgrade.sh
+```
+
+This pulls the latest code, updates dependencies, and restarts services.
+Your configuration is preserved.
+
+## Uninstalling
+
+To remove all services and clean up:
+
+```bash
+./scripts/uninstall.sh        # Keep virtual environment
+./scripts/uninstall.sh --all  # Remove everything
+```
+
+## Accessing the Web Interface
+
+After installation, the scoreboard is discoverable on your local network at:
+
+- **http://scoreboard.local:5001** -- main display
+- **http://scoreboard.local:5001/settings** -- configuration panel
+
+This works automatically on macOS, iOS, and Linux. For **Windows**, mDNS
+requires one of the following:
+
+- Windows 10 1709+ (Fall Creators Update) has built-in mDNS support
+- Older Windows: install [Bonjour Print Services](https://support.apple.com/kb/DL999) or iTunes (which includes Bonjour)
+
+If `scoreboard.local` doesn't resolve, you can use the Pi's IP address
+directly (find it with `hostname -I` on the Pi).
 
 ## Notes
 

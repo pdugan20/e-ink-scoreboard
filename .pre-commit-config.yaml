@@ -20,22 +20,22 @@ repos:
 
   # Python: Black formatter
   - repo: https://github.com/psf/black
-    rev: 24.1.1
+    rev: 26.3.0
     hooks:
       - id: black
         language_version: python3
 
   # Python: Ruff linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+    rev: v0.15.5
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
   # JavaScript/TypeScript: Prettier formatter
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.8.1
     hooks:
       - id: prettier
         types_or: [javascript, json, yaml, markdown]
@@ -43,17 +43,16 @@ repos:
 
   # JavaScript: ESLint
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v10.0.0-rc.1
+    rev: v9.0.0
     hooks:
       - id: eslint
         files: ^src/static/js/.*\.js$
         additional_dependencies:
-          - eslint@8.56.0
-          - '@eslint/js@8.56.0'
+          - '@eslint/js@9.0.0'
 
   # Markdown: markdownlint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: v0.48.0
     hooks:
       - id: markdownlint
         args: [--fix]

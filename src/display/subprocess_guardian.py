@@ -15,7 +15,6 @@ import subprocess
 import threading
 import time
 from threading import Timer
-from typing import Optional, Tuple
 
 import psutil
 
@@ -52,7 +51,7 @@ class SubprocessGuardian:
         except Exception:
             pass  # Keep default
 
-    def check_system_resources(self) -> Tuple[bool, str]:
+    def check_system_resources(self) -> tuple[bool, str]:
         """Check if system has enough resources to safely run subprocess."""
         try:
             # Check available memory
@@ -135,7 +134,7 @@ class SubprocessGuardian:
         timeout: int = DEFAULT_TIMEOUT,
         check_resources: bool = True,
         critical_operation: bool = False,
-    ) -> Tuple[bool, Optional[str], Optional[str]]:
+    ) -> tuple[bool, str | None, str | None]:
         """
         Run a subprocess with multiple safety mechanisms.
 
@@ -286,6 +285,17 @@ class SubprocessGuardian:
                 timer.cancel()
             if process:
                 self.active_processes.discard(process.pid)
+                # Close pipes to prevent file descriptor leaks
+                try:
+                    if process.stdout:
+                        process.stdout.close()
+                except Exception:
+                    pass
+                try:
+                    if process.stderr:
+                        process.stderr.close()
+                except Exception:
+                    pass
                 # Make sure process is really dead
                 if process.poll() is None:
                     try:
@@ -307,7 +317,7 @@ _guardian = SubprocessGuardian()
 
 def run_safe_subprocess(
     cmd: list, timeout: int = 90, **kwargs
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> tuple[bool, str | None, str | None]:
     """Convenience function to run subprocess with guardian protection."""
     return _guardian.run_with_guardian(cmd, timeout, **kwargs)
 

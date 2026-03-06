@@ -2,7 +2,10 @@
 Screenshot and image processing logic for e-ink display.
 """
 
+import gc
+import json
 import logging
+import os
 import platform
 import time
 from contextlib import contextmanager
@@ -34,10 +37,7 @@ class ScreenshotController:
         self.is_mac = platform.system() == "Darwin"
         self.is_pi = platform.system() == "Linux" and self._is_raspberry_pi()
 
-        if self.is_pi:
-            self.inky = self._initialize_inky_display()
-        else:
-            self.inky = None
+        if not self.is_pi:
             logger.info("Running in test mode (no physical eink display)")
 
     def _is_raspberry_pi(self):
@@ -48,39 +48,6 @@ class ScreenshotController:
                 return "Raspberry Pi" in cpuinfo or "BCM" in cpuinfo
         except FileNotFoundError:
             return False
-
-    def _initialize_inky_display(self):
-        """Initialize the Inky e-ink display"""
-        if not self.is_pi:
-            logger.info("Not on Raspberry Pi, skipping Inky display initialization")
-            return None
-
-        try:
-            # Try auto-detection first
-            from inky.auto import auto  # type: ignore
-
-            inky = auto()
-            logger.info(f"Auto-detected Inky display: {inky.width}x{inky.height}")
-            return inky
-        except ImportError as e:
-            logger.error(f"Inky library not found: {e}. Install with: pip install inky")
-            raise
-        except Exception as e:
-            # Fallback to Inky Impression 7.3" if auto-detection fails
-            logger.warning(
-                f"Auto-detection failed ({e}), trying Inky Impression 7.3..."
-            )
-            try:
-                from inky import Inky_Impressions_7  # type: ignore
-
-                inky = Inky_Impressions_7()
-                logger.info(
-                    f"Initialized Inky Impression 7.3: {inky.width}x{inky.height}"
-                )
-                return inky
-            except Exception as e2:
-                logger.error(f"Failed to initialize Inky display: {e2}")
-                raise
 
     def _kill_hanging_browsers(self):
         """Kill any hanging browser processes to prevent resource leaks."""
@@ -182,9 +149,6 @@ class ScreenshotController:
                     f"Low memory: {available_mb:.0f}MB available (minimum {MEMORY_RECOMMENDED_MB}MB recommended)"
                 )
 
-                # Try to free memory
-                import gc
-
                 gc.collect()
 
                 # Kill any hanging browsers to free memory
@@ -235,8 +199,6 @@ class ScreenshotController:
                 log_after_screenshot(logger, success)
 
                 # Force garbage collection after screenshot to free memory
-                import gc
-
                 gc.collect()
 
                 return success
@@ -269,9 +231,6 @@ class ScreenshotController:
     def _screenshot_subprocess(self):
         """Run screenshot in subprocess that can be killed if it hangs."""
         try:
-            import json
-            import os
-
             from .subprocess_guardian import run_safe_subprocess
 
             # Prepare config for subprocess
@@ -315,110 +274,6 @@ class ScreenshotController:
             BrowserCleanup.force_kill_all_browsers()
             return False
 
-    def _screenshot_direct_original(self):
-        """Original implementation - DO NOT USE."""
-        from playwright.sync_api import sync_playwright
-
-        browser = None
-        try:
-            logger.debug("Creating Playwright instance...")
-            with sync_playwright() as p:
-                browser_args = [
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-gpu",
-                    "--disable-software-rasterizer",
-                    "--disable-extensions",
-                    "--disable-plugins",
-                    "--disable-translate",
-                    "--disable-webgl",
-                    f"--js-flags=--max-old-space-size={BROWSER_JS_HEAP_MB}",  # Limit JS heap
-                    "--disable-background-timer-throttling",
-                    "--disable-backgrounding-occluded-windows",
-                    "--disable-renderer-backgrounding",
-                    "--single-process",  # Critical for Pi Zero memory constraints
-                    "--disable-features=site-per-process",
-                    "--memory-pressure-off",
-                    "--max_old_space_size=96",  # Additional JS heap limit
-                    "--aggressive-cache-discard",  # Discard cache aggressively
-                    "--disable-features=RendererCodeIntegrity",  # Reduce overhead
-                ]
-
-                logger.debug(
-                    f"Launching browser with {len(browser_args)} optimization flags..."
-                )
-                browser = p.chromium.launch(headless=True, args=browser_args)
-                logger.debug("Browser launched successfully")
-
-                # Get scale factor from config
-                scale_factor = self.config.get("screenshot_scale", 1)
-
-                page = browser.new_page(
-                    viewport={
-                        "width": self.config["display_width"],
-                        "height": self.config["display_height"],
-                    },
-                    device_scale_factor=scale_factor,  # High DPI rendering
-                    color_scheme="light",  # Force light mode for consistent rendering
-                )
-
-                logger.info(
-                    f"Taking screenshot with Playwright ({scale_factor}x DPI rendering)..."
-                )
-
-                # Reduce timeout for low-memory conditions
-                page.set_default_timeout(20000)  # 20 seconds
-
-                try:
-                    # Load the page and wait for network to settle
-                    page.goto(
-                        self.config["web_server_url"],
-                        wait_until="domcontentloaded",  # Don't wait for all resources
-                        timeout=30000,  # 30 seconds
-                    )
-
-                    # Wait for games to be rendered by JavaScript
-                    # Either wait for game cards OR error message
-                    try:
-                        page.wait_for_selector(
-                            ".game-card, .game-pill, #games > div",
-                            timeout=15000,  # 15 seconds for content
-                        )
-                        logger.info("Game content detected")
-                    except Exception:
-                        # If no games appear, wait a bit more for JS to execute
-                        logger.warning("No game content found, waiting for JS...")
-                        page.wait_for_timeout(8000)
-
-                except Exception as e:
-                    # Last resort - just wait for JS to execute
-                    logger.warning(f"Page load issue: {e}")
-                    page.wait_for_timeout(10000)  # Give JS 10 seconds
-
-                page.screenshot(path=self.config["screenshot_path"], full_page=False)
-
-                # Ensure page and browser are properly closed
-                page.close()
-                browser.close()
-                browser = None
-
-                # Extra cleanup for Playwright node processes
-                time.sleep(1)  # Give browser time to cleanup
-                BrowserCleanup.force_kill_all_browsers()
-
-                logger.info(f"Screenshot saved to {self.config['screenshot_path']}")
-                return True
-
-        except Exception as e:
-            logger.error(f"Playwright screenshot failed: {e}")
-            # Ensure browser is closed even on error
-            if browser:
-                try:
-                    browser.close()
-                except Exception:
-                    pass
-            return False
-
     def process_image(self):
         """Process screenshot for eink display"""
         try:
@@ -434,67 +289,42 @@ class ScreenshotController:
             if img.mode != "RGB":
                 img = img.convert("RGB")
 
-            # Apply dithering if enabled (for both dev and Pi modes)
-            if self.config.get("apply_dithering", False):
-                img = self._apply_eink_dithering(img)
-                logger.info("Applied e-ink dithering")
+            # Apply dev-mode dithering preview (Pi dithering happens in display_worker)
+            if self.config.get("apply_dithering", False) and not self.is_pi:
+                img = self._apply_dev_dithering(img)
+                logger.info("Applied dev-mode e-ink dithering preview")
 
             return img
         except Exception as e:
             logger.error(f"Image processing failed: {e}")
             return None
 
-    def _apply_eink_dithering(self, img):
-        """Apply 7-color dithering to match e-ink display output"""
+    def _apply_dev_dithering(self, img):
+        """Apply 6-color dithering preview for development (Mac).
+        On Pi, dithering uses Inky's actual palette inside display_worker.py."""
         try:
-            # Try using Inky's own palette generation (if on Pi)
-            if self.is_pi and self.inky:
-                saturation = self.config.get("dither_saturation", 0.8)
-                palette = self.inky._palette_blend(saturation, dtype="uint24")
+            # Dev mode: use exact Inky 6-color palette
+            inky_palette = [
+                (0, 0, 0),  # Black
+                (255, 255, 255),  # White
+                (255, 0, 0),  # Red
+                (0, 255, 0),  # Green
+                (0, 0, 255),  # Blue
+                (255, 255, 0),  # Yellow
+            ]
 
-                # Try hitherdither if available (better quality)
-                try:
-                    import hitherdither
+            # Create palette image for quantization
+            palette_img = Image.new("P", (1, 1))
+            palette_data = []
+            for color in inky_palette:
+                palette_data.extend(color)
+            palette_data.extend([0] * (768 - len(palette_data)))  # Pad to 768
+            palette_img.putpalette(palette_data)
 
-                    # Create hitherdither palette from Inky palette
-                    hither_palette = hitherdither.palette.Palette(palette)
-
-                    # Apply Bayer dithering (Pimoroni's recommended method)
-                    dithered = hitherdither.ordered.bayer.bayer_dithering(
-                        img, hither_palette, thresholds=[64, 64, 64], order=8
-                    )
-                    logger.info(
-                        f"Applied Bayer dithering with {len(palette)} colors from Inky palette"
-                    )
-                except ImportError:
-                    # Fallback to Pillow quantization
-                    dithered = img.quantize(
-                        colors=6, dither=Image.Dither.FLOYDSTEINBERG
-                    )
-                    logger.info("Applied Floyd-Steinberg dithering (Pillow fallback)")
-            else:
-                # Dev mode: use exact Inky 6-color palette
-                inky_palette = [
-                    (0, 0, 0),  # Black
-                    (255, 255, 255),  # White
-                    (255, 0, 0),  # Red
-                    (0, 255, 0),  # Green
-                    (0, 0, 255),  # Blue
-                    (255, 255, 0),  # Yellow
-                ]
-
-                # Create palette image for quantization
-                palette_img = Image.new("P", (1, 1))
-                palette_data = []
-                for color in inky_palette:
-                    palette_data.extend(color)
-                palette_data.extend([0] * (768 - len(palette_data)))  # Pad to 768
-                palette_img.putpalette(palette_data)
-
-                dithered = img.quantize(
-                    palette=palette_img, dither=Image.Dither.FLOYDSTEINBERG
-                )
-                logger.info("Applied Inky 6-color dithering (dev mode)")
+            dithered = img.quantize(
+                palette=palette_img, dither=Image.Dither.FLOYDSTEINBERG
+            )
+            logger.info("Applied Inky 6-color dithering (dev mode)")
 
             # Convert back to RGB for consistent handling
             return dithered.convert("RGB")
@@ -505,40 +335,54 @@ class ScreenshotController:
 
     def update_display(self, img):
         """Update the eink display or save for testing"""
-        if self.is_pi and self.inky:
-            try:
-                # Convert image for eink display
-                self.inky.set_image(img)
-                logger.info("Starting e-ink display update...")
-
-                # Add a simple timeout using signal alarm
-                import signal
-
-                def timeout_handler(signum, frame):
-                    raise TimeoutError(
-                        "E-ink display update timed out after 90 seconds"
-                    )
-
-                # Set alarm for 90 seconds (usually takes ~28 seconds)
-                if not self.is_mac:
-                    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-                    signal.alarm(90)
-
-                try:
-                    self.inky.show()
-                    logger.info("Updated eink display")
-                    return True
-                finally:
-                    # Cancel alarm
-                    if not self.is_mac:
-                        signal.alarm(0)
-                        signal.signal(signal.SIGALRM, old_handler)
-            except Exception as e:
-                logger.error(f"Display update failed: {e}")
-                return False
+        if self.is_pi:
+            return self._update_display_subprocess(img)
         else:
             # Save for testing on Mac
             test_path = "test_display_output.png"
             img.save(test_path)
             logger.info(f"Test mode: saved display image to {test_path}")
             return True
+
+    def _update_display_subprocess(self, img):
+        """Run display update in subprocess that can be killed if SPI hangs."""
+        try:
+            from .subprocess_guardian import run_safe_subprocess
+
+            # Save processed image to a temp path for the worker to read
+            display_img_path = self.config["screenshot_path"] + ".display.png"
+            img.save(display_img_path)
+
+            config_data = {
+                "screenshot_path": display_img_path,
+                "apply_dithering": self.config.get("apply_dithering", False),
+                "dither_saturation": self.config.get("dither_saturation", 0.8),
+            }
+            config_json = json.dumps(config_data)
+
+            worker_path = os.path.join(os.path.dirname(__file__), "display_worker.py")
+
+            logger.info("Updating display via guarded subprocess...")
+            success, stdout, stderr = run_safe_subprocess(
+                ["python", worker_path, config_json],
+                timeout=90,
+                check_resources=False,  # Already checked during screenshot
+                critical_operation=True,
+            )
+
+            # Clean up temp file
+            try:
+                os.remove(display_img_path)
+            except OSError:
+                pass
+
+            if success:
+                logger.info("Display update subprocess succeeded")
+                return True
+            else:
+                logger.error(f"Display update subprocess failed: {stderr}")
+                return False
+
+        except Exception as e:
+            logger.error(f"Display update subprocess error: {e}")
+            return False

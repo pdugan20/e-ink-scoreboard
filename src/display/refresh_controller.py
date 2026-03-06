@@ -2,6 +2,7 @@
 Refresh logic and timing for e-ink display controller.
 """
 
+import gc
 import logging
 import time
 from datetime import datetime, timedelta
@@ -45,9 +46,6 @@ class RefreshController:
                 logger.info(
                     f"Waiting for memory to free up: {available_mb:.0f}MB available, need {MEMORY_STARTUP_WAIT_MB}MB"
                 )
-
-                # Try to free memory
-                import gc
 
                 gc.collect()
 
@@ -227,12 +225,25 @@ class RefreshController:
                                 now.year, now.month, now.day
                             ) + timedelta(days=1)
                             seconds_until_tomorrow = (tomorrow - now).total_seconds()
-                            # Add a small buffer (1 minute) to ensure we're past midnight
                             sleep_seconds = seconds_until_tomorrow + 60
                             logger.info(
-                                f"Sleeping for {sleep_seconds / 3600:.1f} hours until next day ({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
+                                f"Sleeping for {sleep_seconds / 3600:.1f} hours until next day "
+                                f"({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
                             )
-                            time.sleep(sleep_seconds)
+                            # Sleep in 5-minute chunks so heartbeat stays fresh
+                            # and system can respond to signals
+                            chunk_seconds = 300
+                            remaining = sleep_seconds
+                            while remaining > 0:
+                                sleep_time = min(chunk_seconds, remaining)
+                                time.sleep(sleep_time)
+                                remaining -= sleep_time
+                                # Update heartbeat file
+                                try:
+                                    with open("/tmp/eink_heartbeat", "w") as f:
+                                        f.write(str(time.time()))
+                                except Exception:
+                                    pass
                             continue  # Skip the regular sleep interval and restart the loop
                         else:
                             # Edge case: games exist but no clear status
@@ -293,9 +304,10 @@ class RefreshController:
 
                 logger.debug(f"Next check in {self.config['refresh_interval']} seconds")
 
-                # Log resource usage every hour
+                # Hourly maintenance: resource snapshot and garbage collection
                 if datetime.now().minute == 0:
                     log_resource_snapshot(logger, "HOURLY_CHECK")
+                    gc.collect()
 
                 time.sleep(int(self.config["refresh_interval"]))
 
@@ -313,9 +325,6 @@ class RefreshController:
                     f"Memory error detected - system may be low on RAM: {e}"
                 )
                 log_resource_snapshot(logger, "MEMORY_ERROR")
-                # Force garbage collection and wait longer
-                import gc
-
                 gc.collect()
                 time.sleep(
                     min(self.config["retry_delay"] * 5, 120)

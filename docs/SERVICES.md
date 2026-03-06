@@ -115,8 +115,9 @@ sudo journalctl -u sports-server.service --since "1 hour ago"
 - **Type**: simple
 - **Restart Policy**: Always restarts on failure
 - **Restart Delay**: 10 seconds
-- **Purpose**: Runs Flask web server on port 5001
-- **Provides**: API endpoints and display page
+- **Memory Limit**: 150M
+- **Purpose**: Runs Flask web server on port 5001 in production mode
+- **Provides**: API endpoints, display page, settings panel
 - **Created**: Dynamically during installation (not a template file)
 
 ### Sports Display Service
@@ -136,6 +137,20 @@ sudo journalctl -u sports-server.service --since "1 hour ago"
 - **Restart Delay**: 60 seconds
 - **Dependencies**: Starts after sports-display.service
 - **Purpose**: Monitors display service health and can trigger restarts
+- **Escalation**: After 3 restarts within 1 hour, triggers a full system reboot
+
+### Sudoers Rules
+
+The `services/scoreboard-sudoers` template grants passwordless sudo for:
+
+- Restarting/checking status of scoreboard services (used by web settings panel)
+- WiFi network connections via `nmcli` (used by WiFi management)
+- System reboot (used by watchdog escalation)
+
+### Daily Reboot
+
+A cron job at 4:00 AM reboots the Pi for memory management. This is
+configured automatically by `setup-services.sh`.
 
 ## Troubleshooting
 

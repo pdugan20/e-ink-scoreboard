@@ -1,0 +1,498 @@
+/* Settings page styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  background: var(--color-gray-50, #f8f8f8);
+  color: var(--color-gray-700, #333);
+  line-height: 1.5;
+}
+
+/* Layout */
+
+.settings-container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-gray-200, #ddd);
+}
+
+.settings-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.header-links {
+  display: flex;
+  gap: 8px;
+}
+
+.back-link {
+  color: var(--color-gray-600, #666);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-gray-300, #ccc);
+  border-radius: 6px;
+}
+
+.back-link:hover {
+  background: var(--color-white, #fff);
+}
+
+/* Setting Groups */
+
+.setting-group {
+  background: var(--color-white, #fff);
+  border: 1px solid var(--color-gray-200, #ddd);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.setting-group h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.setting-description {
+  font-size: 13px;
+  color: var(--color-gray-500, #888);
+  margin-bottom: 12px;
+}
+
+/* Select Dropdowns */
+
+.setting-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-gray-300, #ccc);
+  border-radius: 6px;
+  background: var(--color-white, #fff);
+  color: var(--color-gray-700, #333);
+  appearance: auto;
+}
+
+/* Team Grid */
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 4px;
+}
+
+.team-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.team-checkbox:hover {
+  background: var(--color-gray-50, #f8f8f8);
+}
+
+.team-checkbox input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.team-label {
+  user-select: none;
+}
+
+/* Theme Options */
+
+.theme-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theme-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--color-gray-200, #ddd);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.theme-radio:hover {
+  background: var(--color-gray-50, #f8f8f8);
+}
+
+.theme-radio input[type='radio'] {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.theme-radio:has(input:checked) {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.theme-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theme-label strong,
+.theme-radio .theme-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.theme-description {
+  font-size: 12px;
+  color: var(--color-gray-500, #888);
+}
+
+/* Toggle Switches */
+
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-gray-50, #f8f8f8);
+}
+
+.toggle-row:last-child {
+  border-bottom: none;
+}
+
+.toggle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.toggle-label strong {
+  font-size: 14px;
+}
+
+.toggle-description {
+  font-size: 12px;
+  color: var(--color-gray-500, #888);
+}
+
+.toggle-input {
+  appearance: none;
+  width: 44px;
+  height: 24px;
+  background: var(--color-gray-300, #ccc);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+
+.toggle-input:checked {
+  background: #2563eb;
+}
+
+.toggle-input::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.toggle-input:checked::before {
+  transform: translateX(20px);
+}
+
+.toggle-switch {
+  display: none;
+}
+
+/* Save Button */
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.btn-save {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #1d4ed8;
+}
+
+.btn-save:active {
+  background: #1e40af;
+}
+
+/* Toast Notification */
+
+.toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  transform: translateY(-100px);
+  opacity: 0;
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
+  z-index: 100;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.success {
+  background: #059669;
+  color: white;
+}
+
+.toast.error {
+  background: #dc2626;
+  color: white;
+}
+
+/* Status Panel */
+
+.status-panel {
+  background: var(--color-gray-50, #f8f8f8);
+  border-color: var(--color-gray-200, #ddd);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-gray-500, #888);
+}
+
+.status-value {
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-gray-400, #999);
+}
+
+.status-dot.active {
+  background: #059669;
+}
+
+/* Login Form */
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+}
+
+.login-input {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-gray-300, #ccc);
+  border-radius: 6px;
+  background: var(--color-white, #fff);
+  color: var(--color-gray-700, #333);
+}
+
+.login-error {
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+}
+
+/* Service Controls */
+
+.service-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-restart {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: #059669;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-restart:hover {
+  background: #047857;
+}
+
+.btn-restart:active {
+  background: #065f46;
+}
+
+.btn-restart:disabled {
+  background: var(--color-gray-400, #999);
+  cursor: not-allowed;
+}
+
+.btn-restart-secondary {
+  background: var(--color-gray-500, #888);
+}
+
+.btn-restart-secondary:hover {
+  background: var(--color-gray-600, #666);
+}
+
+.btn-restart-secondary:active {
+  background: var(--color-gray-700, #555);
+}
+
+/* WiFi Management */
+
+.wifi-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+.wifi-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.wifi-item:hover {
+  background: var(--color-gray-50, #f8f8f8);
+}
+
+.wifi-item-active {
+  background: #eff6ff;
+}
+
+.wifi-ssid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.wifi-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-gray-500, #888);
+}
+
+.wifi-signal {
+  font-family: monospace;
+}
+
+.wifi-dialog {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--color-gray-50, #f8f8f8);
+  border: 1px solid var(--color-gray-200, #ddd);
+  border-radius: 8px;
+}
+
+.wifi-dialog h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* Responsive */
+
+@media (max-width: 480px) {
+  .settings-container {
+    padding: 12px;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<!--
+  Avahi mDNS service file for E-Ink Scoreboard.
+  Advertises the web interface so it can be found at scoreboard.local:5001.
+
+  Installed by scripts/install.sh to /etc/avahi/services/scoreboard.service
+-->
+<service-group>
+  <name>E-Ink Scoreboard</name>
+  <service>
+    <type>_http._tcp</type>
+    <port>5001</port>
+    <txt-record>path=/</txt-record>
+    <txt-record>description=E-Ink Scoreboard Web Interface</txt-record>
+  </service>
+</service-group>

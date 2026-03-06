@@ -1,134 +1,401 @@
 #!/usr/bin/env python3
 """
-External watchdog monitor that ensures the display service is actually updating.
-Runs as a separate process to detect and recover from kernel-level hangs.
+Watchdog Monitor - Prevents system freezes with multiple detection methods.
+
+Runs as a separate process (sports-watchdog.service) to detect and recover
+from hangs in the main display service.
+
+Monitors:
+1. Screenshot file age (is the display updating?)
+2. Process state (zombie, D-state, high CPU/memory) and system resources
+3. Browser process leaks
+4. Heartbeat file updates
+5. Log activity
+
+Escalates to full system reboot after repeated restart failures.
 """
 
 import logging
 import os
+import signal
 import subprocess
 import time
 from datetime import datetime, timedelta
+
+import psutil
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-# Configuration
-SCREENSHOT_PATH = "/tmp/sports_display.png"
-MAX_AGE_MINUTES = 10  # Restart if screenshot older than this
-CHECK_INTERVAL = 60  # Check every minute
-SERVICE_NAME = "sports-display.service"
+# Configuration - use environment variables or defaults
+SCREENSHOT_PATH = os.environ.get("EINK_SCREENSHOT_PATH", "/tmp/sports_display.png")
+HEARTBEAT_PATH = os.environ.get("EINK_HEARTBEAT_PATH", "/tmp/eink_heartbeat")
+LOG_PATH = os.environ.get(
+    "EINK_LOG_PATH", os.path.expanduser("~/logs/eink_display.log")
+)
+MAX_SCREENSHOT_AGE_MINUTES = int(os.environ.get("EINK_MAX_SCREENSHOT_AGE", "8"))
+MAX_HEARTBEAT_AGE_SECONDS = int(os.environ.get("EINK_MAX_HEARTBEAT_AGE", "120"))
+CHECK_INTERVAL = int(os.environ.get("EINK_CHECK_INTERVAL", "30"))
+SERVICE_NAME = os.environ.get("EINK_SERVICE_NAME", "sports-display.service")
+
+# Thresholds
+MAX_MEMORY_MB = 100  # Restart if process uses more than this
+MAX_LOAD_AVG = 4.0  # Restart if load average exceeds this
+MIN_FREE_MEMORY_MB = 150  # Restart if system memory drops below this
+MAX_CONSECUTIVE_FAILURES = 3  # Restart after this many check failures
 
 
-def get_file_age_minutes(filepath):
-    """Get age of file in minutes."""
-    try:
-        if not os.path.exists(filepath):
-            return float("inf")
+class WatchdogMonitor:
+    def __init__(self):
+        self.last_restart = datetime.now() - timedelta(hours=1)
+        self.consecutive_failures = 0
+        self.last_screenshot_time = None
+        self.frozen_indicators = set()
 
-        file_time = os.path.getmtime(filepath)
-        current_time = time.time()
-        age_seconds = current_time - file_time
-        return age_seconds / 60
-    except Exception as e:
-        logger.error(f"Error checking file age: {e}")
-        return float("inf")
+        # Reboot escalation tracking
+        self.restart_timestamps = []
+        self.max_restarts_before_reboot = 3
+        self.reboot_window_seconds = 3600  # 1 hour
 
+    def check_heartbeat(self) -> bool:
+        """Check if heartbeat file is being updated."""
+        try:
+            if not os.path.exists(HEARTBEAT_PATH):
+                logger.warning("No heartbeat file found")
+                return False
 
-def restart_service():
-    """Restart the display service."""
-    try:
-        logger.warning(f"Screenshot is stale, restarting {SERVICE_NAME}...")
+            age = time.time() - os.path.getmtime(HEARTBEAT_PATH)
+            if age > MAX_HEARTBEAT_AGE_SECONDS:
+                logger.warning(f"Heartbeat stale: {age:.0f}s old")
+                return False
 
-        # Try graceful restart first
-        subprocess.run(["sudo", "systemctl", "restart", SERVICE_NAME], timeout=30)
-        logger.info("Service restarted successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Heartbeat check failed: {e}")
+            return False
 
-        # Wait for service to start
-        time.sleep(30)
-        return True
+    def check_screenshot_age(self) -> bool:
+        """Check if screenshot is being updated."""
+        try:
+            if not os.path.exists(SCREENSHOT_PATH):
+                logger.warning("No screenshot file found")
+                return False
 
-    except subprocess.TimeoutExpired:
-        logger.error("Service restart timed out, forcing kill...")
+            age_minutes = (time.time() - os.path.getmtime(SCREENSHOT_PATH)) / 60
 
-        # Force kill Python processes
-        subprocess.run(["sudo", "pkill", "-9", "-f", "eink_display.py"], timeout=5)
-        subprocess.run(["sudo", "pkill", "-9", "-f", "playwright"], timeout=5)
+            # Track if screenshot is stuck
+            current_mtime = os.path.getmtime(SCREENSHOT_PATH)
+            if self.last_screenshot_time == current_mtime:
+                self.consecutive_failures += 1
+                logger.warning(
+                    f"Screenshot unchanged for {self.consecutive_failures} checks"
+                )
+            else:
+                self.last_screenshot_time = current_mtime
+                self.consecutive_failures = 0
 
-        # Start service again
-        subprocess.run(["sudo", "systemctl", "start", SERVICE_NAME], timeout=30)
-        return True
+            if age_minutes > MAX_SCREENSHOT_AGE_MINUTES:
+                logger.warning(f"Screenshot too old: {age_minutes:.1f} minutes")
+                return False
 
-    except Exception as e:
-        logger.error(f"Failed to restart service: {e}")
+            return True
+        except Exception as e:
+            logger.error(f"Screenshot check failed: {e}")
+            return False
+
+    def check_process_and_resources(self):
+        """Combined check: process health + system resources in single pass.
+
+        Returns (process_ok, resources_ok) to avoid iterating all processes twice.
+        """
+        try:
+            main_process_found = False
+            main_process_healthy = True
+            browser_count = 0
+
+            for proc in psutil.process_iter(["pid", "name", "cmdline", "status"]):
+                try:
+                    name = proc.info.get("name", "").lower()
+                    cmdline = " ".join(proc.info.get("cmdline") or [])
+
+                    # Check for main process
+                    if "eink_display.py" in cmdline:
+                        main_process_found = True
+
+                        # Check for zombie/dead state
+                        if proc.info["status"] == psutil.STATUS_ZOMBIE:
+                            logger.error("Main process is a zombie")
+                            main_process_healthy = False
+                        elif proc.info["status"] == "disk-sleep":
+                            logger.error("Main process in D state (uninterruptible)")
+                            main_process_healthy = False
+                        else:
+                            # Check memory usage
+                            memory_mb = proc.memory_info().rss / (1024 * 1024)
+                            if memory_mb > MAX_MEMORY_MB:
+                                logger.warning(
+                                    f"Process using too much memory: {memory_mb:.1f}MB"
+                                )
+                                self.frozen_indicators.add("high_memory")
+
+                            # Check CPU usage (stuck in busy loop?)
+                            cpu_percent = proc.cpu_percent(interval=1)
+                            if cpu_percent > 90:
+                                logger.warning(
+                                    f"Process using high CPU: {cpu_percent:.1f}%"
+                                )
+                                self.frozen_indicators.add("high_cpu")
+
+                    # Count browser processes
+                    if "chromium" in name or "chrome" in name:
+                        browser_count += 1
+
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+
+            # Evaluate process health
+            if not main_process_found:
+                logger.warning("Main process not found")
+                process_ok = False
+            elif not main_process_healthy:
+                process_ok = False
+            else:
+                process_ok = len(self.frozen_indicators) < 2
+
+            # Check browser leaks
+            if browser_count > 3:
+                logger.warning(f"Too many browser processes: {browser_count}")
+                self.frozen_indicators.add("browser_leak")
+
+            # System-level checks (no process iteration needed)
+            memory = psutil.virtual_memory()
+            available_mb = memory.available / (1024 * 1024)
+            if available_mb < MIN_FREE_MEMORY_MB:
+                logger.warning(f"Low system memory: {available_mb:.0f}MB available")
+                self.frozen_indicators.add("low_memory")
+
+            load_avg = os.getloadavg()[0]
+            if load_avg > MAX_LOAD_AVG:
+                logger.warning(f"High system load: {load_avg:.2f}")
+                self.frozen_indicators.add("high_load")
+
+            resources_ok = len(self.frozen_indicators) < 3
+
+            return process_ok, resources_ok
+
+        except Exception as e:
+            logger.error(f"Combined health check failed: {e}")
+            return True, True  # Assume OK if can't check
+
+    def check_log_activity(self) -> bool:
+        """Check if logs are still being written."""
+        try:
+            if not os.path.exists(LOG_PATH):
+                return True  # Log might not exist yet
+
+            # Check last modification time
+            age_seconds = time.time() - os.path.getmtime(LOG_PATH)
+            if age_seconds > 300:  # No logs in 5 minutes
+                logger.warning(f"No log activity for {age_seconds:.0f} seconds")
+                return False
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Log check failed: {e}")
+            return True
+
+    def _check_reboot_escalation(self):
+        """Check if we should escalate to a full system reboot."""
+        now = datetime.now()
+        cutoff = now - timedelta(seconds=self.reboot_window_seconds)
+
+        # Prune old timestamps
+        self.restart_timestamps = [ts for ts in self.restart_timestamps if ts > cutoff]
+
+        if len(self.restart_timestamps) >= self.max_restarts_before_reboot:
+            logger.critical(
+                f"System reboot: {len(self.restart_timestamps)} restarts "
+                f"within {self.reboot_window_seconds // 60} minutes"
+            )
+            try:
+                subprocess.run(["sudo", "reboot"], timeout=10, check=False)
+            except Exception as e:
+                logger.error(f"Reboot command failed: {e}")
+            return True
         return False
 
+    def force_restart(self, reason: str):
+        """Force restart the service with aggressive cleanup."""
+        # Track restart and check if we should escalate to reboot
+        self.restart_timestamps.append(datetime.now())
+        if self._check_reboot_escalation():
+            return  # Reboot initiated
 
-def check_process_state():
-    """Check if main process is in D (uninterruptible) state."""
-    try:
-        result = subprocess.run(
-            ["ps", "aux"], capture_output=True, text=True, timeout=5
-        )
+        logger.error(f"FORCE RESTART: {reason}")
 
-        for line in result.stdout.splitlines():
-            if "eink_display.py" in line and " D" in line:
-                logger.warning(
-                    "Main process is in D (uninterruptible) state - likely frozen"
+        try:
+            # Step 1: Try graceful stop
+            logger.info("Attempting graceful stop...")
+            subprocess.run(
+                ["sudo", "systemctl", "stop", SERVICE_NAME], timeout=10, check=False
+            )
+            time.sleep(2)
+
+        except subprocess.TimeoutExpired:
+            logger.warning("Graceful stop timed out")
+
+        try:
+            # Step 2: Kill all related processes
+            logger.info("Killing all related processes...")
+            kill_commands = [
+                ["sudo", "pkill", "-9", "-f", "eink_display.py"],
+                ["sudo", "pkill", "-9", "-f", "screenshot_worker.py"],
+                ["sudo", "pkill", "-9", "-f", "display_worker.py"],
+                ["sudo", "pkill", "-9", "-f", "playwright"],
+                ["sudo", "pkill", "-9", "-f", "chromium"],
+                ["sudo", "pkill", "-9", "-f", "chrome"],
+            ]
+
+            for cmd in kill_commands:
+                subprocess.run(cmd, timeout=5, check=False)
+
+            time.sleep(2)
+
+            # Step 3: Clean up temp files
+            logger.info("Cleaning temp files...")
+            temp_files = [SCREENSHOT_PATH, HEARTBEAT_PATH, "/tmp/.X99-lock"]
+            for f in temp_files:
+                try:
+                    if os.path.exists(f):
+                        os.remove(f)
+                except (OSError, PermissionError):
+                    pass
+
+            # Step 4: Clear system caches (helps with memory)
+            logger.info("Clearing system caches...")
+            subprocess.run(["sudo", "sync"], timeout=5, check=False)
+            subprocess.run(
+                ["sudo", "sh", "-c", "echo 3 > /proc/sys/vm/drop_caches"],
+                timeout=5,
+                check=False,
+            )
+
+            # Step 5: Start service
+            logger.info("Starting service...")
+            subprocess.run(
+                ["sudo", "systemctl", "start", SERVICE_NAME], timeout=30, check=True
+            )
+
+            logger.info("Service restarted successfully")
+            self.last_restart = datetime.now()
+            self.consecutive_failures = 0
+            self.frozen_indicators.clear()
+
+            # Wait for service to stabilize
+            time.sleep(30)
+
+        except Exception as e:
+            logger.error(f"Force restart failed: {e}")
+            logger.critical("Unable to restart service, manual intervention needed")
+
+    def run_checks(self) -> bool:
+        """Run all health checks."""
+        checks = {
+            "heartbeat": self.check_heartbeat(),
+            "screenshot": self.check_screenshot_age(),
+            "logs": self.check_log_activity(),
+        }
+
+        # Combined process + resource check (single process iteration pass)
+        process_ok, resources_ok = self.check_process_and_resources()
+        checks["process"] = process_ok
+        checks["resources"] = resources_ok
+
+        failed_checks = [name for name, passed in checks.items() if not passed]
+
+        if failed_checks:
+            logger.warning(f"Failed checks: {failed_checks}")
+
+            # Multiple failures or critical single failure
+            if len(failed_checks) >= 2 or "process" in failed_checks:
+                return False
+
+            # Consecutive screenshot failures
+            if self.consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                logger.error(
+                    f"Too many consecutive failures: {self.consecutive_failures}"
                 )
                 return False
 
+        else:
+            # All checks passed
+            if self.frozen_indicators:
+                logger.info(f"Clearing warning indicators: {self.frozen_indicators}")
+                self.frozen_indicators.clear()
+
         return True
 
-    except Exception as e:
-        logger.error(f"Error checking process state: {e}")
-        return True  # Assume OK if can't check
+    def should_restart(self) -> bool:
+        """Determine if we should restart based on cooldown."""
+        time_since_restart = datetime.now() - self.last_restart
+        cooldown_seconds = 180  # 3 minute minimum between restarts
 
+        if time_since_restart.total_seconds() < cooldown_seconds:
+            remaining = cooldown_seconds - time_since_restart.total_seconds()
+            logger.info(f"Restart cooldown: {remaining:.0f}s remaining")
+            return False
 
-def main():
-    """Main watchdog loop."""
-    logger.info(f"Starting watchdog monitor for {SERVICE_NAME}")
-    logger.info(f"Monitoring {SCREENSHOT_PATH} (max age: {MAX_AGE_MINUTES} minutes)")
+        return True
 
-    last_restart = datetime.now() - timedelta(hours=1)  # Allow immediate restart
+    def run(self):
+        """Main watchdog loop."""
+        logger.info("=" * 60)
+        logger.info(f"Watchdog Monitor Started for {SERVICE_NAME}")
+        logger.info(
+            f"Screenshot: {SCREENSHOT_PATH} (max {MAX_SCREENSHOT_AGE_MINUTES} min)"
+        )
+        logger.info(
+            f"Heartbeat: {HEARTBEAT_PATH} (max {MAX_HEARTBEAT_AGE_SECONDS} sec)"
+        )
+        logger.info(f"Check interval: {CHECK_INTERVAL} seconds")
+        logger.info(
+            f"Reboot escalation: after {self.max_restarts_before_reboot} restarts "
+            f"within {self.reboot_window_seconds // 60} minutes"
+        )
+        logger.info("=" * 60)
 
-    while True:
-        try:
-            # Check screenshot age
-            age_minutes = get_file_age_minutes(SCREENSHOT_PATH)
-
-            if age_minutes > MAX_AGE_MINUTES:
-                logger.warning(
-                    f"Screenshot is {age_minutes:.1f} minutes old (threshold: {MAX_AGE_MINUTES})"
-                )
-
-                # Check if we recently restarted
-                time_since_restart = datetime.now() - last_restart
-                if time_since_restart.total_seconds() < 300:  # 5 minutes
-                    logger.info("Recently restarted, waiting before another restart...")
-                else:
-                    # Check if process is frozen
-                    if not check_process_state():
-                        logger.error("Process appears frozen, forcing restart")
-                        restart_service()
-                        last_restart = datetime.now()
+        while True:
+            try:
+                if not self.run_checks():
+                    if self.should_restart():
+                        self.force_restart("Multiple health check failures")
                     else:
-                        logger.info("Process seems OK, will wait longer")
-            else:
-                logger.debug(f"Screenshot age OK: {age_minutes:.1f} minutes")
+                        logger.warning("Would restart but in cooldown period")
 
-            # Sleep before next check
-            time.sleep(CHECK_INTERVAL)
+                time.sleep(CHECK_INTERVAL)
 
-        except KeyboardInterrupt:
-            logger.info("Watchdog monitor stopped by user")
-            break
-        except Exception as e:
-            logger.error(f"Watchdog error: {e}")
-            time.sleep(CHECK_INTERVAL)
+            except KeyboardInterrupt:
+                logger.info("Watchdog stopped by user")
+                break
+            except Exception as e:
+                logger.error(f"Watchdog error: {e}")
+                time.sleep(CHECK_INTERVAL)
+
+
+def signal_handler(signum, frame):
+    """Handle shutdown signals."""
+    logger.info(f"Received signal {signum}, shutting down...")
+    exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    # Set up signal handlers
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Run watchdog
+    watchdog = WatchdogMonitor()
+    watchdog.run()

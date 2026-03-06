@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - E-Ink Scoreboard</title>
+    <link rel="stylesheet" href="/static/styles/variables.css" />
+    <link rel="stylesheet" href="/static/styles/settings.css" />
+  </head>
+  <body>
+    <div class="settings-container">
+      <header class="settings-header">
+        <h1>Admin Login</h1>
+        <a href="/" class="back-link">View Display</a>
+      </header>
+
+      <section class="setting-group">
+        <p class="setting-description">
+          Enter the admin password to access settings.
+        </p>
+
+        {% if error %}
+        <div class="login-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="/login" class="login-form">
+          <input type="hidden" name="next" value="{{ next }}" />
+          <input
+            type="password"
+            name="password"
+            class="login-input"
+            placeholder="Password"
+            autofocus
+            required
+          />
+          <button type="submit" class="btn-save">Log In</button>
+        </form>
+      </section>
+    </div>
+  </body>
+</html>
