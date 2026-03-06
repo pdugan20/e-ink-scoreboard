@@ -126,8 +126,50 @@ To update an existing installation to the latest version:
 ./scripts/upgrade.sh
 ```
 
-This pulls the latest code, updates dependencies, and restarts services.
-Your configuration is preserved.
+This pulls the latest code, updates Python packages and Playwright browser,
+re-installs service files and sudoers rules, restarts all services, and runs
+verification. Your configuration is preserved.
+
+## Development Iteration
+
+When developing on your Mac and deploying to the Pi, the typical workflow is:
+
+1. **Make changes on Mac** -- edit code, run tests with `make test`
+2. **Push to GitHub** -- `git push origin main`
+3. **Update the Pi** -- SSH in and run the upgrade script:
+
+```bash
+ssh pi@scoreboard.local
+cd ~/e-ink-scoreboard
+./scripts/upgrade.sh
+```
+
+The upgrade script handles everything: pulling code, updating dependencies,
+re-installing service files, and restarting all three services.
+
+**Checking logs after an upgrade:**
+
+```bash
+# Watch display service output in real-time
+sudo journalctl -u sports-display.service -f
+
+# View application log
+tail -f ~/logs/eink_display.log
+
+# Check all three services at once
+sudo systemctl status sports-server sports-display sports-watchdog
+```
+
+**Quick manual test without waiting for the refresh cycle:**
+
+```bash
+source ~/.virtualenvs/pimoroni/bin/activate
+python src/eink_display.py --once --force
+```
+
+**If you change service files** (`services/*.service`), the upgrade script
+automatically re-templates and reloads them. No need to manually run
+`setup-services.sh` unless doing a fresh install.
 
 ## Uninstalling
 

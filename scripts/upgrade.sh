@@ -22,9 +22,10 @@ if [ "${1:-}" = "--help" ]; then
     echo ""
     echo "Steps performed:"
     echo "  1. Pull latest code from git"
-    echo "  2. Reinstall Python dependencies"
-    echo "  3. Restart all services"
-    echo "  4. Run installation verification"
+    echo "  2. Update Python dependencies and Playwright browser"
+    echo "  3. Re-install service files and sudoers rules"
+    echo "  4. Restart all services"
+    echo "  5. Run installation verification"
     echo ""
     echo "Your configuration (config.js, eink_config.json) is preserved."
     exit 0
@@ -39,7 +40,7 @@ cd "$PROJECT_DIR"
 
 # ── Step 1: Pull latest code ─────────────────────────────────────────
 
-echo "[Step 1/4] Pulling latest code..."
+echo "[Step 1/5] Pulling latest code..."
 
 # Check for uncommitted changes
 if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
@@ -72,40 +73,66 @@ fi
 # ── Step 2: Update dependencies ──────────────────────────────────────
 
 echo ""
-echo "[Step 2/4] Updating Python dependencies..."
+echo "[Step 2/5] Updating dependencies..."
 
 if [ -x "$VENV_PATH/bin/python" ]; then
     source "$VENV_PATH/bin/activate"
     pip install -r requirements.txt --quiet
     echo "[SUCCESS] Python packages updated"
+
+    # Update Playwright browser if version changed
+    if command -v playwright &>/dev/null; then
+        echo "[INFO] Updating Playwright browser..."
+        playwright install chromium --with-deps 2>/dev/null || playwright install chromium
+        echo "[SUCCESS] Playwright browser updated"
+    fi
 else
     echo "[WARN] Virtual environment not found -- run install.sh first"
 fi
 
-# ── Step 3: Restart services ─────────────────────────────────────────
+# ── Step 3: Update service files ─────────────────────────────────────
 
 echo ""
-echo "[Step 3/4] Restarting services..."
+echo "[Step 3/5] Updating service files..."
 
 if command -v systemctl &>/dev/null; then
-    # Re-run service setup to pick up any template changes
-    if [ -f "services/sports-display.service" ]; then
-        USER_NAME=$(whoami)
+    USER_NAME=$(whoami)
+
+    # Re-template all three service files to pick up any changes
+    for svc_file in sports-server sports-display sports-watchdog; do
+        if [ -f "services/${svc_file}.service" ]; then
+            sed -e "s|{{USER}}|$USER_NAME|g" \
+                -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
+                -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
+                "services/${svc_file}.service" | sudo tee "/etc/systemd/system/${svc_file}.service" > /dev/null
+            echo "[SUCCESS] Updated ${svc_file}.service"
+        fi
+    done
+
+    # Update sudoers rules
+    if [ -f "services/scoreboard-sudoers" ]; then
         sed -e "s|{{USER}}|$USER_NAME|g" \
-            -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
-            -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
-            services/sports-display.service | sudo tee /etc/systemd/system/sports-display.service > /dev/null
-    fi
-    if [ -f "services/sports-watchdog.service" ]; then
-        USER_NAME=$(whoami)
-        sed -e "s|{{USER}}|$USER_NAME|g" \
-            -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
-            -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
-            services/sports-watchdog.service | sudo tee /etc/systemd/system/sports-watchdog.service > /dev/null
+            services/scoreboard-sudoers | sudo tee /etc/sudoers.d/scoreboard > /dev/null
+        sudo chmod 0440 /etc/sudoers.d/scoreboard
+        if sudo visudo -c -f /etc/sudoers.d/scoreboard &>/dev/null; then
+            echo "[SUCCESS] Updated sudoers rules"
+        else
+            echo "[ERROR] Invalid sudoers rule -- removing to prevent lockout"
+            sudo rm -f /etc/sudoers.d/scoreboard
+        fi
     fi
 
     sudo systemctl daemon-reload
+else
+    echo "[INFO] systemctl not available -- restart services manually"
+fi
 
+# ── Step 4: Restart services ─────────────────────────────────────────
+
+echo ""
+echo "[Step 4/5] Restarting services..."
+
+if command -v systemctl &>/dev/null; then
     for svc in sports-server sports-display sports-watchdog; do
         if systemctl is-active "${svc}.service" &>/dev/null; then
             sudo systemctl restart "${svc}.service"
@@ -118,10 +145,10 @@ else
     echo "[INFO] systemctl not available -- restart services manually"
 fi
 
-# ── Step 4: Verify ───────────────────────────────────────────────────
+# ── Step 5: Verify ───────────────────────────────────────────────────
 
 echo ""
-echo "[Step 4/4] Verifying installation..."
+echo "[Step 5/5] Verifying installation..."
 echo ""
 
 "$SCRIPT_DIR/verify-installation.sh" --quick || true

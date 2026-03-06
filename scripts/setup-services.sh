@@ -45,7 +45,15 @@ if [ -f /etc/systemd/system/sports-server.service ]; then
 else
     echo "[INFO] Creating web server service..."
 fi
-sudo tee /etc/systemd/system/sports-server.service > /dev/null <<EOF
+if [ -f "services/sports-server.service" ]; then
+    sed -e "s|{{USER}}|$USER|g" \
+        -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
+        -e "s|{{VENV_PATH}}|$VENV_PATH|g" \
+        services/sports-server.service | sudo tee /etc/systemd/system/sports-server.service > /dev/null
+    echo "[SUCCESS] Web server service installed with correct paths"
+else
+    echo "[WARN] Server service template not found, creating inline..."
+    sudo tee /etc/systemd/system/sports-server.service > /dev/null <<EOF
 [Unit]
 Description=E-Ink Scoreboard Web Server
 After=network.target
@@ -63,6 +71,7 @@ MemoryMax=150M
 [Install]
 WantedBy=multi-user.target
 EOF
+fi
 
 # Copy sports-display.service file
 if [ -f /etc/systemd/system/sports-display.service ]; then

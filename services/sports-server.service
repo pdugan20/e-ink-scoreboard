@@ -1,0 +1,16 @@
+[Unit]
+Description=E-Ink Scoreboard Web Server
+After=network.target
+
+[Service]
+Type=simple
+User={{USER}}
+WorkingDirectory={{PROJECT_DIR}}
+Environment=PATH={{VENV_PATH}}/bin
+ExecStart={{VENV_PATH}}/bin/python src/dev_server.py --port 5001 --production
+Restart=always
+RestartSec=10
+MemoryMax=150M
+
+[Install]
+WantedBy=multi-user.target
