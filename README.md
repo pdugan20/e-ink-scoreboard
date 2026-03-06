@@ -46,7 +46,14 @@ python src/eink_display.py --once
 
 ### Raspberry Pi
 
-See [docs/RASPBERRY_PI_SETUP.md](docs/RASPBERRY_PI_SETUP.md) for complete installation instructions.
+```bash
+git clone https://github.com/pdugan20/e-ink-scoreboard.git
+cd e-ink-scoreboard
+./scripts/setup.sh    # Install, configure, and enable services
+sudo reboot           # Apply hardware changes, scoreboard starts automatically
+```
+
+See [docs/RASPBERRY_PI_SETUP.md](docs/RASPBERRY_PI_SETUP.md) for detailed instructions and troubleshooting.
 
 ## Commands
 

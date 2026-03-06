@@ -1,5 +1,12 @@
 # Raspberry Pi Setup Instructions
 
+## Prerequisites
+
+- **Hardware**: Raspberry Pi Zero 2 W + [Inky Impression 7.3"](https://shop.pimoroni.com/products/inky-impression-7-3) e-ink display
+- **OS**: Raspberry Pi OS Bookworm (64-bit recommended)
+- **Python**: 3.11+ (included with Bookworm)
+- **Network**: WiFi connection for live score data
+
 ## Quick Install (Recommended)
 
 For automatic setup, use the installation script:
@@ -52,24 +59,39 @@ cd e-ink-scoreboard
 
 ---
 
-## Test the Setup
+## After Reboot
 
-The installation script creates default configuration files. You can customize them later with `./scripts/configure.sh`.
+After rebooting, the scoreboard starts automatically. Verify everything is working:
+
+```bash
+# Check all three services are running
+sudo systemctl status sports-server sports-display sports-watchdog
+
+# Verify the web UI is accessible
+curl -s http://localhost:5001/api/scores/MLB | head -c 100
+
+# Run the full verification script
+./scripts/verify-installation.sh
+```
+
+The display should update within a few minutes. If games are currently active,
+you'll see live scores. If not, the screensaver will show team news.
 
 ## Manual Control Commands
 
+To run commands manually, activate the virtual environment first:
+
 ```bash
+source ~/.virtualenvs/pimoroni/bin/activate
+
 # Update display once
 python src/eink_display.py --once
 
-# Update with custom interval (in seconds)
-python src/eink_display.py --interval 600  # 10 minutes
+# Force update (bypass game check)
+python src/eink_display.py --once --force
 
 # Use custom config file
 python src/eink_display.py --config my_config.json
-
-# Update with custom server URL
-python src/eink_display.py --url http://localhost:5002/display
 ```
 
 ## Troubleshooting
