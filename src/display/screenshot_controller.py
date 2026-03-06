@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import platform
+import sys
 import time
 from contextlib import contextmanager
 
@@ -253,7 +254,7 @@ class ScreenshotController:
             logger.info("Taking screenshot via guarded subprocess...")
             # Skip resource checks in test mode (--once or --force)
             success, stdout, stderr = run_safe_subprocess(
-                ["python", worker_path, config_json],
+                [sys.executable, worker_path, config_json],
                 timeout=150,  # Increased for slow Pi Zero
                 check_resources=not self.test_mode,  # Skip checks in test mode
                 critical_operation=True,  # Screenshots are critical
@@ -364,7 +365,7 @@ class ScreenshotController:
 
             logger.info("Updating display via guarded subprocess...")
             success, stdout, stderr = run_safe_subprocess(
-                ["python", worker_path, config_json],
+                [sys.executable, worker_path, config_json],
                 timeout=90,
                 check_resources=False,  # Already checked during screenshot
                 critical_operation=True,

@@ -91,6 +91,7 @@ fi
 echo "[INFO] Installing dependencies..."
 if sudo apt install -y python3-pip python3-venv git \
     libjpeg-dev libopenjp2-7 libtiff5-dev \
+    zlib1g-dev libatlas-base-dev \
     libsystemd-dev pkg-config; then
     step_pass "System dependencies installed"
 else
