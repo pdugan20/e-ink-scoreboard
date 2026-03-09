@@ -21,6 +21,7 @@ from api.auth import (
     login_required,
 )
 from api.config_api import config_bp
+from api.display_api import display_bp
 from api.scores_api import fetch_mlb_games, fetch_nfl_games
 from api.screensaver_api import get_screensaver_data
 from api.static_files import setup_static_routes
@@ -44,6 +45,7 @@ except FileNotFoundError:
 # Register API blueprints
 app.register_blueprint(auth_bp)
 app.register_blueprint(config_bp)
+app.register_blueprint(display_bp)
 app.register_blueprint(wifi_bp)
 
 # Make auth helpers available in templates

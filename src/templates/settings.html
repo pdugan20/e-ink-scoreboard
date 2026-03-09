@@ -190,6 +190,40 @@
         </div>
       </section>
 
+      <!-- Display Preview -->
+      <section class="setting-group">
+        <h2>Display Preview</h2>
+        <p class="setting-description">
+          Push a preview to the e-ink display. Auto-reverts after 60 seconds.
+        </p>
+        <div class="service-actions">
+          <button
+            type="button"
+            class="btn-restart"
+            id="preview-live-btn"
+            onclick="previewDisplay('live')"
+          >
+            Send Live Scores
+          </button>
+          <button
+            type="button"
+            class="btn-restart btn-restart-secondary"
+            id="preview-test-btn"
+            onclick="previewDisplay('test')"
+          >
+            Send Test Data
+          </button>
+          <button
+            type="button"
+            class="btn-restart btn-restart-secondary"
+            id="preview-screensaver-btn"
+            onclick="previewDisplay('screensaver')"
+          >
+            Send Screensaver
+          </button>
+        </div>
+      </section>
+
       <!-- WiFi Management -->
       <section class="setting-group" id="wifi-section">
         <h2>WiFi Network</h2>
@@ -450,6 +484,55 @@
           .catch(function () {
             var toast = document.getElementById('toast');
             toast.textContent = 'Network error restarting service';
+            toast.className = 'toast show error';
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = originalText;
+          });
+      }
+
+      // Push a preview to the e-ink display
+      function previewDisplay(mode) {
+        var btn = document.getElementById('preview-' + mode + '-btn');
+        var originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+
+        fetch('/api/display/preview', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '{{ csrf_token() }}',
+          },
+          body: JSON.stringify({ mode: mode }),
+        })
+          .then(function (response) {
+            return response.json().then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            var toast = document.getElementById('toast');
+            if (result.ok) {
+              toast.textContent =
+                'Preview sent! Reverts in ' + result.data.revert_in + 's';
+              toast.className = 'toast show success';
+            } else {
+              toast.textContent =
+                'Failed: ' + (result.data.error || 'Unknown error');
+              toast.className = 'toast show error';
+            }
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .catch(function () {
+            var toast = document.getElementById('toast');
+            toast.textContent = 'Network error sending preview';
             toast.className = 'toast show error';
             setTimeout(function () {
               toast.className = 'toast';

@@ -108,8 +108,23 @@ window.loadScreensaverData = loadScreensaverData;
 
 // Initialize the app
 export async function initApp() {
-  await loadTestData();
-  loadMLBData();
+  const urlParams = new URLSearchParams(window.location.search);
+  const mode = urlParams.get('mode');
+
+  if (mode === 'screensaver') {
+    loadScreensaverData();
+  } else if (mode === 'test') {
+    await loadTestData();
+    loadMLBData();
+  } else if (window.location.pathname === '/display') {
+    // /display defaults to live data (Pi production)
+    fetchLiveData();
+  } else {
+    // Dev preview (/) defaults to test data
+    await loadTestData();
+    loadMLBData();
+  }
+
   updateSizeIndicator();
   initResizable();
 
