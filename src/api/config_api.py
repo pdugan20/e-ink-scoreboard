@@ -67,7 +67,7 @@ MLB_TEAMS = [
     "Minnesota Twins",
     "New York Mets",
     "New York Yankees",
-    "Oakland Athletics",
+    "Athletics",
     "Philadelphia Phillies",
     "Pittsburgh Pirates",
     "San Francisco Giants",

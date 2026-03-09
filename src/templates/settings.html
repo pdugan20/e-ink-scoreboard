@@ -26,12 +26,7 @@
 
       <div id="toast" class="toast"></div>
 
-      <form
-        id="settings-form"
-        hx-post="/api/config"
-        hx-trigger="submit"
-        hx-swap="none"
-      >
+      <form id="settings-form" onsubmit="return saveSettings(event)">
         <!-- Favorite Teams -->
         <section class="setting-group">
           <h2>Favorite Teams</h2>
@@ -466,57 +461,80 @@
           });
       }
 
-      // Handle HTMX form submission
-      document.body.addEventListener('htmx:configRequest', function (event) {
-        // Convert form data to JSON for the API
-        if (event.detail.path === '/api/config') {
-          event.detail.headers['Content-Type'] = 'application/json';
-          event.detail.headers['X-CSRF-Token'] = '{{ csrf_token() }}';
+      // Save settings via fetch
+      function saveSettings(event) {
+        event.preventDefault();
 
-          const form = document.getElementById('settings-form');
-          const formData = new FormData(form);
-          const data = {};
+        var form = document.getElementById('settings-form');
+        var formData = new FormData(form);
+        var data = {};
 
-          // Favorite teams (checkboxes)
-          data.favorite_teams = formData.getAll('favorite_teams');
+        // Favorite teams (checkboxes)
+        data.favorite_teams = formData.getAll('favorite_teams');
 
-          // Timezone
-          data.timezone = formData.get('timezone');
+        // Timezone
+        data.timezone = formData.get('timezone');
 
-          // Theme
-          data.theme = formData.get('theme');
+        // Theme
+        data.theme = formData.get('theme');
 
-          // Refresh interval
-          data.refresh_interval = parseInt(formData.get('refresh_interval'));
+        // Refresh interval
+        data.refresh_interval = parseInt(formData.get('refresh_interval'));
 
-          // Boolean toggles (unchecked checkboxes don't appear in FormData)
-          data.show_screensaver = form.querySelector(
-            '[name="show_screensaver"]'
-          ).checked;
-          data.eink_optimized_contrast = form.querySelector(
-            '[name="eink_optimized_contrast"]'
-          ).checked;
+        // Boolean toggles (unchecked checkboxes don't appear in FormData)
+        data.show_screensaver = form.querySelector(
+          '[name="show_screensaver"]'
+        ).checked;
+        data.eink_optimized_contrast = form.querySelector(
+          '[name="eink_optimized_contrast"]'
+        ).checked;
 
-          event.detail.body = JSON.stringify(data);
-        }
-      });
+        var btn = document.getElementById('save-btn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
 
-      // Show toast on success/error
-      document.body.addEventListener('htmx:afterRequest', function (event) {
-        if (event.detail.pathInfo.requestPath === '/api/config') {
-          const toast = document.getElementById('toast');
-          if (event.detail.successful) {
-            toast.textContent = 'Settings saved';
-            toast.className = 'toast show success';
-          } else {
-            toast.textContent = 'Error saving settings';
+        fetch('/api/config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '{{ csrf_token() }}',
+          },
+          body: JSON.stringify(data),
+        })
+          .then(function (response) {
+            return response.json().then(function (d) {
+              return { ok: response.ok, data: d };
+            });
+          })
+          .then(function (result) {
+            var toast = document.getElementById('toast');
+            if (result.ok) {
+              toast.textContent = 'Settings saved';
+              toast.className = 'toast show success';
+            } else {
+              toast.textContent =
+                'Error: ' + (result.data.error || 'Unknown error');
+              toast.className = 'toast show error';
+            }
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .catch(function () {
+            var toast = document.getElementById('toast');
+            toast.textContent = 'Network error saving settings';
             toast.className = 'toast show error';
-          }
-          setTimeout(function () {
-            toast.className = 'toast';
-          }, 3000);
-        }
-      });
+            setTimeout(function () {
+              toast.className = 'toast';
+            }, 3000);
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = 'Save Settings';
+          });
+
+        return false;
+      }
 
       // Format status response
       document.body.addEventListener('htmx:beforeSwap', function (event) {

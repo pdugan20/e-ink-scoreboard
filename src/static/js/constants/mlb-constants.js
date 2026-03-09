@@ -21,7 +21,7 @@ export const MLB_TEAM_NAME_MAP = {
   'Minnesota Twins': 'Twins',
   'New York Mets': 'Mets',
   'New York Yankees': 'Yankees',
-  'Oakland Athletics': 'Athletics',
+  'Athletics': 'Athletics',
   'Philadelphia Phillies': 'Phillies',
   'Pittsburgh Pirates': 'Pirates',
   'San Diego Padres': 'Padres',

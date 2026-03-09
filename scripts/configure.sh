@@ -115,7 +115,7 @@ get_team_name() {
         1) echo "null" ;;
         2) echo "'Los Angeles Angels'" ;;
         3) echo "'Houston Astros'" ;;
-        4) echo "'Oakland Athletics'" ;;
+        4) echo "'Athletics'" ;;
         5) echo "'Toronto Blue Jays'" ;;
         6) echo "'Cleveland Guardians'" ;;
         7) echo "'Chicago White Sox'" ;;
@@ -152,7 +152,7 @@ get_readable_team_name() {
         1) echo "" ;;
         2) echo "Los Angeles Angels" ;;
         3) echo "Houston Astros" ;;
-        4) echo "Oakland Athletics" ;;
+        4) echo "Athletics" ;;
         5) echo "Toronto Blue Jays" ;;
         6) echo "Cleveland Guardians" ;;
         7) echo "Chicago White Sox" ;;
