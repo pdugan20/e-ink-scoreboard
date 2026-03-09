@@ -151,6 +151,32 @@ body {
   display: block;
 }
 
+.controls-footer {
+  padding: var(--dev-space-sm) var(--dev-space-lg);
+  border-top: 1px solid var(--dev-border-light);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.controls-footer a {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dev-text-secondary);
+  text-decoration: none;
+  padding: var(--dev-space-xs) var(--dev-space-sm);
+  border-radius: var(--dev-radius-sm);
+  transition: all 0.2s;
+}
+
+.controls-footer a::after {
+  content: ' \2192';
+}
+
+.controls-footer a:hover {
+  color: var(--dev-text-primary);
+  background: var(--dev-bg-secondary);
+}
+
 .control-buttons {
   display: flex;
   flex-wrap: wrap;

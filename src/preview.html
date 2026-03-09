@@ -18,7 +18,6 @@
       <div class="controls" id="devControls">
         <div class="controls-header">
           <span>Settings</span>
-          <a href="/settings" style="font-size: 12px; color: #666; text-decoration: none; margin-left: auto; margin-right: 8px;">Config Panel</a>
           <button class="dismiss-btn" onclick="toggleDevTray()">Close</button>
         </div>
         <div class="control-section">
@@ -31,23 +30,14 @@
           </div>
         </div>
         <div class="control-section">
-          <label>NFL</label>
-          <div class="control-buttons">
-            <button onclick="loadNFLData()">Mixed</button>
-          </div>
-        </div>
-        <div class="control-section">
-          <label>CFB</label>
-          <div class="control-buttons">
-            <button onclick="loadCFBData()">Mixed</button>
-          </div>
-        </div>
-        <div class="control-section">
           <label>Display Size</label>
           <div class="control-buttons">
             <button onclick="setSize(800, 480)">800×480</button>
             <button onclick="setSize(1600, 1200)">1600×1200</button>
           </div>
+        </div>
+        <div class="controls-footer">
+          <a href="/settings">Config Panel</a>
         </div>
       </div>
     </div>

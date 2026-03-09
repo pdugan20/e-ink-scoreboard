@@ -80,14 +80,19 @@ body {
 /* Select Dropdowns */
 
 .setting-select {
-  width: 100%;
-  padding: 10px 12px;
+  width: auto;
+  min-width: 280px;
+  padding: 12px 36px 12px 14px;
   font-size: 14px;
   border: 1px solid var(--color-gray-300, #ccc);
   border-radius: 6px;
   background: var(--color-white, #fff);
   color: var(--color-gray-700, #333);
-  appearance: auto;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
 }
 
 /* Team Grid */
@@ -145,7 +150,7 @@ body {
 }
 
 .theme-radio input[type='radio'] {
-  margin-top: 2px;
+  margin-top: 3px;
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -160,12 +165,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
 }
 
-.theme-label strong,
-.theme-radio .theme-label {
+.theme-label strong {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .theme-description {
@@ -197,6 +202,7 @@ body {
 
 .toggle-label strong {
   font-size: 14px;
+  font-weight: 600;
 }
 
 .toggle-description {
@@ -241,14 +247,7 @@ body {
   display: none;
 }
 
-/* Save Button */
-
-.settings-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
+/* Save / Primary Button */
 
 .btn-save {
   padding: 10px 24px;
@@ -306,7 +305,7 @@ body {
 /* Status Panel */
 
 .status-panel {
-  background: var(--color-gray-50, #f8f8f8);
+  background: var(--color-white, #fff);
   border-color: var(--color-gray-200, #ddd);
 }
 

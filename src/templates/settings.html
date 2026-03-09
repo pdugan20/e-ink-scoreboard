@@ -26,7 +26,7 @@
 
       <div id="toast" class="toast"></div>
 
-      <form id="settings-form" onsubmit="return saveSettings(event)">
+      <form id="settings-form">
         <!-- Favorite Teams -->
         <section class="setting-group">
           <h2>Favorite Teams</h2>
@@ -73,16 +73,18 @@
                 {% if theme == config.theme %}checked{% endif %}
               />
               <span class="theme-label">
-                {% if theme == 'default' %}Default
-                {% elif theme == 'team_colors' %}Team Colors
-                {% elif theme == 'mlb_scoreboard' %}MLB Scoreboard
-                {% endif %}
-              </span>
-              <span class="theme-description">
-                {% if theme == 'default' %}Clean with colorful team logos
-                {% elif theme == 'team_colors' %}Dynamic backgrounds with team colors
-                {% elif theme == 'mlb_scoreboard' %}Classic scoreboard appearance
-                {% endif %}
+                <strong>
+                  {% if theme == 'default' %}Default
+                  {% elif theme == 'team_colors' %}Team Colors
+                  {% elif theme == 'mlb_scoreboard' %}MLB Scoreboard
+                  {% endif %}
+                </strong>
+                <span class="theme-description">
+                  {% if theme == 'default' %}Clean with colorful team logos
+                  {% elif theme == 'team_colors' %}Dynamic backgrounds with team colors
+                  {% elif theme == 'mlb_scoreboard' %}Classic scoreboard appearance
+                  {% endif %}
+                </span>
               </span>
             </label>
             {% endfor %}
@@ -143,13 +145,6 @@
           </label>
         </section>
 
-        <!-- Submit -->
-        <div class="settings-actions">
-          <button type="submit" class="btn-save" id="save-btn">
-            Save Settings
-          </button>
-          <span class="save-indicator" id="save-indicator"></span>
-        </div>
       </form>
 
       <!-- Status Panel -->
@@ -544,37 +539,29 @@
           });
       }
 
-      // Save settings via fetch
-      function saveSettings(event) {
-        event.preventDefault();
+      // Auto-save: debounce to avoid rapid-fire POSTs when clicking teams
+      var _saveTimer = null;
 
+      function autoSave() {
+        clearTimeout(_saveTimer);
+        _saveTimer = setTimeout(saveSettings, 300);
+      }
+
+      function saveSettings() {
         var form = document.getElementById('settings-form');
         var formData = new FormData(form);
         var data = {};
 
-        // Favorite teams (checkboxes)
         data.favorite_teams = formData.getAll('favorite_teams');
-
-        // Timezone
         data.timezone = formData.get('timezone');
-
-        // Theme
         data.theme = formData.get('theme');
-
-        // Refresh interval
         data.refresh_interval = parseInt(formData.get('refresh_interval'));
-
-        // Boolean toggles (unchecked checkboxes don't appear in FormData)
         data.show_screensaver = form.querySelector(
           '[name="show_screensaver"]'
         ).checked;
         data.eink_optimized_contrast = form.querySelector(
           '[name="eink_optimized_contrast"]'
         ).checked;
-
-        var btn = document.getElementById('save-btn');
-        btn.disabled = true;
-        btn.textContent = 'Saving...';
 
         fetch('/api/config', {
           method: 'POST',
@@ -610,14 +597,12 @@
             setTimeout(function () {
               toast.className = 'toast';
             }, 3000);
-          })
-          .finally(function () {
-            btn.disabled = false;
-            btn.textContent = 'Save Settings';
           });
-
-        return false;
       }
+
+      // Listen for any form change and auto-save
+      document.getElementById('settings-form')
+        .addEventListener('change', autoSave);
 
       // Format status response
       document.body.addEventListener('htmx:beforeSwap', function (event) {
