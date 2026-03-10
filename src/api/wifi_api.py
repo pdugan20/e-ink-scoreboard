@@ -162,7 +162,7 @@ def wifi_connect():
         logger.info(f"Connecting to WiFi network: {ssid}")
 
         # Build command -- password is passed as an argument (not shell-expanded)
-        cmd = ["sudo", "nmcli", "dev", "wifi", "connect", ssid]
+        cmd = ["/usr/bin/sudo", "/usr/bin/nmcli", "dev", "wifi", "connect", ssid]
         if password:
             cmd.extend(["password", password])
 

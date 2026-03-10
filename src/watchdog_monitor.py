@@ -286,7 +286,7 @@ class WatchdogMonitor:
                 f"within {self.reboot_window_seconds // 60} minutes"
             )
             try:
-                subprocess.run(["sudo", "reboot"], timeout=10, check=False)
+                subprocess.run(["/usr/bin/sudo", "/usr/sbin/reboot"], timeout=10, check=False)
             except Exception as e:
                 logger.error(f"Reboot command failed: {e}")
             return True
@@ -306,7 +306,7 @@ class WatchdogMonitor:
             # stop/kill/start which requires permissions we don't have
             logger.info("Restarting display service...")
             result = subprocess.run(
-                ["sudo", "systemctl", "restart", SERVICE_NAME],
+                ["/usr/bin/sudo", "/usr/bin/systemctl", "restart", SERVICE_NAME],
                 timeout=30,
                 capture_output=True,
                 text=True,

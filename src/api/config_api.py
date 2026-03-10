@@ -406,7 +406,7 @@ def _get_service_status():
         services = {}
         for svc in ["sports-server", "sports-display", "sports-watchdog"]:
             result = subprocess.run(
-                ["systemctl", "is-active", f"{svc}.service"],
+                ["/usr/bin/systemctl", "is-active", f"{svc}.service"],
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -423,7 +423,7 @@ def _restart_display_service():
         import subprocess
 
         result = subprocess.run(
-            ["sudo", "systemctl", "restart", "sports-display.service"],
+            ["/usr/bin/sudo", "/usr/bin/systemctl", "restart", "sports-display.service"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -457,7 +457,7 @@ def get_services_status():
             try:
                 # Get active state
                 result = subprocess.run(
-                    ["systemctl", "is-active", svc_name],
+                    ["/usr/bin/systemctl", "is-active", svc_name],
                     capture_output=True,
                     text=True,
                     timeout=5,
@@ -467,7 +467,7 @@ def get_services_status():
                 # Get uptime from ActiveEnterTimestamp
                 result = subprocess.run(
                     [
-                        "systemctl",
+                        "/usr/bin/systemctl",
                         "show",
                         svc_name,
                         "--property=ActiveEnterTimestamp",
@@ -533,7 +533,7 @@ def restart_service():
         logger.info(f"Restarting service: {svc_name}")
 
         result = subprocess.run(
-            ["sudo", "systemctl", "restart", svc_name],
+            ["/usr/bin/sudo", "/usr/bin/systemctl", "restart", svc_name],
             capture_output=True,
             text=True,
             timeout=30,
