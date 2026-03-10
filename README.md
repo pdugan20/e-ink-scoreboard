@@ -4,7 +4,8 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
 
-Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh and team news screensaver.
+Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh and
+team news screensaver.
 
 ## Features
 
@@ -15,10 +16,36 @@ Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh and team
 - **Web Settings Panel** - Configure teams, timezone, theme, and more from any browser
 - **WiFi Management** - Scan and switch WiFi networks from the settings page
 - **Local Network Discovery** - Access at `scoreboard.local:5001` via mDNS
-- **Mac Testing** - Full development environment with live preview
-- **Raspberry Pi Ready** - Complete deployment guide with one-command setup
 
-## Quick Start
+## Hardware
+
+- **[Raspberry Pi Zero 2 W](https://shop.pimoroni.com/products/raspberry-pi-zero-2-w)** -
+  Must be the Zero 2 W (with WiFi). The original Zero is too slow.
+- **[Inky Impression 7.3"](https://shop.pimoroni.com/products/inky-impression-7-3?variant=55186435244411)** -
+  800x480, 7-color e-ink display. Connects directly to the GPIO header.
+- **MicroSD Card** - 16GB minimum, Class 10 or better
+- **USB-C Power Supply** - 5V 2.5A minimum
+
+## Getting Started
+
+### Raspberry Pi
+
+**New to Raspberry Pi?** The
+[Raspberry Pi Setup Guide](docs/RASPBERRY_PI_SETUP.md) walks through everything
+from flashing the SD card to a working scoreboard.
+
+If you already have a booted Pi with SSH access:
+
+```bash
+sudo apt update && sudo apt install -y git
+git clone https://github.com/pdugan20/e-ink-scoreboard.git
+cd e-ink-scoreboard
+./scripts/setup.sh    # Install, configure, and enable services
+sudo reboot           # Apply hardware changes, scoreboard starts automatically
+```
+
+After reboot, access the scoreboard at `http://scoreboard.local:5001` and
+configure settings at `http://scoreboard.local:5001/settings`.
 
 ### Mac Development
 
@@ -32,84 +59,47 @@ playwright install chromium
 ```
 
 ```bash
-# Start web server
-python src/dev_server.py --port 5001
-
-# Take screenshot (in another terminal)
-python src/eink_display.py --once
-
-# View result: test_display_output.png
+python src/dev_server.py --port 5001    # Start web server
+python src/eink_display.py --once       # Take screenshot (in another terminal)
 ```
 
 - Live data: <http://localhost:5001/display>
 - Test data: <http://localhost:5001/display?test=true>
 
-### Raspberry Pi
-
-**New to Raspberry Pi?** The
-[Raspberry Pi Setup Guide](docs/RASPBERRY_PI_SETUP.md) covers everything from
-flashing the SD card to a working scoreboard.
-
-If you already have a booted Pi with SSH access:
-
-```bash
-git clone https://github.com/pdugan20/e-ink-scoreboard.git
-cd e-ink-scoreboard
-./scripts/setup.sh    # Install, configure, and enable services
-sudo reboot           # Apply hardware changes, scoreboard starts automatically
-```
-
-After reboot, access the scoreboard at `http://scoreboard.local:5001` and
-configure settings at `http://scoreboard.local:5001/settings`.
-
-See also: [Troubleshooting](docs/TROUBLESHOOTING.md) |
-[Services](docs/SERVICES.md)
-
-## Commands
-
-```bash
-source venv/bin/activate
-
-python src/eink_display.py --once              # Single update
-python src/eink_display.py --once --force      # Force update (bypass game check)
-python src/eink_display.py --once --dithering  # Generate dithered preview
-```
-
-## API
-
-- `/api/scores/MLB` - Live game scores
-- `/api/screensaver/MLB` - Team news articles
-- `/api/config` - Read/write scoreboard configuration (GET/POST)
-- `/api/services/status` - Service health and uptime
-- `/api/wifi/networks` - Scan available WiFi networks
-- `/display` - E-ink optimized display page
-- `/settings` - Web configuration panel
-
-See [docs/API.md](docs/API.md) for full API reference and [docs/API_EXAMPLES.md](docs/API_EXAMPLES.md) for examples.
-
 ## Configuration
 
-Open `http://scoreboard.local:5001/settings` to configure via web browser, or
-edit config files directly:
+Open `http://scoreboard.local:5001/settings` to configure teams, timezone,
+theme, refresh interval, and more from any browser on your network.
 
-**`src/eink_config.json`** (backend):
+For direct config file editing, see the
+[Raspberry Pi Setup Guide](docs/RASPBERRY_PI_SETUP.md#maintenance).
 
-| Setting            | Default | Description                     |
-| ------------------ | ------- | ------------------------------- |
-| `refresh_interval` | 360     | Seconds between updates (6 min) |
-| `display_width`    | 800     | Display width in pixels         |
-| `display_height`   | 480     | Display height in pixels        |
+## Documentation
 
-**`src/static/js/config.js`** (frontend):
+| Guide                                              | Description                                       |
+| -------------------------------------------------- | ------------------------------------------------- |
+| [Raspberry Pi Setup](docs/RASPBERRY_PI_SETUP.md)   | Complete setup from SD card to working scoreboard |
+| [Troubleshooting](docs/TROUBLESHOOTING.md)         | Common issues and solutions                       |
+| [Services](docs/SERVICES.md)                       | Systemd service architecture and management       |
+| [API Reference](docs/API.md)                       | Full API endpoint documentation                   |
+| [API Examples](docs/API_EXAMPLES.md)               | Curl examples and sample responses                |
+| [Testing](docs/TESTING.md)                         | Test patterns, conventions, and running tests     |
+| [Contributing](CONTRIBUTING.md)                    | Development setup and code quality standards      |
+| [Logging Style Guide](docs/LOGGING_STYLE_GUIDE.md) | Log message formatting conventions                |
 
-| Setting                          | Default             | Description                         |
-| -------------------------------- | ------------------- | ----------------------------------- |
-| `favoriteTeams`                  | `null`              | MLB teams to highlight when playing |
-| `displayTimezone`                | `TIMEZONES.EASTERN` | Timezone for game times             |
-| `currentTheme`                   | `THEMES.DEFAULT`    | Display theme                       |
-| `FEATURE_FLAGS.SHOW_SCREENSAVER` | `true`              | Show team news when no games        |
+## Development
 
-## Project Structure
+```bash
+make install        # Install all dependencies
+make install-hooks  # Install pre-commit hooks
+make check          # Run all linters and formatters
+make test           # Run all tests (Python + JavaScript)
+make test-coverage  # Run with coverage reports
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup.
+
+### Project Structure
 
 ```text
 src/                       # Core application
@@ -124,20 +114,3 @@ tests/                     # Test suite (unit, integration, JS)
 scripts/                   # Pi installation and setup scripts
 docs/                      # Documentation
 ```
-
-## Development
-
-```bash
-make install        # Install all dependencies
-make install-hooks  # Install pre-commit hooks
-make check          # Run all linters and formatters
-make test           # Run all tests (Python + JavaScript)
-make test-coverage  # Run with coverage reports
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup.
-
-## Hardware
-
-- [Raspberry Pi Zero 2 W](https://shop.pimoroni.com/products/raspberry-pi-zero-2-w)
-- [Inky Impression 7.3"](https://shop.pimoroni.com/products/inky-impression-7-3?variant=55186435244411) (800x480, 7-color)
