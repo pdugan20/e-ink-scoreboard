@@ -19,13 +19,13 @@ team news screensaver.
 
 ## Hardware
 
-- **[Raspberry Pi Zero 2 W](https://shop.pimoroni.com/products/raspberry-pi-zero-2-w)** -
+- [Raspberry Pi Zero 2 W](https://shop.pimoroni.com/products/raspberry-pi-zero-2-w) -
   Must be the Zero 2 W (with WiFi). The original Zero is too slow.
-- **[Inky Impression 7.3"](https://shop.pimoroni.com/products/inky-impression-7-3?variant=55186435244411)** -
+- [Inky Impression 7.3"](https://shop.pimoroni.com/products/inky-impression-7-3?variant=55186435244411) -
   800x480, 7-color e-ink display. Connects directly to the GPIO header.
-- **[MicroSD Card](https://www.amazon.com/s?k=microSDHC)** -
+- [MicroSD Card](https://www.amazon.com/s?k=microSDHC) -
   16GB minimum, Class 10 or better
-- **[Micro USB Power Supply](https://www.raspberrypi.com/products/micro-usb-power-supply/)** -
+- [Micro USB Power Supply](https://www.raspberrypi.com/products/micro-usb-power-supply/) -
   5V 2.5A minimum
 
 ## Setup
