@@ -1,5 +1,8 @@
 # Logging Style Guide
 
+> See also: [Contributing Guide](../CONTRIBUTING.md) |
+> [Troubleshooting](TROUBLESHOOTING.md) | [Services](SERVICES.md)
+
 ## General Principles
 
 - Be concise but informative

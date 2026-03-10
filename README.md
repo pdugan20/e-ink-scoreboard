@@ -46,6 +46,12 @@ python src/eink_display.py --once
 
 ### Raspberry Pi
 
+**New to Raspberry Pi?** The
+[Raspberry Pi Setup Guide](docs/RASPBERRY_PI_SETUP.md) covers everything from
+flashing the SD card to a working scoreboard.
+
+If you already have a booted Pi with SSH access:
+
 ```bash
 git clone https://github.com/pdugan20/e-ink-scoreboard.git
 cd e-ink-scoreboard
@@ -53,7 +59,11 @@ cd e-ink-scoreboard
 sudo reboot           # Apply hardware changes, scoreboard starts automatically
 ```
 
-See [docs/RASPBERRY_PI_SETUP.md](docs/RASPBERRY_PI_SETUP.md) for detailed instructions and troubleshooting.
+After reboot, access the scoreboard at `http://scoreboard.local:5001` and
+configure settings at `http://scoreboard.local:5001/settings`.
+
+See also: [Troubleshooting](docs/TROUBLESHOOTING.md) |
+[Services](docs/SERVICES.md)
 
 ## Commands
 
@@ -84,20 +94,20 @@ edit config files directly:
 
 **`src/eink_config.json`** (backend):
 
-| Setting | Default | Description |
-| ------- | ------- | ----------- |
-| `refresh_interval` | 360 | Seconds between updates (6 min) |
-| `display_width` | 800 | Display width in pixels |
-| `display_height` | 480 | Display height in pixels |
+| Setting            | Default | Description                     |
+| ------------------ | ------- | ------------------------------- |
+| `refresh_interval` | 360     | Seconds between updates (6 min) |
+| `display_width`    | 800     | Display width in pixels         |
+| `display_height`   | 480     | Display height in pixels        |
 
 **`src/static/js/config.js`** (frontend):
 
-| Setting | Default | Description |
-| ------- | ------- | ----------- |
-| `favoriteTeams` | `null` | MLB teams to highlight when playing |
-| `displayTimezone` | `TIMEZONES.EASTERN` | Timezone for game times |
-| `currentTheme` | `THEMES.DEFAULT` | Display theme |
-| `FEATURE_FLAGS.SHOW_SCREENSAVER` | `true` | Show team news when no games |
+| Setting                          | Default             | Description                         |
+| -------------------------------- | ------------------- | ----------------------------------- |
+| `favoriteTeams`                  | `null`              | MLB teams to highlight when playing |
+| `displayTimezone`                | `TIMEZONES.EASTERN` | Timezone for game times             |
+| `currentTheme`                   | `THEMES.DEFAULT`    | Display theme                       |
+| `FEATURE_FLAGS.SHOW_SCREENSAVER` | `true`              | Show team news when no games        |
 
 ## Project Structure
 

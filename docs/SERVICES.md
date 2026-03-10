@@ -1,6 +1,10 @@
 # SystemD Service Templates
 
-This document describes the systemd service files used for the Sports E-Ink Display project.
+> See also: [Raspberry Pi Setup Guide](RASPBERRY_PI_SETUP.md) |
+> [Troubleshooting](TROUBLESHOOTING.md)
+
+This document describes the systemd service files used for the E-Ink Scoreboard
+project.
 
 ## Service Files Location
 

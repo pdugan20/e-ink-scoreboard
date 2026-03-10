@@ -65,6 +65,11 @@ npm run format
 npm run lint:fix
 ```
 
+### Logging
+
+For log message conventions, see
+**[docs/LOGGING_STYLE_GUIDE.md](docs/LOGGING_STYLE_GUIDE.md)**.
+
 ### Markdown
 
 - **Linter:** markdownlint
