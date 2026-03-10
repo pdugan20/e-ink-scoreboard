@@ -110,13 +110,20 @@ else
 fi
 
 # Check core Python packages
-for pkg in flask pillow requests playwright psutil pytz feedparser; do
+for pkg in flask requests playwright psutil pytz feedparser; do
     if $PYTHON -c "import $pkg" 2>/dev/null; then
         check_pass "Python package: $pkg"
     else
         check_fail "Python package missing: $pkg"
     fi
 done
+
+# Pillow's import name is PIL, not pillow
+if $PYTHON -c "import PIL" 2>/dev/null; then
+    check_pass "Python package: pillow"
+else
+    check_fail "Python package missing: pillow"
+fi
 
 # Check inky (only expected on Pi)
 if $PYTHON -c "import inky" 2>/dev/null; then
