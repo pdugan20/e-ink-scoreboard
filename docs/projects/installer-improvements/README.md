@@ -28,31 +28,31 @@ be safely re-run or rolled back.
 
 ## Current Issues
 
-| Issue | Impact |
-|---|---|
-| No post-install verification | Silent partial failures cause confusing runtime errors |
-| Playwright/Chromium can fail silently | Display service starts but crashes |
-| Pimoroni venv checked by directory, not function | Reinstalls unnecessarily or uses broken venv |
-| Static IP setup modified `/etc/dhcpcd.conf` | Removed -- mDNS discovery replaces static IP |
-| Scripts not idempotent | Re-running can duplicate cron jobs, recreate services |
-| Log dirs mismatch actual log paths | `/var/log/eink-display`, `/tmp/eink-logs`, `~/logs/` all created but only one used |
-| `RASPBERRY_PI_SETUP.md` references old repo name | Confusing for new users |
-| ~~`enhanced_watchdog.py` exists but unused~~ | Resolved: merged into `watchdog_monitor.py` |
-| No uninstall or upgrade path | Users must manually clean up |
+| Issue                                            | Impact                                                                             |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| No post-install verification                     | Silent partial failures cause confusing runtime errors                             |
+| Playwright/Chromium can fail silently            | Display service starts but crashes                                                 |
+| Pimoroni venv checked by directory, not function | Reinstalls unnecessarily or uses broken venv                                       |
+| Static IP setup modified `/etc/dhcpcd.conf`      | Removed -- mDNS discovery replaces static IP                                       |
+| Scripts not idempotent                           | Re-running can duplicate cron jobs, recreate services                              |
+| Log dirs mismatch actual log paths               | `/var/log/eink-display`, `/tmp/eink-logs`, `~/logs/` all created but only one used |
+| `RASPBERRY_PI_SETUP.md` references old repo name | Confusing for new users                                                            |
+| ~~`enhanced_watchdog.py` exists but unused~~     | Resolved: merged into `watchdog_monitor.py`                                        |
+| No uninstall or upgrade path                     | Users must manually clean up                                                       |
 
 ## Key Files
 
-| File | Role |
-|---|---|
-| `scripts/install.sh` | Main installation script |
-| `scripts/configure.sh` | Interactive configuration |
-| `scripts/setup-services.sh` | Systemd service setup |
-| `services/sports-server.service` | Flask web server template |
-| `services/sports-display.service` | Display controller template |
-| `services/sports-watchdog.service` | Watchdog monitor template |
-| `docs/RASPBERRY_PI_SETUP.md` | Setup documentation |
-| `src/eink_config.json` | Runtime configuration |
-| `src/static/js/config.js` | Frontend configuration |
+| File                               | Role                        |
+| ---------------------------------- | --------------------------- |
+| `scripts/install.sh`               | Main installation script    |
+| `scripts/configure.sh`             | Interactive configuration   |
+| `scripts/setup-services.sh`        | Systemd service setup       |
+| `services/sports-server.service`   | Flask web server template   |
+| `services/sports-display.service`  | Display controller template |
+| `services/sports-watchdog.service` | Watchdog monitor template   |
+| `docs/RASPBERRY_PI_SETUP.md`       | Setup documentation         |
+| `src/eink_config.json`             | Runtime configuration       |
+| `src/static/js/config.js`          | Frontend configuration      |
 
 ## Tracker
 

@@ -16,15 +16,15 @@ that serves the display page and scores API. We extend this server with a
 
 ## Architecture Decisions
 
-| Decision | Choice | Rationale |
-|---|---|---|
-| Backend framework | Flask (existing) | Already running; no new process on 512MB Pi Zero 2 W |
-| Frontend interactivity | HTMX | 14KB script tag, no build step, aligns with vanilla JS approach |
-| Templating | Jinja2 | Ships with Flask, no additional dependency |
-| Database | None | Two config files with ~10 values each; JSON is sufficient |
-| New Python dependencies | None | Flask + Jinja2 handle everything |
-| Authentication | Session-based, optional | Simple password for write ops, no database needed |
-| Discovery | Avahi/mDNS | `scoreboard.local` works on macOS/iOS/Linux out of the box |
+| Decision                | Choice                  | Rationale                                                       |
+| ----------------------- | ----------------------- | --------------------------------------------------------------- |
+| Backend framework       | Flask (existing)        | Already running; no new process on 512MB Pi Zero 2 W            |
+| Frontend interactivity  | HTMX                    | 14KB script tag, no build step, aligns with vanilla JS approach |
+| Templating              | Jinja2                  | Ships with Flask, no additional dependency                      |
+| Database                | None                    | Two config files with ~10 values each; JSON is sufficient       |
+| New Python dependencies | None                    | Flask + Jinja2 handle everything                                |
+| Authentication          | Session-based, optional | Simple password for write ops, no database needed               |
+| Discovery               | Avahi/mDNS              | `scoreboard.local` works on macOS/iOS/Linux out of the box      |
 
 ## Reference Projects
 
@@ -48,20 +48,20 @@ These production projects run admin panels on Raspberry Pi:
 
 ## Key Files
 
-| File | Role |
-|---|---|
-| `src/dev_server.py` | Flask app with `/settings` route and blueprint registration |
-| `src/api/config_api.py` | Config read/write API and service management endpoints |
-| `src/api/auth.py` | Optional admin authentication (sessions, CSRF) |
-| `src/api/wifi_api.py` | WiFi scanning and connection via nmcli |
-| `src/templates/settings.html` | Settings page (Jinja2 + HTMX) |
-| `src/templates/login.html` | Admin login page |
-| `src/static/styles/settings.css` | Settings page styles |
-| `src/eink_config.json` | Backend config (refresh interval, display settings) |
-| `src/static/js/config.js` | Frontend config (teams, timezone, theme) |
-| `services/scoreboard-sudoers` | Passwordless systemctl/nmcli rules for web panel |
-| `services/scoreboard-avahi.service` | mDNS service advertisement (port 5001) |
-| `scripts/configure.sh` | CLI config script (kept as fallback) |
+| File                                | Role                                                        |
+| ----------------------------------- | ----------------------------------------------------------- |
+| `src/dev_server.py`                 | Flask app with `/settings` route and blueprint registration |
+| `src/api/config_api.py`             | Config read/write API and service management endpoints      |
+| `src/api/auth.py`                   | Optional admin authentication (sessions, CSRF)              |
+| `src/api/wifi_api.py`               | WiFi scanning and connection via nmcli                      |
+| `src/templates/settings.html`       | Settings page (Jinja2 + HTMX)                               |
+| `src/templates/login.html`          | Admin login page                                            |
+| `src/static/styles/settings.css`    | Settings page styles                                        |
+| `src/eink_config.json`              | Backend config (refresh interval, display settings)         |
+| `src/static/js/config.js`           | Frontend config (teams, timezone, theme)                    |
+| `services/scoreboard-sudoers`       | Passwordless systemctl/nmcli rules for web panel            |
+| `services/scoreboard-avahi.service` | mDNS service advertisement (port 5001)                      |
+| `scripts/configure.sh`              | CLI config script (kept as fallback)                        |
 
 ## Config Values to Expose
 

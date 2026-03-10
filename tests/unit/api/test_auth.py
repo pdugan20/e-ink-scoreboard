@@ -70,7 +70,6 @@ class TestCSRFToken:
 
         monkeypatch.setattr(auth, "PASSWORD_FILE", str(tmp_path / "missing"))
         with app.test_request_context():
-
             token = auth.generate_csrf_token()
             assert len(token) == 64  # 32 bytes hex
             # Same call returns same token

@@ -1,80 +1,80 @@
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/"
+  - package-ecosystem: 'pip'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
-      timezone: "America/New_York"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
+      timezone: 'America/New_York'
     open-pull-requests-limit: 10
     commit-message:
-      prefix: "deps"
-      include: "scope"
+      prefix: 'deps'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "python"
+      - 'dependencies'
+      - 'python'
     assignees:
-      - "pdugan20"
+      - 'pdugan20'
     reviewers:
-      - "pdugan20"
+      - 'pdugan20'
     groups:
       python-dependencies:
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
 
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
-      timezone: "America/New_York"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
+      timezone: 'America/New_York'
     open-pull-requests-limit: 10
     commit-message:
-      prefix: "deps"
-      prefix-development: "deps-dev"
-      include: "scope"
+      prefix: 'deps'
+      prefix-development: 'deps-dev'
+      include: 'scope'
     labels:
-      - "dependencies"
-      - "npm"
+      - 'dependencies'
+      - 'npm'
     assignees:
-      - "pdugan20"
+      - 'pdugan20'
     reviewers:
-      - "pdugan20"
+      - 'pdugan20'
     groups:
       dev-dependencies:
-        dependency-type: "development"
+        dependency-type: 'development'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
       production-dependencies:
-        dependency-type: "production"
+        dependency-type: 'production'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
-      timezone: "America/New_York"
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
+      timezone: 'America/New_York'
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "ci"
+      prefix: 'ci'
     labels:
-      - "dependencies"
-      - "github-actions"
+      - 'dependencies'
+      - 'github-actions'
     assignees:
-      - "pdugan20"
+      - 'pdugan20'
     reviewers:
-      - "pdugan20"
+      - 'pdugan20'
     groups:
       github-actions:
-        patterns: ["*"]
+        patterns: ['*']
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'

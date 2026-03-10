@@ -41,7 +41,11 @@ def preview_display():
         mode = data.get("mode", "live")
         if mode not in VALID_MODES:
             return (
-                jsonify({"error": f"Invalid mode: {mode}. Must be one of: {sorted(VALID_MODES)}"}),
+                jsonify(
+                    {
+                        "error": f"Invalid mode: {mode}. Must be one of: {sorted(VALID_MODES)}"
+                    }
+                ),
                 400,
             )
 
