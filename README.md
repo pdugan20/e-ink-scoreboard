@@ -26,13 +26,10 @@ team news screensaver.
 - **MicroSD Card** - 16GB minimum, Class 10 or better
 - **USB-C Power Supply** - 5V 2.5A minimum
 
-## Getting Started
+## Setup
 
-### Raspberry Pi
-
-**New to Raspberry Pi?** The
-[Raspberry Pi Setup Guide](docs/RASPBERRY_PI_SETUP.md) walks through everything
-from flashing the SD card to a working scoreboard.
+The [Raspberry Pi Setup Guide](docs/RASPBERRY_PI_SETUP.md) walks through
+everything from flashing the SD card to a working scoreboard.
 
 If you already have a booted Pi with SSH access:
 
@@ -44,10 +41,30 @@ cd e-ink-scoreboard
 sudo reboot           # Apply hardware changes, scoreboard starts automatically
 ```
 
-After reboot, access the scoreboard at `http://scoreboard.local:5001` and
-configure settings at `http://scoreboard.local:5001/settings`.
+After reboot, the scoreboard is accessible at `http://scoreboard.local:5001`.
 
-### Mac Development
+## Configuration
+
+Open `http://scoreboard.local:5001/settings` from any browser on your network
+to configure teams, timezone, theme, refresh interval, WiFi, and more.
+
+All settings changes take effect on the next display refresh. No SSH required.
+
+## Documentation
+
+| Guide                                            | Description                                       |
+| ------------------------------------------------ | ------------------------------------------------- |
+| [Raspberry Pi Setup](docs/RASPBERRY_PI_SETUP.md) | Complete setup from SD card to working scoreboard |
+| [Troubleshooting](docs/TROUBLESHOOTING.md)       | Common issues and solutions                       |
+| [Services](docs/SERVICES.md)                     | Systemd service architecture and management       |
+| [API Reference](docs/API.md)                     | Full API endpoint documentation                   |
+| [API Examples](docs/API_EXAMPLES.md)             | Curl examples and sample responses                |
+
+## Contributing
+
+### Development Environment
+
+Clone the repo and set up a local dev environment on Mac:
 
 ```bash
 git clone https://github.com/pdugan20/e-ink-scoreboard.git
@@ -58,6 +75,8 @@ pip install -r requirements-dev.txt
 playwright install chromium
 ```
 
+Start the dev server and preview the display:
+
 ```bash
 python src/dev_server.py --port 5001    # Start web server
 python src/eink_display.py --once       # Take screenshot (in another terminal)
@@ -66,38 +85,17 @@ python src/eink_display.py --once       # Take screenshot (in another terminal)
 - Live data: <http://localhost:5001/display>
 - Test data: <http://localhost:5001/display?test=true>
 
-## Configuration
-
-Open `http://scoreboard.local:5001/settings` to configure teams, timezone,
-theme, refresh interval, and more from any browser on your network.
-
-For direct config file editing, see the
-[Raspberry Pi Setup Guide](docs/RASPBERRY_PI_SETUP.md#maintenance).
-
-## Documentation
-
-| Guide                                              | Description                                       |
-| -------------------------------------------------- | ------------------------------------------------- |
-| [Raspberry Pi Setup](docs/RASPBERRY_PI_SETUP.md)   | Complete setup from SD card to working scoreboard |
-| [Troubleshooting](docs/TROUBLESHOOTING.md)         | Common issues and solutions                       |
-| [Services](docs/SERVICES.md)                       | Systemd service architecture and management       |
-| [API Reference](docs/API.md)                       | Full API endpoint documentation                   |
-| [API Examples](docs/API_EXAMPLES.md)               | Curl examples and sample responses                |
-| [Testing](docs/TESTING.md)                         | Test patterns, conventions, and running tests     |
-| [Contributing](CONTRIBUTING.md)                    | Development setup and code quality standards      |
-| [Logging Style Guide](docs/LOGGING_STYLE_GUIDE.md) | Log message formatting conventions                |
-
-## Development
+### Code Quality
 
 ```bash
-make install        # Install all dependencies
 make install-hooks  # Install pre-commit hooks
 make check          # Run all linters and formatters
 make test           # Run all tests (Python + JavaScript)
 make test-coverage  # Run with coverage reports
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full development setup.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for code style, testing conventions, and
+CI requirements.
 
 ### Project Structure
 
@@ -114,3 +112,11 @@ tests/                     # Test suite (unit, integration, JS)
 scripts/                   # Pi installation and setup scripts
 docs/                      # Documentation
 ```
+
+### Additional Developer Docs
+
+| Guide                                                | Description                                   |
+| ---------------------------------------------------- | --------------------------------------------- |
+| [Testing](docs/TESTING.md)                           | Test patterns, conventions, and running tests |
+| [Logging Style Guide](docs/LOGGING_STYLE_GUIDE.md)   | Log message formatting conventions            |
+| [Timeout Architecture](docs/TIMEOUT_ARCHITECTURE.md) | Screenshot timeout strategy deep-dive         |
