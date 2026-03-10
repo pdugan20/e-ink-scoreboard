@@ -15,8 +15,8 @@ to a working scoreboard on your wall.
   800x480 e-ink display. Connects directly to the GPIO header.
 - **MicroSD Card** - 16GB minimum, 32GB recommended. Use a Class 10 or better
   card from a reputable brand (SanDisk, Samsung).
-- **USB-C Power Supply** - 5V 2.5A minimum. The official Raspberry Pi power
-  supply is recommended.
+- **[Micro USB Power Supply](https://www.raspberrypi.com/products/micro-usb-power-supply/)** -
+  5V 2.5A minimum. The official Raspberry Pi power supply is recommended.
 
 ### Before You Start
 

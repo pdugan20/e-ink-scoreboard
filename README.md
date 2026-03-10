@@ -23,8 +23,10 @@ team news screensaver.
   Must be the Zero 2 W (with WiFi). The original Zero is too slow.
 - **[Inky Impression 7.3"](https://shop.pimoroni.com/products/inky-impression-7-3?variant=55186435244411)** -
   800x480, 7-color e-ink display. Connects directly to the GPIO header.
-- **MicroSD Card** - 16GB minimum, Class 10 or better
-- **USB-C Power Supply** - 5V 2.5A minimum
+- **[MicroSD Card](https://www.amazon.com/s?k=microSDHC)** -
+  16GB minimum, Class 10 or better
+- **[Micro USB Power Supply](https://www.raspberrypi.com/products/micro-usb-power-supply/)** -
+  5V 2.5A minimum
 
 ## Setup
 
@@ -104,7 +106,7 @@ src/                       # Core application
 ├── api/                   # API endpoints and data fetching
 ├── display/               # Display controllers
 ├── services/              # Business logic
-├── assets/logos/           # Team and league logos
+├── assets/logos/          # Team and league logos
 ├── static/                # CSS, JS, static assets
 └── test-data/             # Test game data
 
