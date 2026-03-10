@@ -12,9 +12,14 @@ Monitors:
 4. Heartbeat file updates
 5. Log activity
 
+Thresholds scale with the configured refresh_interval from eink_config.json.
+A startup grace period avoids false positives while the display service
+takes its first screenshot.
+
 Escalates to full system reboot after repeated restart failures.
 """
 
+import json
 import logging
 import os
 import signal
@@ -35,10 +40,9 @@ HEARTBEAT_PATH = os.environ.get("EINK_HEARTBEAT_PATH", "/tmp/eink_heartbeat")
 LOG_PATH = os.environ.get(
     "EINK_LOG_PATH", os.path.expanduser("~/logs/eink_display.log")
 )
-MAX_SCREENSHOT_AGE_MINUTES = int(os.environ.get("EINK_MAX_SCREENSHOT_AGE", "8"))
-MAX_HEARTBEAT_AGE_SECONDS = int(os.environ.get("EINK_MAX_HEARTBEAT_AGE", "120"))
 CHECK_INTERVAL = int(os.environ.get("EINK_CHECK_INTERVAL", "30"))
 SERVICE_NAME = os.environ.get("EINK_SERVICE_NAME", "sports-display.service")
+CONFIG_PATH = os.environ.get("EINK_CONFIG_PATH", "src/eink_config.json")
 
 # Thresholds
 MAX_MEMORY_MB = 100  # Restart if process uses more than this
@@ -47,17 +51,71 @@ MIN_FREE_MEMORY_MB = 150  # Restart if system memory drops below this
 MAX_CONSECUTIVE_FAILURES = 3  # Restart after this many check failures
 
 
+def load_refresh_interval():
+    """Read refresh_interval from eink_config.json."""
+    try:
+        if os.path.exists(CONFIG_PATH):
+            with open(CONFIG_PATH) as f:
+                config = json.load(f)
+            interval = int(config.get("refresh_interval", 360))
+            logger.info(f"Loaded refresh_interval from config: {interval}s")
+            return interval
+    except Exception as e:
+        logger.warning(f"Could not read config, using default: {e}")
+    return 360
+
+
+def compute_thresholds(refresh_interval):
+    """Derive watchdog thresholds from the configured refresh interval.
+
+    Returns a dict with:
+        max_screenshot_age_minutes: how old a screenshot can be before it's stale
+        max_heartbeat_age_seconds: how old the heartbeat file can be
+        log_inactivity_seconds: how long without log writes before flagging
+        startup_grace_seconds: how long to skip checks after watchdog start
+    """
+    refresh_minutes = refresh_interval / 60
+
+    return {
+        # Screenshot can be up to 2x the refresh interval + 5 min buffer,
+        # minimum 10 minutes (covers the default 6-min interval)
+        "max_screenshot_age_minutes": max(10, refresh_minutes * 2 + 5),
+        # Heartbeat thread writes every 30s, so 120s gives 4x headroom
+        "max_heartbeat_age_seconds": 120,
+        # Log inactivity: refresh interval + 5 min buffer, minimum 10 min
+        "log_inactivity_seconds": max(600, refresh_interval + 300),
+        # Grace period: enough time for server wait (60s) + memory wait (300s)
+        # + first screenshot (90s), scaled up for longer intervals
+        "startup_grace_seconds": max(300, refresh_interval + 120),
+    }
+
+
 class WatchdogMonitor:
     def __init__(self):
         self.last_restart = datetime.now() - timedelta(hours=1)
         self.consecutive_failures = 0
         self.last_screenshot_time = None
         self.frozen_indicators = set()
+        self.startup_time = time.time()
+
+        # Load config-aware thresholds
+        self.refresh_interval = load_refresh_interval()
+        self.thresholds = compute_thresholds(self.refresh_interval)
 
         # Reboot escalation tracking
         self.restart_timestamps = []
         self.max_restarts_before_reboot = 3
         self.reboot_window_seconds = 3600  # 1 hour
+
+    def _in_grace_period(self) -> bool:
+        """Check if we're still in the startup grace period."""
+        elapsed = time.time() - self.startup_time
+        grace = self.thresholds["startup_grace_seconds"]
+        if elapsed < grace:
+            remaining = grace - elapsed
+            logger.debug(f"Startup grace period: {remaining:.0f}s remaining")
+            return True
+        return False
 
     def check_heartbeat(self) -> bool:
         """Check if heartbeat file is being updated."""
@@ -67,8 +125,9 @@ class WatchdogMonitor:
                 return False
 
             age = time.time() - os.path.getmtime(HEARTBEAT_PATH)
-            if age > MAX_HEARTBEAT_AGE_SECONDS:
-                logger.warning(f"Heartbeat stale: {age:.0f}s old")
+            max_age = self.thresholds["max_heartbeat_age_seconds"]
+            if age > max_age:
+                logger.warning(f"Heartbeat stale: {age:.0f}s old (max {max_age}s)")
                 return False
 
             return True
@@ -84,8 +143,9 @@ class WatchdogMonitor:
                 return False
 
             age_minutes = (time.time() - os.path.getmtime(SCREENSHOT_PATH)) / 60
+            max_age = self.thresholds["max_screenshot_age_minutes"]
 
-            # Track if screenshot is stuck
+            # Track if screenshot is stuck (same mtime across multiple checks)
             current_mtime = os.path.getmtime(SCREENSHOT_PATH)
             if self.last_screenshot_time == current_mtime:
                 self.consecutive_failures += 1
@@ -96,8 +156,10 @@ class WatchdogMonitor:
                 self.last_screenshot_time = current_mtime
                 self.consecutive_failures = 0
 
-            if age_minutes > MAX_SCREENSHOT_AGE_MINUTES:
-                logger.warning(f"Screenshot too old: {age_minutes:.1f} minutes")
+            if age_minutes > max_age:
+                logger.warning(
+                    f"Screenshot too old: {age_minutes:.1f} min (max {max_age:.0f} min)"
+                )
                 return False
 
             return True
@@ -197,8 +259,11 @@ class WatchdogMonitor:
 
             # Check last modification time
             age_seconds = time.time() - os.path.getmtime(LOG_PATH)
-            if age_seconds > 300:  # No logs in 5 minutes
-                logger.warning(f"No log activity for {age_seconds:.0f} seconds")
+            max_age = self.thresholds["log_inactivity_seconds"]
+            if age_seconds > max_age:
+                logger.warning(
+                    f"No log activity for {age_seconds:.0f}s (max {max_age}s)"
+                )
                 return False
 
             return True
@@ -228,7 +293,7 @@ class WatchdogMonitor:
         return False
 
     def force_restart(self, reason: str):
-        """Force restart the service with aggressive cleanup."""
+        """Restart the display service using systemctl restart."""
         # Track restart and check if we should escalate to reboot
         self.restart_timestamps.append(datetime.now())
         if self._check_reboot_escalation():
@@ -237,72 +302,57 @@ class WatchdogMonitor:
         logger.error(f"FORCE RESTART: {reason}")
 
         try:
-            # Step 1: Try graceful stop
-            logger.info("Attempting graceful stop...")
-            subprocess.run(
-                ["sudo", "systemctl", "stop", SERVICE_NAME], timeout=10, check=False
-            )
-            time.sleep(2)
-
-        except subprocess.TimeoutExpired:
-            logger.warning("Graceful stop timed out")
-
-        try:
-            # Step 2: Kill all related processes
-            logger.info("Killing all related processes...")
-            kill_commands = [
-                ["sudo", "pkill", "-9", "-f", "eink_display.py"],
-                ["sudo", "pkill", "-9", "-f", "screenshot_worker.py"],
-                ["sudo", "pkill", "-9", "-f", "display_worker.py"],
-                ["sudo", "pkill", "-9", "-f", "playwright"],
-                ["sudo", "pkill", "-9", "-f", "chromium"],
-                ["sudo", "pkill", "-9", "-f", "chrome"],
-            ]
-
-            for cmd in kill_commands:
-                subprocess.run(cmd, timeout=5, check=False)
-
-            time.sleep(2)
-
-            # Step 3: Clean up temp files
-            logger.info("Cleaning temp files...")
-            temp_files = [SCREENSHOT_PATH, HEARTBEAT_PATH, "/tmp/.X99-lock"]
-            for f in temp_files:
-                try:
-                    if os.path.exists(f):
-                        os.remove(f)
-                except (OSError, PermissionError):
-                    pass
-
-            # Step 4: Clear system caches (helps with memory)
-            logger.info("Clearing system caches...")
-            subprocess.run(["sudo", "sync"], timeout=5, check=False)
-            subprocess.run(
-                ["sudo", "sh", "-c", "echo 3 > /proc/sys/vm/drop_caches"],
-                timeout=5,
+            # Use systemctl restart (allowed by sudoers) instead of
+            # stop/kill/start which requires permissions we don't have
+            logger.info("Restarting display service...")
+            result = subprocess.run(
+                ["sudo", "systemctl", "restart", SERVICE_NAME],
+                timeout=30,
+                capture_output=True,
+                text=True,
                 check=False,
             )
 
-            # Step 5: Start service
-            logger.info("Starting service...")
-            subprocess.run(
-                ["sudo", "systemctl", "start", SERVICE_NAME], timeout=30, check=True
-            )
+            if result.returncode == 0:
+                logger.info("Service restarted successfully")
+            else:
+                logger.error(
+                    f"Service restart failed (exit {result.returncode}): "
+                    f"{result.stderr.strip()}"
+                )
 
-            logger.info("Service restarted successfully")
             self.last_restart = datetime.now()
             self.consecutive_failures = 0
             self.frozen_indicators.clear()
 
+            # Reset grace period so we don't immediately flag the restarted service
+            self.startup_time = time.time()
+
             # Wait for service to stabilize
             time.sleep(30)
 
+        except subprocess.TimeoutExpired:
+            logger.error("Service restart timed out")
         except Exception as e:
             logger.error(f"Force restart failed: {e}")
             logger.critical("Unable to restart service, manual intervention needed")
 
     def run_checks(self) -> bool:
         """Run all health checks."""
+        in_grace = self._in_grace_period()
+
+        # During grace period, only check process health and system resources
+        if in_grace:
+            process_ok, resources_ok = self.check_process_and_resources()
+            if not process_ok:
+                logger.warning("Process unhealthy during grace period")
+                return False
+            if not resources_ok:
+                logger.warning("Resources unhealthy during grace period")
+                return False
+            return True
+
+        # Normal operation: run all checks
         checks = {
             "heartbeat": self.check_heartbeat(),
             "screenshot": self.check_screenshot_age(),
@@ -352,15 +402,21 @@ class WatchdogMonitor:
 
     def run(self):
         """Main watchdog loop."""
+        thresholds = self.thresholds
         logger.info("=" * 60)
         logger.info(f"Watchdog Monitor Started for {SERVICE_NAME}")
+        logger.info(f"Refresh interval: {self.refresh_interval}s")
         logger.info(
-            f"Screenshot: {SCREENSHOT_PATH} (max {MAX_SCREENSHOT_AGE_MINUTES} min)"
+            f"Screenshot: {SCREENSHOT_PATH} "
+            f"(max {thresholds['max_screenshot_age_minutes']:.0f} min)"
         )
         logger.info(
-            f"Heartbeat: {HEARTBEAT_PATH} (max {MAX_HEARTBEAT_AGE_SECONDS} sec)"
+            f"Heartbeat: {HEARTBEAT_PATH} "
+            f"(max {thresholds['max_heartbeat_age_seconds']}s)"
         )
-        logger.info(f"Check interval: {CHECK_INTERVAL} seconds")
+        logger.info(f"Log inactivity: max {thresholds['log_inactivity_seconds']}s")
+        logger.info(f"Startup grace period: {thresholds['startup_grace_seconds']}s")
+        logger.info(f"Check interval: {CHECK_INTERVAL}s")
         logger.info(
             f"Reboot escalation: after {self.max_restarts_before_reboot} restarts "
             f"within {self.reboot_window_seconds // 60} minutes"

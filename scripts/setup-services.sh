@@ -91,12 +91,12 @@ else
     echo "Creating basic service file..."
     sudo tee /etc/systemd/system/sports-display.service > /dev/null <<EOF
 [Unit]
-Description=E-Ink Scoreboard Display
+Description=Sports E-Ink Display Service
 After=network.target sports-server.service
 Requires=sports-server.service
 
 [Service]
-Type=notify
+Type=simple
 User=$USER
 WorkingDirectory=$PROJECT_DIR
 Environment="PATH=$VENV_PATH/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -106,16 +106,15 @@ ExecStart=$VENV_PATH/bin/python src/eink_display.py --config src/eink_config.jso
 Restart=always
 RestartSec=30
 
-# Watchdog - systemd will restart if no heartbeat in 3 minutes
-WatchdogSec=180
-
-# Resource limits
+# Resource limits to prevent runaway memory usage
 MemoryMax=200M
 MemorySwapMax=100M
 
-# Kill timeout
+# Kill timeout - if service doesn't stop gracefully in 30s, force kill
 TimeoutStopSec=30
 KillMode=mixed
+KillSignal=SIGTERM
+FinalKillSignal=SIGKILL
 
 [Install]
 WantedBy=multi-user.target

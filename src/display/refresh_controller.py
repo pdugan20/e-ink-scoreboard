@@ -230,20 +230,15 @@ class RefreshController:
                                 f"Sleeping for {sleep_seconds / 3600:.1f} hours until next day "
                                 f"({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
                             )
-                            # Sleep in 5-minute chunks so heartbeat stays fresh
-                            # and system can respond to signals
+                            # Sleep in 5-minute chunks so system can respond
+                            # to signals. Heartbeat is handled by the daemon
+                            # thread in eink_display.py.
                             chunk_seconds = 300
                             remaining = sleep_seconds
                             while remaining > 0:
                                 sleep_time = min(chunk_seconds, remaining)
                                 time.sleep(sleep_time)
                                 remaining -= sleep_time
-                                # Update heartbeat file
-                                try:
-                                    with open("/tmp/eink_heartbeat", "w") as f:
-                                        f.write(str(time.time()))
-                                except Exception:
-                                    pass
                             continue  # Skip the regular sleep interval and restart the loop
                         else:
                             # Edge case: games exist but no clear status

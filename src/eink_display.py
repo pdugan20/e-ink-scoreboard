@@ -109,10 +109,10 @@ class EinkDisplayController:
                     # Update heartbeat file
                     with open(heartbeat_path, "w") as f:
                         f.write(str(time.time()))
-                    time.sleep(60)  # Update every 60 seconds
+                    time.sleep(30)  # Update every 30 seconds
                 except Exception as e:
                     logger.error(f"Heartbeat update failed - {e}")
-                    time.sleep(60)
+                    time.sleep(30)
 
         file_thread = threading.Thread(target=file_heartbeat, daemon=True)
         file_thread.start()
