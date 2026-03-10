@@ -196,7 +196,7 @@ def settings():
 def display():
     """Serve clean display HTML for screenshots (no dev UI)"""
     try:
-        with open("src/preview.html") as f:
+        with open("src/display.html") as f:
             return f.read()
     except FileNotFoundError:
         return "Display template not found", 404
