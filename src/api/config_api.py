@@ -298,7 +298,19 @@ def update_config():
             write_js_config(js_updates)
 
         logger.info(f"Configuration updated: {list(data.keys())}")
-        return jsonify({"status": "ok", "updated": list(data.keys())})
+
+        # Restart display service to pick up new refresh interval
+        service_restarted = False
+        if "refresh_interval" in data:
+            service_restarted = _restart_display_service()
+
+        return jsonify(
+            {
+                "status": "ok",
+                "updated": list(data.keys()),
+                "service_restarted": service_restarted,
+            }
+        )
 
     except Exception as e:
         logger.error(f"Error updating config: {e}")
@@ -403,6 +415,28 @@ def _get_service_status():
         return services
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return None
+
+
+def _restart_display_service():
+    """Restart sports-display service to pick up config changes."""
+    try:
+        import subprocess
+
+        result = subprocess.run(
+            ["sudo", "systemctl", "restart", "sports-display.service"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if result.returncode == 0:
+            logger.info("Display service restarted after config change")
+            return True
+        else:
+            logger.error(f"Failed to restart display service: {result.stderr.strip()}")
+            return False
+    except Exception as e:
+        logger.error(f"Error restarting display service: {e}")
+        return False
 
 
 # Allowed services for restart (whitelist for safety)

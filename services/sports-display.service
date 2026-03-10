@@ -4,7 +4,7 @@ After=network.target sports-server.service
 Requires=sports-server.service
 
 [Service]
-Type=notify
+Type=simple
 User={{USER}}
 WorkingDirectory={{PROJECT_DIR}}
 Environment="PATH={{VENV_PATH}}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -13,10 +13,6 @@ ExecStart={{VENV_PATH}}/bin/python src/eink_display.py --config src/eink_config.
 # Restart policy
 Restart=always
 RestartSec=30
-
-# Watchdog - systemd will restart if no watchdog ping in 3 minutes
-WatchdogSec=180
-# Note: The Python script needs to implement sd_notify for this to work fully
 
 # Resource limits to prevent runaway memory usage
 MemoryMax=200M
