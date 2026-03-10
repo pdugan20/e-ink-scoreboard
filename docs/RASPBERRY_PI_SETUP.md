@@ -135,9 +135,11 @@ If using an IP address instead: `ssh pi@192.168.1.xxx` (replace with actual IP).
 
 ## Part 3: Install the Scoreboard
 
-Once you're connected via SSH, clone the project and run the setup script:
+Once you're connected via SSH, install git (not included in Raspberry Pi OS
+Lite), clone the project, and run the setup script:
 
 ```bash
+sudo apt update && sudo apt install -y git
 git clone https://github.com/pdugan20/e-ink-scoreboard.git
 cd e-ink-scoreboard
 ./scripts/setup.sh
