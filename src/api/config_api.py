@@ -423,7 +423,12 @@ def _restart_display_service():
         import subprocess
 
         result = subprocess.run(
-            ["/usr/bin/sudo", "/usr/bin/systemctl", "restart", "sports-display.service"],
+            [
+                "/usr/bin/sudo",
+                "/usr/bin/systemctl",
+                "restart",
+                "sports-display.service",
+            ],
             capture_output=True,
             text=True,
             timeout=30,
