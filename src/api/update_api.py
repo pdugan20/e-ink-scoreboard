@@ -111,12 +111,19 @@ def apply_update():
         logger.info("Starting software update from %s", old_version)
 
         # Run upgrade script with extended timeout (deps + playwright can be slow)
+        # Ensure standard PATH is available (systemd services have minimal PATH)
+        env = os.environ.copy()
+        env["PATH"] = (
+            "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:"
+            + env.get("PATH", "")
+        )
         result = subprocess.run(
             ["/bin/bash", UPGRADE_SCRIPT],
             capture_output=True,
             text=True,
             timeout=300,
             cwd=PROJECT_DIR,
+            env=env,
         )
 
         # Capture new commit after upgrade
