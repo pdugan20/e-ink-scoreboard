@@ -38,32 +38,38 @@ export async function loadTestData() {
 }
 
 export function loadMLBData() {
+  // Set fake date for test mode (Saturday, August 16 at 4:30 PM ET)
+  window.testDate = new Date('2025-08-16T16:30:00-04:00');
   updateHeaderTitle('MLB');
   renderGames(mlbTestData);
 }
 
 export function loadMLBScheduledData() {
+  window.testDate = new Date('2025-08-16T11:00:00-04:00');
   updateHeaderTitle('MLB');
   renderGames(mlbScheduledData);
 }
 
 export function loadMLBEmptyData() {
+  window.testDate = new Date('2025-02-10T12:00:00-05:00');
   updateHeaderTitle('MLB');
   renderGames(mlbEmptyData);
 }
 
 export function loadNFLData() {
+  window.testDate = new Date('2025-10-12T16:00:00-04:00');
   updateHeaderTitle('NFL');
   renderGames(nflTestData, 'nfl');
 }
 
 export function loadCFBData() {
+  window.testDate = new Date('2025-10-11T15:00:00-04:00');
   updateHeaderTitle('CFB');
   renderGames(cfbTestData, 'cfb');
 }
 
 export async function fetchLiveData() {
-  // Try to fetch MLB data first
+  window.testDate = null;
   const league = 'MLB';
 
   try {

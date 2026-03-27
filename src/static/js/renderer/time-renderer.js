@@ -4,7 +4,7 @@ import { convertTimeToTimezone } from '../utils/teams.js';
 
 export function updateHeaderTitle(league) {
   const headerTitle = document.getElementById('header-title');
-  const today = new Date();
+  const today = window.testDate || new Date();
   const dayName = DAYS[today.getDay()];
   const monthName = MONTHS[today.getMonth()];
   const dayOfMonth = today.getDate();
@@ -26,7 +26,7 @@ export function updateCurrentTime(customText = null) {
   const currentTimeEl = document.getElementById('current-time');
   if (!currentTimeEl) return;
 
-  const now = new Date();
+  const now = window.testDate || new Date();
 
   // Convert to display timezone
   const timeOptions = {

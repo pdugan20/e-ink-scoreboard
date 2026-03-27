@@ -82,12 +82,100 @@
   },
   {
     "away_record": "69-69",
-    "away_score": 0,
+    "away_score": 4,
     "away_team": "Seattle Mariners",
     "home_record": "60-78",
-    "home_score": 0,
+    "home_score": 2,
     "home_team": "Athletics",
-    "status": "7:07 PM ET",
-    "venue": "Sutter Health Park"
+    "status": "Top 6th",
+    "bases": {
+      "first": true,
+      "second": false,
+      "third": false
+    },
+    "outs": 1
+  },
+  {
+    "away_record": "82-56",
+    "away_score": 5,
+    "away_team": "New York Yankees",
+    "home_record": "70-68",
+    "home_score": 7,
+    "home_team": "Boston Red Sox",
+    "status": "Final"
+  },
+  {
+    "away_record": "74-64",
+    "away_score": 4,
+    "away_team": "New York Mets",
+    "home_record": "84-54",
+    "home_score": 4,
+    "home_team": "Philadelphia Phillies",
+    "status": "Top 8th",
+    "bases": {
+      "first": false,
+      "second": false,
+      "third": true
+    },
+    "outs": 1
+  },
+  {
+    "away_record": "78-60",
+    "away_score": 6,
+    "away_team": "Atlanta Braves",
+    "home_record": "50-88",
+    "home_score": 2,
+    "home_team": "Miami Marlins",
+    "status": "Final"
+  },
+  {
+    "away_record": "72-66",
+    "away_score": 3,
+    "away_team": "Toronto Blue Jays",
+    "home_record": "63-75",
+    "home_score": 3,
+    "home_team": "Pittsburgh Pirates",
+    "status": "Bot 9th",
+    "bases": {
+      "first": true,
+      "second": false,
+      "third": false
+    },
+    "outs": 2
+  },
+  {
+    "away_record": "73-65",
+    "away_score": 1,
+    "away_team": "Chicago Cubs",
+    "home_record": "71-67",
+    "home_score": 0,
+    "home_team": "San Francisco Giants",
+    "status": "Top 3rd",
+    "bases": {
+      "first": false,
+      "second": false,
+      "third": false
+    },
+    "outs": 0
+  },
+  {
+    "away_record": "55-83",
+    "away_score": 0,
+    "away_team": "Colorado Rockies",
+    "home_record": "62-76",
+    "home_score": 0,
+    "home_team": "Washington Nationals",
+    "status": "8:05 PM ET",
+    "venue": "Nationals Park"
+  },
+  {
+    "away_record": "58-80",
+    "away_score": 0,
+    "away_team": "Los Angeles Angels",
+    "home_record": "67-71",
+    "home_score": 0,
+    "home_team": "Texas Rangers",
+    "status": "8:10 PM ET",
+    "venue": "Globe Life Field"
   }
 ]
