@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for E-Ink Scoreboard updates every 6 hours
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=6h
+RandomizedDelaySec=30min
+
+[Install]
+WantedBy=timers.target

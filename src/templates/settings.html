@@ -219,6 +219,38 @@
         </div>
       </section>
 
+      <!-- Software Update -->
+      <section class="setting-group">
+        <h2>Software Update</h2>
+        <p class="setting-description" id="update-status">
+          Checking for updates...
+        </p>
+        <div id="update-progress" style="display: none">
+          <p class="setting-description">
+            Updating... services will restart when complete.
+          </p>
+        </div>
+        <div class="service-actions">
+          <button
+            type="button"
+            class="btn-restart btn-restart-secondary"
+            id="update-check-btn"
+            onclick="checkForUpdates()"
+          >
+            Check Now
+          </button>
+          <button
+            type="button"
+            class="btn-restart"
+            id="update-apply-btn"
+            onclick="applyUpdate()"
+            style="display: none"
+          >
+            Update Now
+          </button>
+        </div>
+      </section>
+
       <!-- WiFi Management -->
       <section class="setting-group" id="wifi-section">
         <h2>WiFi Network</h2>
@@ -538,6 +570,155 @@
             btn.textContent = originalText;
           });
       }
+
+      // ── Software Update ──────────────────────────────────────────
+
+      function checkForUpdates() {
+        var btn = document.getElementById('update-check-btn');
+        var originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Checking...';
+
+        fetch('/api/update/status')
+          .then(function (response) {
+            return response.json().then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            if (!result.ok) {
+              showToast('Failed to check for updates', 'error');
+              return;
+            }
+            renderUpdateStatus(result.data);
+          })
+          .catch(function () {
+            showToast('Network error checking for updates', 'error');
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = originalText;
+          });
+      }
+
+      function renderUpdateStatus(data) {
+        var statusEl = document.getElementById('update-status');
+        var applyBtn = document.getElementById('update-apply-btn');
+        var version = data.current_commit;
+        if (data.current_date) {
+          version += ' (' + data.current_date + ')';
+        }
+
+        if (data.update_available) {
+          statusEl.textContent =
+            'Version ' + version + ' — ' + data.commits_behind + ' update(s) available';
+          applyBtn.style.display = 'inline-block';
+        } else {
+          statusEl.textContent = 'Version ' + version + ' — up to date';
+          applyBtn.style.display = 'none';
+        }
+      }
+
+      function applyUpdate() {
+        if (
+          !confirm(
+            'Apply software update? Services will restart and the page will reload.'
+          )
+        ) {
+          return;
+        }
+
+        var applyBtn = document.getElementById('update-apply-btn');
+        var checkBtn = document.getElementById('update-check-btn');
+        var progressDiv = document.getElementById('update-progress');
+
+        applyBtn.disabled = true;
+        applyBtn.textContent = 'Updating...';
+        checkBtn.disabled = true;
+        progressDiv.style.display = 'block';
+
+        fetch('/api/update/apply', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': '{{ csrf_token() }}',
+          },
+          body: JSON.stringify({}),
+        })
+          .then(function (response) {
+            return response.json().then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            if (result.ok) {
+              showToast(
+                'Updated ' +
+                  result.data.old_version +
+                  ' -> ' +
+                  result.data.new_version,
+                'success'
+              );
+              // Server may have restarted, reload after a short delay
+              setTimeout(function () {
+                window.location.reload();
+              }, 3000);
+            } else {
+              showToast(
+                'Update failed: ' + (result.data.error || 'Unknown error'),
+                'error'
+              );
+              progressDiv.style.display = 'none';
+              applyBtn.disabled = false;
+              applyBtn.textContent = 'Update Now';
+              checkBtn.disabled = false;
+            }
+          })
+          .catch(function () {
+            // Network error likely means server restarted -- poll until it's back
+            pollForServer();
+          });
+      }
+
+      function pollForServer() {
+        var attempts = 0;
+        var maxAttempts = 30;
+        var interval = setInterval(function () {
+          attempts++;
+          fetch('/api/update/status?cached=true')
+            .then(function (response) {
+              if (response.ok) {
+                clearInterval(interval);
+                showToast('Update complete, reloading...', 'success');
+                setTimeout(function () {
+                  window.location.reload();
+                }, 1000);
+              }
+            })
+            .catch(function () {
+              // Server still down, keep polling
+            });
+          if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            showToast(
+              'Server has not come back after update. Check the Pi manually.',
+              'error'
+            );
+          }
+        }, 3000);
+      }
+
+      function showToast(message, type) {
+        var toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast show ' + type;
+        setTimeout(function () {
+          toast.className = 'toast';
+        }, 5000);
+      }
+
+      // Check for updates on page load
+      checkForUpdates();
 
       // Auto-save: debounce to avoid rapid-fire POSTs when clicking teams
       var _saveTimer = null;

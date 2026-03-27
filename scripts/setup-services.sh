@@ -164,6 +164,23 @@ sudo systemctl enable sports-server.service
 sudo systemctl enable sports-display.service
 sudo systemctl enable sports-watchdog.service
 
+# Install update check timer
+echo "[INFO] Installing update check timer..."
+if [ -f "services/scoreboard-update-check.service" ] && [ -f "services/scoreboard-update-check.timer" ]; then
+    sed -e "s|{{USER}}|$USER|g" \
+        -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
+        services/scoreboard-update-check.service | sudo tee /etc/systemd/system/scoreboard-update-check.service > /dev/null
+    sed -e "s|{{USER}}|$USER|g" \
+        -e "s|{{PROJECT_DIR}}|$PROJECT_DIR|g" \
+        services/scoreboard-update-check.timer | sudo tee /etc/systemd/system/scoreboard-update-check.timer > /dev/null
+    sudo systemctl daemon-reload
+    sudo systemctl enable scoreboard-update-check.timer
+    sudo systemctl start scoreboard-update-check.timer
+    echo "[SUCCESS] Update check timer installed (runs every 6 hours)"
+else
+    echo "[WARN] Update check timer templates not found, skipping"
+fi
+
 # Install sudoers rule for web config panel service management
 echo "[INFO] Installing sudoers rule for web config panel..."
 if [ -f "services/scoreboard-sudoers" ]; then

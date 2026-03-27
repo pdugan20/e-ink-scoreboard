@@ -25,6 +25,7 @@ from api.display_api import display_bp
 from api.scores_api import fetch_mlb_games, fetch_nfl_games
 from api.screensaver_api import get_screensaver_data
 from api.static_files import setup_static_routes
+from api.update_api import update_bp
 from api.wifi_api import wifi_bp
 
 app = Flask(__name__, template_folder="templates")
@@ -46,6 +47,7 @@ except FileNotFoundError:
 app.register_blueprint(auth_bp)
 app.register_blueprint(config_bp)
 app.register_blueprint(display_bp)
+app.register_blueprint(update_bp)
 app.register_blueprint(wifi_bp)
 
 # Make auth helpers available in templates

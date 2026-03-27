@@ -79,17 +79,20 @@
       import './static/js/constants/mlb-logos.js';
       import './static/js/constants/mlb-secondary-logos.js';
       import './static/js/constants/mlb-colors.js';
-      import { fetchLiveData, loadScreensaverData } from './static/js/data.js';
+      import { fetchLiveData, loadScreensaverData, loadTestData, loadMLBData } from './static/js/data.js';
       import { updateCurrentTime } from './static/js/renderer.js';
 
-      // Check URL parameters for screensaver mode
+      // Check URL parameters for display mode
       const urlParams = new URLSearchParams(window.location.search);
-      const useScreensaver = urlParams.get('screensaver') === 'true';
+      const mode = urlParams.get('mode');
 
-      // Initialize with live data or screensaver
+      // Initialize with live data, test data, or screensaver
       async function initDisplay() {
-        if (useScreensaver) {
+        if (mode === 'screensaver') {
           await loadScreensaverData();
+        } else if (mode === 'test') {
+          await loadTestData();
+          loadMLBData();
         } else {
           await fetchLiveData();
         }

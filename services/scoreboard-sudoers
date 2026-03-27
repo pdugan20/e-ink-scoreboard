@@ -6,10 +6,12 @@
 # Install with: sudo cp services/scoreboard-sudoers /etc/sudoers.d/scoreboard
 # Template variables ({{USER}}) are replaced by setup-services.sh
 
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sports-server.service
 {{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sports-display.service
 {{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart sports-watchdog.service
 {{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl status sports-display.service
 {{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl status sports-watchdog.service
 {{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl status sports-server.service
+{{USER}} ALL=(ALL) NOPASSWD: /usr/bin/systemctl daemon-reload
 {{USER}} ALL=(ALL) NOPASSWD: /usr/bin/nmcli dev wifi connect *
 {{USER}} ALL=(ALL) NOPASSWD: /usr/sbin/reboot

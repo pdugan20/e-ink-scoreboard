@@ -1,0 +1,11 @@
+[Unit]
+Description=E-Ink Scoreboard Update Check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User={{USER}}
+WorkingDirectory={{PROJECT_DIR}}
+ExecStart=/usr/bin/git -C {{PROJECT_DIR}} fetch origin
+TimeoutStartSec=60
