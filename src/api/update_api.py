@@ -41,9 +41,7 @@ def update_status():
         if not skip_fetch:
             fetch_result = _git("fetch", "origin", timeout=30)
             if fetch_result.returncode != 0:
-                logger.warning(
-                    "git fetch failed: %s", fetch_result.stderr.strip()
-                )
+                logger.warning("git fetch failed: %s", fetch_result.stderr.strip())
 
         # Get current commit
         head = _git("rev-parse", "--short", "HEAD")
