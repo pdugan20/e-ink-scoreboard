@@ -4,6 +4,7 @@ import {
   loadMLBData,
   loadMLBScheduledData,
   loadMLBEmptyData,
+  loadMLBAllFinalData,
   loadNFLData,
   loadCFBData,
   fetchLiveData,
@@ -101,6 +102,7 @@ function initResizable() {
 window.loadMLBData = loadMLBData;
 window.loadMLBScheduledData = loadMLBScheduledData;
 window.loadMLBEmptyData = loadMLBEmptyData;
+window.loadMLBAllFinalData = loadMLBAllFinalData;
 window.loadNFLData = loadNFLData;
 window.loadCFBData = loadCFBData;
 window.fetchLiveData = fetchLiveData;

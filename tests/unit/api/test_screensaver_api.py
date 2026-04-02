@@ -1,7 +1,7 @@
 """
 Unit tests for screensaver API functions.
 
-Tests the screensaver API config parsing logic.
+Tests the screensaver API config parsing logic and fallback behavior.
 """
 
 from unittest.mock import mock_open, patch
@@ -10,6 +10,7 @@ import pytest
 
 from src.api.screensaver_api import (
     get_favorite_teams_from_config,
+    get_screensaver_data_with_fallback,
 )
 
 
@@ -144,6 +145,57 @@ class TestFavoriteTeamsConfig:
         }
 
 
-# Note: ScreensaverService integration tests have been moved to
-# tests/integration/test_screensaver_integration.py
-# Only config parsing is tested here in unit tests
+@pytest.mark.unit
+class TestScreensaverFallback:
+    """Tests for feed type fallback logic."""
+
+    @patch("src.api.screensaver_api.get_screensaver_data")
+    def test_both_tries_photos_first(self, mock_get):
+        """When feed_type is 'both', photos is tried first."""
+        mock_get.side_effect = [
+            {"title": "Photo", "image_url": "http://img.jpg", "feed_source": "photos"},
+        ]
+        result = get_screensaver_data_with_fallback("mlb", "both")
+        assert result["feed_source"] == "photos"
+        mock_get.assert_called_once_with("mlb", "photos")
+
+    @patch("src.api.screensaver_api.get_screensaver_data")
+    def test_both_falls_back_to_news(self, mock_get):
+        """When photos fails in 'both' mode, falls back to news."""
+        mock_get.side_effect = [
+            {"error": "No photos", "title": None, "image_url": None},
+            {"title": "Article", "image_url": "http://img.jpg", "feed_source": "news"},
+        ]
+        result = get_screensaver_data_with_fallback("mlb", "both")
+        assert result["feed_source"] == "news"
+        assert mock_get.call_count == 2
+
+    @patch("src.api.screensaver_api.get_screensaver_data")
+    def test_news_falls_back_to_photos(self, mock_get):
+        """When news fails, falls back to photos."""
+        mock_get.side_effect = [
+            {"error": "No news", "title": None, "image_url": None},
+            {"title": "Photo", "image_url": "http://img.jpg", "feed_source": "photos"},
+        ]
+        result = get_screensaver_data_with_fallback("mlb", "news")
+        assert result["feed_source"] == "photos"
+
+    @patch("src.api.screensaver_api.get_screensaver_data")
+    def test_photos_falls_back_to_news(self, mock_get):
+        """When photos fails, falls back to news."""
+        mock_get.side_effect = [
+            {"error": "No photos", "title": None, "image_url": None},
+            {"title": "Article", "image_url": "http://img.jpg", "feed_source": "news"},
+        ]
+        result = get_screensaver_data_with_fallback("mlb", "photos")
+        assert result["feed_source"] == "news"
+
+    @patch("src.api.screensaver_api.get_screensaver_data")
+    def test_both_fail_returns_last_error(self, mock_get):
+        """When both sources fail, returns the last attempt's result."""
+        mock_get.side_effect = [
+            {"error": "No photos", "title": None, "image_url": None},
+            {"error": "No news", "title": None, "image_url": None},
+        ]
+        result = get_screensaver_data_with_fallback("mlb", "both")
+        assert "error" in result

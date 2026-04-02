@@ -53,8 +53,10 @@ src/
 │   ├── settings.html       # Web settings page (HTMX)
 │   └── login.html          # Admin login page
 ├── services/               # Business logic
-│   └── screensaver_service.py # News article fetching
+│   └── screensaver_service.py # News/photos article fetching
 ├── config/                 # Configuration
+│   ├── game_status.py      # Shared game status helpers
+│   └── team-rss-feeds.json # RSS feed URLs by team (news + photos)
 ├── utils/                  # Shared utilities
 ├── assets/logos/           # Team and league logos
 ├── static/                 # CSS, JS, static assets
@@ -81,6 +83,7 @@ services/                   # Systemd service and config templates
 - **Settings**: Web config panel at `/settings` using Jinja2 + HTMX (no build step)
 - **Display**: Playwright captures screenshots of the HTML page, sends to e-ink display
 - **Data**: MLB scores fetched from external API, rendered as game cards in a 3x5 grid
+- **Screensaver**: Shows team news articles or AP photos when no games active. Supports multiple feed sources per team (news + photos) with automatic fallback. Can trigger on no-game days or after the last game goes final.
 - **Discovery**: Avahi/mDNS advertises `scoreboard.local` on the local network
 
 ## Code Style
@@ -105,3 +108,6 @@ services/                   # Systemd service and config templates
 - Configuration lives in two files: `src/eink_config.json` (backend) and `src/static/js/config.js` (frontend)
 - Web settings panel reads/writes both config files via `/api/config`
 - Authentication is optional: when `src/.admin_password` exists, write endpoints require login
+- Screensaver config split: `screensaver_mode` lives in both config files (frontend needs it for trigger logic), `screensaver_feed_type` lives in `eink_config.json` only (backend-only)
+- Scores API returns wrapped response `{ games: [...], all_games_final: bool }` — game status helpers in `src/config/game_status.py` are shared between web API and display controller
+- RSS feed config (`team-rss-feeds.json`) uses nested format: `{ "team": { "news": "url", "photos": "url" } }`

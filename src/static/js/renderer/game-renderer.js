@@ -5,6 +5,8 @@ import {
   LEAGUES,
   GAME_STATUS,
   FEATURE_FLAGS,
+  screensaverMode,
+  SCREENSAVER_MODES,
 } from '../config.js';
 import {
   MLB_STATUS_PATTERNS,
@@ -41,7 +43,11 @@ function isFavoriteTeam(teamName, league) {
   }
 }
 
-export function renderGames(games, league = LEAGUES.MLB) {
+export function renderGames(
+  games,
+  league = LEAGUES.MLB,
+  allGamesFinal = false
+) {
   const container = document.getElementById('games');
   const display = document.getElementById('display');
   const header = document.getElementById('header');
@@ -68,14 +74,19 @@ export function renderGames(games, league = LEAGUES.MLB) {
 
   // Check for empty games array
   if (!games || games.length === 0) {
-    // Check if screensaver is enabled, and if so, try to show it instead of no-games message
-    if (FEATURE_FLAGS.SHOW_SCREENSAVER) {
+    if (screensaverMode !== SCREENSAVER_MODES.OFF) {
       tryShowScreensaver(league);
       return;
     }
 
     // Show "There are no games scheduled for today" message
     showNoGamesMessage();
+    return;
+  }
+
+  // Check if all games are final and after-last-game screensaver is enabled
+  if (allGamesFinal && screensaverMode === SCREENSAVER_MODES.AFTER_LAST_GAME) {
+    tryShowScreensaver(league);
     return;
   }
 

@@ -77,6 +77,14 @@ body {
   margin-bottom: 12px;
 }
 
+.setting-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-600, #555);
+  margin-bottom: 6px;
+}
+
 /* Select Dropdowns */
 
 .setting-select {

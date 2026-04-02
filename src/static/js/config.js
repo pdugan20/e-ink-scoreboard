@@ -1,18 +1,10 @@
 // Configuration and feature flags
 
 // Feature flags
-export const FEATURE_FLAGS = {
-  SHOW_STANDINGS: false,
-  EINK_OPTIMIZED_CONTRAST: true,
-  SHOW_SCREENSAVER: true,
-};
+export const FEATURE_FLAGS = { SHOW_STANDINGS: false, EINK_OPTIMIZED_CONTRAST: true, SHOW_SCREENSAVER: true };
 
 // Favorite team configuration
-export const favoriteTeams = {
-  mlb: ['Seattle Mariners'],
-  nfl: null,
-  cfb: null,
-};
+export const favoriteTeams = { mlb: ['Seattle Mariners'], nfl: null, cfb: null };
 
 // Timezone constants
 export const TIMEZONES = {
@@ -37,6 +29,16 @@ export const THEMES = {
 
 // Theme configuration
 export const currentTheme = THEMES.DEFAULT;
+
+// Screensaver mode constants
+export const SCREENSAVER_MODES = {
+  OFF: 'off',
+  NO_GAMES: 'no_games',
+  AFTER_LAST_GAME: 'after_last_game',
+};
+
+// Screensaver mode configuration
+export const screensaverMode = SCREENSAVER_MODES.NO_GAMES;
 
 // League constants
 export const LEAGUES = {

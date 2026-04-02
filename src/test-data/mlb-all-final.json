@@ -1,0 +1,181 @@
+[
+  {
+    "away_record": "69-69",
+    "away_score": 3,
+    "away_team": "St. Louis Cardinals",
+    "home_record": "81-57",
+    "home_score": 9,
+    "home_team": "Milwaukee Brewers",
+    "status": "Final"
+  },
+  {
+    "away_record": "31-108",
+    "away_score": 3,
+    "away_team": "Chicago White Sox",
+    "home_record": "80-59",
+    "home_score": 13,
+    "home_team": "Baltimore Orioles",
+    "status": "Final"
+  },
+  {
+    "away_record": "75-63",
+    "away_score": 3,
+    "away_team": "Houston Astros",
+    "home_record": "66-73",
+    "home_score": 5,
+    "home_team": "Cincinnati Reds",
+    "status": "Final"
+  },
+  {
+    "away_record": "79-59",
+    "away_score": 4,
+    "away_team": "Cleveland Guardians",
+    "home_record": "75-64",
+    "home_score": 2,
+    "home_team": "Kansas City Royals",
+    "status": "Final"
+  },
+  {
+    "away_record": "83-55",
+    "away_score": 8,
+    "away_team": "Los Angeles Dodgers",
+    "home_record": "77-61",
+    "home_score": 3,
+    "home_team": "Arizona Diamondbacks",
+    "status": "Final",
+    "bases": {
+      "first": true,
+      "second": false,
+      "third": true
+    },
+    "outs": 2
+  },
+  {
+    "away_record": "70-69",
+    "away_score": 2,
+    "away_team": "Detroit Tigers",
+    "home_record": "79-61",
+    "home_score": 1,
+    "home_team": "San Diego Padres",
+    "status": "Final",
+    "bases": {
+      "first": false,
+      "second": true,
+      "third": false
+    },
+    "outs": 1
+  },
+  {
+    "away_record": "75-62",
+    "away_score": 1,
+    "away_team": "Minnesota Twins",
+    "home_record": "67-70",
+    "home_score": 2,
+    "home_team": "Tampa Bay Rays",
+    "status": "Final",
+    "bases": {
+      "first": true,
+      "second": true,
+      "third": false
+    },
+    "outs": 0
+  },
+  {
+    "away_record": "69-69",
+    "away_score": 4,
+    "away_team": "Seattle Mariners",
+    "home_record": "60-78",
+    "home_score": 2,
+    "home_team": "Athletics",
+    "status": "Final",
+    "bases": {
+      "first": true,
+      "second": false,
+      "third": false
+    },
+    "outs": 1
+  },
+  {
+    "away_record": "82-56",
+    "away_score": 5,
+    "away_team": "New York Yankees",
+    "home_record": "70-68",
+    "home_score": 7,
+    "home_team": "Boston Red Sox",
+    "status": "Final"
+  },
+  {
+    "away_record": "74-64",
+    "away_score": 4,
+    "away_team": "New York Mets",
+    "home_record": "84-54",
+    "home_score": 4,
+    "home_team": "Philadelphia Phillies",
+    "status": "Final",
+    "bases": {
+      "first": false,
+      "second": false,
+      "third": true
+    },
+    "outs": 1
+  },
+  {
+    "away_record": "78-60",
+    "away_score": 6,
+    "away_team": "Atlanta Braves",
+    "home_record": "50-88",
+    "home_score": 2,
+    "home_team": "Miami Marlins",
+    "status": "Final"
+  },
+  {
+    "away_record": "72-66",
+    "away_score": 3,
+    "away_team": "Toronto Blue Jays",
+    "home_record": "63-75",
+    "home_score": 3,
+    "home_team": "Pittsburgh Pirates",
+    "status": "Final",
+    "bases": {
+      "first": true,
+      "second": false,
+      "third": false
+    },
+    "outs": 2
+  },
+  {
+    "away_record": "73-65",
+    "away_score": 1,
+    "away_team": "Chicago Cubs",
+    "home_record": "71-67",
+    "home_score": 0,
+    "home_team": "San Francisco Giants",
+    "status": "Final",
+    "bases": {
+      "first": false,
+      "second": false,
+      "third": false
+    },
+    "outs": 0
+  },
+  {
+    "away_record": "55-83",
+    "away_score": 3,
+    "away_team": "Colorado Rockies",
+    "home_record": "62-76",
+    "home_score": 5,
+    "home_team": "Washington Nationals",
+    "status": "Final",
+    "venue": "Nationals Park"
+  },
+  {
+    "away_record": "58-80",
+    "away_score": 3,
+    "away_team": "Los Angeles Angels",
+    "home_record": "67-71",
+    "home_score": 5,
+    "home_team": "Texas Rangers",
+    "status": "Final",
+    "venue": "Globe Life Field"
+  }
+]

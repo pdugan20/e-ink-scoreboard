@@ -1,5 +1,8 @@
 {
   "mlb": {
-    "Seattle Mariners": "https://rss-feed-generator-production.up.railway.app/feed?url=https://www.seattletimes.com/sports/mariners/"
+    "Seattle Mariners": {
+      "news": "https://rss-feed-generator-production.up.railway.app/feed?url=https://www.seattletimes.com/sports/mariners/",
+      "photos": "https://rss-feed-generator-production.up.railway.app/feed?url=https%3A%2F%2Fnewsroom.ap.org%2Feditorial-photos-videos%2Fsearch%3Fquery%3DLindsey%2BWasson%26mediaType%3Dphoto%26st%3Dkeyword"
+    }
   }
 }

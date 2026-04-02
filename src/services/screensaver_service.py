@@ -47,12 +47,21 @@ class ScreensaverService:
         # Future parsers can be added here as we expand to other sources
         pass
 
-    def get_team_rss_url(self, team_name, league="mlb"):
-        """Get RSS URL for a specific team."""
+    def get_team_rss_url(self, team_name, league="mlb", feed_type="news"):
+        """Get RSS URL for a specific team and feed type."""
         league_feeds = self.rss_feeds.get(league, {})
-        return league_feeds.get(team_name)
+        team_config = league_feeds.get(team_name)
+        if team_config is None:
+            return None
+        # Support nested format: { "news": "url", "photos": "url" }
+        if isinstance(team_config, dict):
+            return team_config.get(feed_type)
+        # Legacy flat format: plain URL string (treat as news)
+        if feed_type == "news":
+            return team_config
+        return None
 
-    def get_favorite_team_rss_url(self, favorite_teams, league="mlb"):
+    def get_favorite_team_rss_url(self, favorite_teams, league="mlb", feed_type="news"):
         """Get RSS URL for the first favorite team that has a configured feed."""
         if not favorite_teams:
             return None, None
@@ -65,35 +74,39 @@ class ScreensaverService:
 
         # Try to find RSS feed for the first favorite team
         for team in favorite_teams:
-            rss_url = self.get_team_rss_url(team, league)
+            rss_url = self.get_team_rss_url(team, league, feed_type)
             if rss_url:
                 return rss_url, team
 
         return None, None
 
-    def fetch_article(self, team_name, league="mlb"):
+    def fetch_article(self, team_name, league="mlb", feed_type="news"):
         """Fetch a random article for the specified team."""
-        rss_url = self.get_team_rss_url(team_name, league)
+        rss_url = self.get_team_rss_url(team_name, league, feed_type)
 
         if not rss_url:
             return self._create_error_response(
                 f"No RSS feed configured for {team_name}"
             )
 
-        return self._fetch_article_from_rss(rss_url, team_name)
+        return self._fetch_article_from_rss(rss_url, team_name, feed_type)
 
-    def fetch_article_for_favorites(self, favorite_teams, league="mlb"):
+    def fetch_article_for_favorites(
+        self, favorite_teams, league="mlb", feed_type="news"
+    ):
         """Fetch article for the first available favorite team."""
-        rss_url, team_name = self.get_favorite_team_rss_url(favorite_teams, league)
+        rss_url, team_name = self.get_favorite_team_rss_url(
+            favorite_teams, league, feed_type
+        )
 
         if not rss_url:
             return self._create_error_response(
                 "No RSS feed configured for favorite teams"
             )
 
-        return self._fetch_article_from_rss(rss_url, team_name)
+        return self._fetch_article_from_rss(rss_url, team_name, feed_type)
 
-    def _fetch_article_from_rss(self, rss_url, team_name):
+    def _fetch_article_from_rss(self, rss_url, team_name, feed_type="news"):
         """Fetch and parse article from RSS feed with timeout protection."""
         try:
             # Parse the RSS feed with timeout protection
@@ -105,11 +118,21 @@ class ScreensaverService:
             # Get the last 10 articles (or fewer if there aren't 10)
             recent_articles = feed.entries[:10]
 
+            # For photos feed, filter to landscape-only images
+            if feed_type == "photos":
+                recent_articles = [
+                    a for a in recent_articles if self._is_landscape_image(a)
+                ]
+                if not recent_articles:
+                    return self._create_error_response(
+                        f"No landscape photos found for {team_name}"
+                    )
+
             # Choose one article at random
             selected_article = random.choice(recent_articles)
 
             # Process the article data
-            return self._process_article(selected_article, team_name)
+            return self._process_article(selected_article, team_name, feed_type)
 
         except Exception as e:
             return self._create_error_response(
@@ -171,7 +194,25 @@ class ScreensaverService:
 
             return result["feed"]
 
-    def _process_article(self, article, team_name):
+    def _is_landscape_image(self, article):
+        """Check if article's media_content image is landscape orientation.
+
+        Returns True if width >= height, or if dimensions are not available
+        (don't filter what we can't measure).
+        """
+        if hasattr(article, "media_content"):
+            for media in article.media_content:
+                width = media.get("width")
+                height = media.get("height")
+                if width and height:
+                    try:
+                        return int(width) >= int(height)
+                    except (ValueError, TypeError):
+                        pass
+        # No dimensions available — don't filter
+        return True
+
+    def _process_article(self, article, team_name, feed_type="news"):
         """Process and format article data."""
         # Extract article information
         title = article.get("title", f"{team_name} News")
@@ -200,6 +241,7 @@ class ScreensaverService:
             "link": article.get("link", ""),
             "team": team_name,
             "type": "screensaver",
+            "feed_source": feed_type,
         }
 
     def _format_published_date(self, published):
@@ -255,7 +297,8 @@ class ScreensaverService:
     def _format_image_url(self, image_url):
         """Format image URL for proper display dimensions."""
 
-        # Ensure image URL is absolute
+        # For relative URLs, only resolve against Seattle Times
+        # (other sources provide absolute URLs)
         if image_url and not image_url.startswith("http"):
             image_url = urljoin("https://www.seattletimes.com", image_url)
 

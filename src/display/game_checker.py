@@ -2,30 +2,15 @@
 Game status checking logic for e-ink display controller.
 """
 
-import json
 import logging
-import os
 import time
 from datetime import datetime
 
 import requests
 
+from config.game_status import load_game_status_config
+
 logger = logging.getLogger(__name__)
-
-
-def load_game_status_config():
-    """Load game status patterns from JSON config"""
-    try:
-        config_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "config",
-            "game-status-config.json",
-        )
-        with open(config_path) as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"Could not load game status config: {e}")
-        raise
 
 
 class GameChecker:
@@ -110,7 +95,12 @@ class GameChecker:
             # Reset failure count on success
             self._api_failure_count = 0
 
-            games = response.json()
+            response_data = response.json()
+            # Handle both wrapped and raw response formats
+            if isinstance(response_data, dict) and "games" in response_data:
+                games = response_data["games"]
+            else:
+                games = response_data
 
             # Analyze all games in one pass
             active_games = []

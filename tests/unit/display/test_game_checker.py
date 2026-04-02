@@ -650,3 +650,57 @@ class TestCleanup:
 
         # Assert
         mock_session.close.assert_called_once()
+
+
+@pytest.mark.unit
+class TestWrappedApiResponse:
+    """Tests for handling the wrapped scores API response format."""
+
+    @freeze_time("2024-09-15 12:00:00")
+    @patch("src.display.game_checker.load_game_status_config")
+    def test_unwraps_dict_response(self, mock_load_config, requests_mock):
+        """Test that wrapped response { games: [...] } is unwrapped correctly."""
+        mock_load_config.return_value = {
+            "activeGameStatuses": ["in progress"],
+            "scheduledGameStatuses": ["pm et"],
+            "finalGameStatuses": ["final"],
+        }
+
+        checker = GameChecker("http://localhost:5000/display")
+
+        requests_mock.get(
+            "http://localhost:5000/api/scores/MLB",
+            json={
+                "games": [
+                    {"status": "Final", "away_team": "Yankees", "home_team": "Red Sox"}
+                ],
+                "all_games_final": True,
+            },
+        )
+
+        state = checker.get_game_state()
+        assert state["has_any_games"] is True
+        assert len(state["final_games"]) == 1
+
+    @freeze_time("2024-09-15 12:00:00")
+    @patch("src.display.game_checker.load_game_status_config")
+    def test_handles_raw_list_response(self, mock_load_config, requests_mock):
+        """Test backward compatibility with raw list response."""
+        mock_load_config.return_value = {
+            "activeGameStatuses": ["in progress"],
+            "scheduledGameStatuses": ["pm et"],
+            "finalGameStatuses": ["final"],
+        }
+
+        checker = GameChecker("http://localhost:5000/display")
+
+        requests_mock.get(
+            "http://localhost:5000/api/scores/MLB",
+            json=[
+                {"status": "In Progress", "away_team": "Cubs", "home_team": "Mets"}
+            ],
+        )
+
+        state = checker.get_game_state()
+        assert state["has_any_games"] is True
+        assert len(state["active_games"]) == 1

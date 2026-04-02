@@ -46,6 +46,16 @@ THEME_MAP = {
 
 THEME_REVERSE = {v: k for k, v in THEME_MAP.items()}
 
+SCREENSAVER_MODE_MAP = {
+    "off": "SCREENSAVER_MODES.OFF",
+    "no_games": "SCREENSAVER_MODES.NO_GAMES",
+    "after_last_game": "SCREENSAVER_MODES.AFTER_LAST_GAME",
+}
+
+SCREENSAVER_MODE_REVERSE = {v: k for k, v in SCREENSAVER_MODE_MAP.items()}
+
+SCREENSAVER_FEED_TYPES = ["news", "photos", "both"]
+
 # All 30 MLB teams
 MLB_TEAMS = [
     "Arizona Diamondbacks",
@@ -149,6 +159,15 @@ def read_js_config():
         else:
             config["theme"] = theme_val.strip("'\"")
 
+    # Parse screensaverMode
+    mode_match = re.search(r"export const screensaverMode\s*=\s*(.+?);", content)
+    if mode_match:
+        mode_val = mode_match.group(1).strip()
+        if mode_val in SCREENSAVER_MODE_REVERSE:
+            config["screensaver_mode"] = SCREENSAVER_MODE_REVERSE[mode_val]
+        else:
+            config["screensaver_mode"] = mode_val.strip("'\"")
+
     return config
 
 
@@ -192,6 +211,17 @@ def write_js_config(updates):
             rf"\g<1>{theme_js};",
             content,
         )
+
+    if "screensaver_mode" in updates:
+        mode = updates["screensaver_mode"]
+        mode_js = SCREENSAVER_MODE_MAP.get(mode, f"'{mode}'")
+        content = re.sub(
+            r"(export const screensaverMode\s*=\s*).+?;",
+            rf"\g<1>{mode_js};",
+            content,
+        )
+        # Derive SHOW_SCREENSAVER from screensaver_mode
+        updates["show_screensaver"] = mode != "off"
 
     # Build FEATURE_FLAGS from individual boolean fields
     flag_keys = {
@@ -248,9 +278,20 @@ def get_config():
                 "show_screensaver": js.get("show_screensaver", True),
                 "eink_optimized_contrast": js.get("eink_optimized_contrast", True),
                 "show_standings": js.get("show_standings", False),
+                "screensaver_mode": js.get(
+                    "screensaver_mode",
+                    eink.get("screensaver_mode", "no_games"),
+                ),
+                "screensaver_feed_type": eink.get(
+                    "screensaver_feed_type", "news"
+                ),
                 "available_teams": MLB_TEAMS,
                 "available_timezones": list(TIMEZONE_MAP.keys()),
                 "available_themes": list(THEME_MAP.keys()),
+                "available_screensaver_modes": list(
+                    SCREENSAVER_MODE_MAP.keys()
+                ),
+                "available_screensaver_feed_types": SCREENSAVER_FEED_TYPES,
             }
         )
     except Exception as e:
@@ -276,9 +317,18 @@ def update_config():
             return jsonify({"error": "Validation failed", "details": errors}), 400
 
         # Update eink_config.json
+        eink_needs_write = False
+        eink = read_eink_config()
         if "refresh_interval" in data:
-            eink = read_eink_config()
             eink["refresh_interval"] = int(data["refresh_interval"])
+            eink_needs_write = True
+        if "screensaver_mode" in data:
+            eink["screensaver_mode"] = data["screensaver_mode"]
+            eink_needs_write = True
+        if "screensaver_feed_type" in data:
+            eink["screensaver_feed_type"] = data["screensaver_feed_type"]
+            eink_needs_write = True
+        if eink_needs_write:
             write_eink_config(eink)
 
         # Update config.js
@@ -290,6 +340,7 @@ def update_config():
             "show_screensaver",
             "eink_optimized_contrast",
             "show_standings",
+            "screensaver_mode",
         ]:
             if key in data:
                 js_updates[key] = data[key]
@@ -374,6 +425,22 @@ def validate_config(data):
     for bool_field in ["show_screensaver", "eink_optimized_contrast", "show_standings"]:
         if bool_field in data and not isinstance(data[bool_field], bool):
             errors.append(f"{bool_field} must be a boolean")
+
+    if "screensaver_mode" in data:
+        mode = data["screensaver_mode"]
+        if mode not in SCREENSAVER_MODE_MAP:
+            errors.append(
+                f"Invalid screensaver_mode: {mode}. "
+                f"Must be one of: {list(SCREENSAVER_MODE_MAP.keys())}"
+            )
+
+    if "screensaver_feed_type" in data:
+        feed_type = data["screensaver_feed_type"]
+        if feed_type not in SCREENSAVER_FEED_TYPES:
+            errors.append(
+                f"Invalid screensaver_feed_type: {feed_type}. "
+                f"Must be one of: {SCREENSAVER_FEED_TYPES}"
+            )
 
     return errors
 

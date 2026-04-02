@@ -7,6 +7,7 @@ import { renderGames, updateHeaderTitle } from './renderer.js';
 let mlbTestData = [];
 let mlbScheduledData = [];
 let mlbEmptyData = [];
+let mlbAllFinalData = [];
 let nflTestData = [];
 let cfbTestData = [];
 
@@ -17,12 +18,14 @@ export async function loadTestData() {
       mlbResponse,
       mlbScheduledResponse,
       mlbEmptyResponse,
+      mlbAllFinalResponse,
       nflResponse,
       cfbResponse,
     ] = await Promise.all([
       fetch('/static/test-data/mlb.json'),
       fetch('/static/test-data/mlb-scheduled.json'),
       fetch('/static/test-data/mlb-empty.json'),
+      fetch('/static/test-data/mlb-all-final.json'),
       fetch('/static/test-data/nfl.json'),
       fetch('/static/test-data/cfb.json'),
     ]);
@@ -30,6 +33,7 @@ export async function loadTestData() {
     mlbTestData = await mlbResponse.json();
     mlbScheduledData = await mlbScheduledResponse.json();
     mlbEmptyData = await mlbEmptyResponse.json();
+    mlbAllFinalData = await mlbAllFinalResponse.json();
     nflTestData = await nflResponse.json();
     cfbTestData = await cfbResponse.json();
   } catch (error) {
@@ -54,6 +58,12 @@ export function loadMLBEmptyData() {
   window.testDate = new Date('2025-02-10T12:00:00-05:00');
   updateHeaderTitle('MLB');
   renderGames(mlbEmptyData);
+}
+
+export function loadMLBAllFinalData() {
+  window.testDate = new Date('2025-08-16T23:30:00-04:00');
+  updateHeaderTitle('MLB');
+  renderGames(mlbAllFinalData, 'mlb', true);
 }
 
 export function loadNFLData() {
@@ -91,14 +101,18 @@ export async function fetchLiveData() {
     }
 
     if (response.ok) {
-      const data = await response.json();
+      const responseData = await response.json();
+
+      // Handle both wrapped and raw response formats
+      const games = responseData.games || responseData;
+      const allGamesFinal = responseData.all_games_final || false;
 
       // Apply favorite team prioritization using the configured favorites
       const { sortGamesByFavorite } = await import('./renderer.js');
-      const prioritizedData = sortGamesByFavorite(data, league);
+      const prioritizedData = sortGamesByFavorite(games, league);
 
       updateHeaderTitle(league);
-      renderGames(prioritizedData);
+      renderGames(prioritizedData, league, allGamesFinal);
       console.log('Loaded live data:', prioritizedData);
     } else {
       // Show error message
@@ -118,19 +132,23 @@ export async function fetchLiveData() {
   }
 }
 
-export async function loadScreensaverData() {
+export async function loadScreensaverData(feedType) {
   try {
-    // Try to fetch screensaver data from dev server for MLB (could be made configurable later)
     const league = 'mlb';
-    const response = await fetch(`/api/screensaver/${league}`);
+    const url = feedType
+      ? `/api/screensaver/${league}?feed_type=${feedType}`
+      : `/api/screensaver/${league}`;
+    const response = await fetch(url);
     if (response.ok) {
       const data = await response.json();
-      // Update header title based on the team or use a generic title
-      const headerTitle = data.team ? `${data.team} News` : 'Team News';
+      const source = data.feed_source || feedType || 'unknown';
+      const headerTitle = data.team
+        ? `${data.team} ${source === 'photos' ? 'Photos' : 'News'}`
+        : 'Team News';
       updateHeaderTitle(headerTitle);
       const { renderScreensaver } = await import('./renderer.js');
       renderScreensaver(data);
-      console.log('Loaded screensaver data:', data);
+      console.log(`Loaded screensaver (${source}):`, data.title);
     } else {
       console.log('Dev server not running, cannot load screensaver');
     }

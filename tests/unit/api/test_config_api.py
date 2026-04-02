@@ -58,6 +58,16 @@ export const THEMES = {
 
 // Theme configuration
 export const currentTheme = THEMES.DEFAULT;
+
+// Screensaver mode constants
+export const SCREENSAVER_MODES = {
+  OFF: 'off',
+  NO_GAMES: 'no_games',
+  AFTER_LAST_GAME: 'after_last_game',
+};
+
+// Screensaver mode configuration
+export const screensaverMode = SCREENSAVER_MODES.NO_GAMES;
 """
 
 SAMPLE_EINK_CONFIG = {
@@ -336,3 +346,70 @@ class TestRoundTrip:
         assert updated_js["show_screensaver"] is False
         assert updated_js["eink_optimized_contrast"] is False
         assert updated_eink["refresh_interval"] == 1800
+
+
+@pytest.mark.unit
+class TestScreensaverConfig:
+    """Tests for screensaver mode config reading, writing, and validation."""
+
+    def test_reads_screensaver_mode(self, config_dir):
+        config = read_js_config()
+        assert config["screensaver_mode"] == "no_games"
+
+    def test_writes_screensaver_mode(self, config_dir):
+        write_js_config({"screensaver_mode": "after_last_game"})
+        config = read_js_config()
+        assert config["screensaver_mode"] == "after_last_game"
+
+    def test_writes_screensaver_mode_off(self, config_dir):
+        write_js_config({"screensaver_mode": "off"})
+        config = read_js_config()
+        assert config["screensaver_mode"] == "off"
+
+    def test_screensaver_mode_off_disables_show_screensaver(self, config_dir):
+        """Setting screensaver_mode to 'off' should set SHOW_SCREENSAVER to false."""
+        write_js_config({"screensaver_mode": "off"})
+        config = read_js_config()
+        assert config["show_screensaver"] is False
+
+    def test_screensaver_mode_no_games_enables_show_screensaver(self, config_dir):
+        """Setting screensaver_mode to 'no_games' should set SHOW_SCREENSAVER to true."""
+        # First set to off
+        write_js_config({"screensaver_mode": "off"})
+        # Then back to no_games
+        write_js_config({"screensaver_mode": "no_games"})
+        config = read_js_config()
+        assert config["show_screensaver"] is True
+
+    def test_writes_screensaver_mode_as_constant(self, config_dir):
+        write_js_config({"screensaver_mode": "after_last_game"})
+        js_path = config_dir / "config.js"
+        content = js_path.read_text()
+        assert "SCREENSAVER_MODES.AFTER_LAST_GAME" in content
+
+    def test_validate_invalid_screensaver_mode(self):
+        errors = validate_config({"screensaver_mode": "always"})
+        assert len(errors) == 1
+        assert "screensaver_mode" in errors[0]
+
+    def test_validate_valid_screensaver_mode(self):
+        errors = validate_config({"screensaver_mode": "after_last_game"})
+        assert errors == []
+
+    def test_validate_invalid_screensaver_feed_type(self):
+        errors = validate_config({"screensaver_feed_type": "video"})
+        assert len(errors) == 1
+        assert "screensaver_feed_type" in errors[0]
+
+    def test_validate_valid_screensaver_feed_type(self):
+        errors = validate_config({"screensaver_feed_type": "both"})
+        assert errors == []
+
+    def test_screensaver_mode_round_trip(self, config_dir):
+        """Write screensaver_mode, read it back, verify all values."""
+        write_js_config({"screensaver_mode": "after_last_game"})
+        config = read_js_config()
+        assert config["screensaver_mode"] == "after_last_game"
+        # Other values preserved
+        assert config["timezone"] == "America/Los_Angeles"
+        assert config["theme"] == "default"

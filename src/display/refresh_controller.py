@@ -103,6 +103,28 @@ class RefreshController:
         # Update display
         return self.screenshot_controller.update_display(img)
 
+    def _sleep_until_tomorrow(self):
+        """Sleep until the next day, in 5-minute chunks for signal responsiveness."""
+        logger.info(
+            "All games finished for today, display staying static until next day"
+        )
+        now = datetime.now()
+        tomorrow = datetime(now.year, now.month, now.day) + timedelta(days=1)
+        seconds_until_tomorrow = (tomorrow - now).total_seconds()
+        sleep_seconds = seconds_until_tomorrow + 60
+        logger.info(
+            f"Sleeping for {sleep_seconds / 3600:.1f} hours until next day "
+            f"({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
+        )
+        # Sleep in 5-minute chunks so system can respond to signals.
+        # Heartbeat is handled by the daemon thread in eink_display.py.
+        chunk_seconds = 300
+        remaining = sleep_seconds
+        while remaining > 0:
+            sleep_time = min(chunk_seconds, remaining)
+            time.sleep(sleep_time)
+            remaining -= sleep_time
+
     def run_continuous(self, wait_for_server_callback):
         """Run continuous refresh loop with smart game detection and screensaver refresh"""
         logger.info(
@@ -215,31 +237,51 @@ class RefreshController:
                                 f"Continuing regular checks."
                             )
                         elif final_games and not scheduled_games:
-                            # All games are final and no more scheduled - wait until next day
-                            logger.info(
-                                "All games finished for today, display staying static until next day"
+                            # All games are final and no more scheduled
+                            screensaver_mode = self.config.get(
+                                "screensaver_mode", "no_games"
                             )
-                            # Calculate time until midnight (next day)
-                            now = datetime.now()
-                            tomorrow = datetime(
-                                now.year, now.month, now.day
-                            ) + timedelta(days=1)
-                            seconds_until_tomorrow = (tomorrow - now).total_seconds()
-                            sleep_seconds = seconds_until_tomorrow + 60
-                            logger.info(
-                                f"Sleeping for {sleep_seconds / 3600:.1f} hours until next day "
-                                f"({tomorrow.strftime('%Y-%m-%d %H:%M:%S')})"
-                            )
-                            # Sleep in 5-minute chunks so system can respond
-                            # to signals. Heartbeat is handled by the daemon
-                            # thread in eink_display.py.
-                            chunk_seconds = 300
-                            remaining = sleep_seconds
-                            while remaining > 0:
-                                sleep_time = min(chunk_seconds, remaining)
-                                time.sleep(sleep_time)
-                                remaining -= sleep_time
-                            continue  # Skip the regular sleep interval and restart the loop
+                            if screensaver_mode == "after_last_game":
+                                # Check if screensaver content is available
+                                screensaver_eligible = (
+                                    self.game_checker.check_screensaver_eligible()
+                                )
+                                if screensaver_eligible:
+                                    # Enter screensaver mode with hourly refresh
+                                    should_update_screensaver = (
+                                        last_screensaver_hour is None
+                                        or current_hour != last_screensaver_hour
+                                    )
+                                    if should_update_screensaver:
+                                        logger.info(
+                                            "All games final - showing screensaver"
+                                        )
+                                        success = self.refresh_display(
+                                            force_update=True
+                                        )
+                                        if success:
+                                            last_screensaver_hour = current_hour
+                                            logger.info(
+                                                f"Post-game screensaver updated at {datetime.now()}, "
+                                                f"next refresh at hour {(current_hour + 1) % 24}"
+                                            )
+                                        else:
+                                            logger.error(
+                                                "Post-game screensaver refresh failed"
+                                            )
+                                    else:
+                                        logger.debug(
+                                            f"Post-game screensaver active, next refresh at hour "
+                                            f"{(current_hour + 1) % 24}"
+                                        )
+                                else:
+                                    # Screensaver not available, sleep until next day
+                                    self._sleep_until_tomorrow()
+                                    continue
+                            else:
+                                # Default: sleep until next day
+                                self._sleep_until_tomorrow()
+                                continue
                         else:
                             # Edge case: games exist but no clear status
                             logger.info(

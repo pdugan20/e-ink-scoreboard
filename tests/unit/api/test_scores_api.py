@@ -16,6 +16,7 @@ from src.api.scores_api import (
     fetch_mlb_standings,
     fetch_nfl_games,
 )
+from src.config.game_status import check_all_games_final
 
 
 @pytest.mark.unit
@@ -506,3 +507,50 @@ class TestNFLGames:
 
         # Assert
         assert games == []
+
+
+@pytest.mark.unit
+class TestCheckAllGamesFinal:
+    """Tests for the check_all_games_final helper."""
+
+    def test_all_games_final(self):
+        games = [
+            {"status": "Final"},
+            {"status": "Final"},
+            {"status": "Game Over"},
+        ]
+        assert check_all_games_final(games) is True
+
+    def test_mixed_statuses(self):
+        games = [
+            {"status": "Final"},
+            {"status": "Top 7th"},
+            {"status": "7:05 PM ET"},
+        ]
+        assert check_all_games_final(games) is False
+
+    def test_empty_games(self):
+        assert check_all_games_final([]) is False
+
+    def test_all_active(self):
+        games = [
+            {"status": "Bottom 3rd"},
+            {"status": "Top 7th"},
+        ]
+        assert check_all_games_final(games) is False
+
+    def test_postponed_counts_as_final(self):
+        """Postponed games are in finalGameStatuses config."""
+        games = [
+            {"status": "Final"},
+            {"status": "Postponed"},
+        ]
+        assert check_all_games_final(games) is True
+
+    def test_one_scheduled_game_not_final(self):
+        games = [
+            {"status": "Final"},
+            {"status": "Final"},
+            {"status": "7:05 PM ET"},
+        ]
+        assert check_all_games_final(games) is False

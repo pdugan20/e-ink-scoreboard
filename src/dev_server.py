@@ -9,7 +9,7 @@ import glob
 import logging
 import os
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
 
 # Import our modular API components
@@ -23,7 +23,7 @@ from api.auth import (
 from api.config_api import config_bp
 from api.display_api import display_bp
 from api.scores_api import fetch_mlb_games, fetch_nfl_games
-from api.screensaver_api import get_screensaver_data
+from api.screensaver_api import get_screensaver_data_with_fallback
 from api.static_files import setup_static_routes
 from api.update_api import update_bp
 from api.wifi_api import wifi_bp
@@ -168,6 +168,8 @@ def settings():
     try:
         from api.config_api import (
             MLB_TEAMS,
+            SCREENSAVER_FEED_TYPES,
+            SCREENSAVER_MODE_MAP,
             THEME_MAP,
             TIMEZONE_MAP,
             read_eink_config,
@@ -184,9 +186,18 @@ def settings():
             "theme": js_config.get("theme", "default"),
             "show_screensaver": js_config.get("show_screensaver", True),
             "eink_optimized_contrast": js_config.get("eink_optimized_contrast", True),
+            "screensaver_mode": js_config.get(
+                "screensaver_mode",
+                eink_config.get("screensaver_mode", "no_games"),
+            ),
+            "screensaver_feed_type": eink_config.get(
+                "screensaver_feed_type", "news"
+            ),
             "available_teams": MLB_TEAMS,
             "available_timezones": list(TIMEZONE_MAP.keys()),
             "available_themes": list(THEME_MAP.keys()),
+            "available_screensaver_modes": list(SCREENSAVER_MODE_MAP.keys()),
+            "available_screensaver_feed_types": SCREENSAVER_FEED_TYPES,
         }
         return render_template("settings.html", config=config)
     except Exception as e:
@@ -216,9 +227,23 @@ def get_scores(league):
     """Fetch live scores for the specified league"""
     try:
         if league == "MLB":
-            return jsonify(fetch_mlb_games())
+            from config.game_status import check_all_games_final
+
+            games = fetch_mlb_games()
+            return jsonify(
+                {
+                    "games": games,
+                    "all_games_final": check_all_games_final(games),
+                }
+            )
         elif league == "NFL":
-            return jsonify(fetch_nfl_games())
+            games = fetch_nfl_games()
+            return jsonify(
+                {
+                    "games": games,
+                    "all_games_final": False,
+                }
+            )
         else:
             return jsonify({"error": "Invalid league"}), 400
     except Exception as e:
@@ -228,9 +253,19 @@ def get_scores(league):
 
 @app.route("/api/screensaver/<league>")
 def get_screensaver(league):
-    """Fetch screensaver article for favorite team in specified league"""
+    """Fetch screensaver article for favorite team in specified league.
+
+    Supports ?feed_type=news|photos|both query param to override config.
+    """
     try:
-        article_data = get_screensaver_data(league)
+        from api.config_api import read_eink_config
+
+        # Allow query param override for testing
+        feed_type = request.args.get("feed_type")
+        if not feed_type:
+            eink_config = read_eink_config()
+            feed_type = eink_config.get("screensaver_feed_type", "news")
+        article_data = get_screensaver_data_with_fallback(league, feed_type)
         return jsonify(article_data)
     except Exception as e:
         logger.error(f"Error fetching screensaver data for {league}: {e}")

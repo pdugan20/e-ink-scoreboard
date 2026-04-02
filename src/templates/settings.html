@@ -110,24 +110,35 @@
           </select>
         </section>
 
+        <!-- Screensaver Mode -->
+        <section class="setting-group">
+          <h2>Screensaver Mode</h2>
+          <p class="setting-description">
+            When to show the screensaver instead of scores.
+          </p>
+          <select name="screensaver_mode" class="setting-select">
+            {% for mode in config.available_screensaver_modes %}
+            <option value="{{ mode }}" {% if mode == config.screensaver_mode %}selected{% endif %}>{% if mode == 'off' %}Off{% elif mode == 'no_games' %}No Games Scheduled{% elif mode == 'after_last_game' %}After Last Game{% endif %}</option>
+            {% endfor %}
+          </select>
+        </section>
+
+        <!-- Screensaver Content -->
+        <section class="setting-group">
+          <h2>Screensaver Content</h2>
+          <p class="setting-description">
+            Choose what to display during screensaver.
+          </p>
+          <select name="screensaver_feed_type" class="setting-select">
+            {% for ft in config.available_screensaver_feed_types %}
+            <option value="{{ ft }}" {% if ft == config.screensaver_feed_type %}selected{% endif %}>{% if ft == 'news' %}Team News{% elif ft == 'photos' %}AP Photos{% elif ft == 'both' %}Both{% endif %}</option>
+            {% endfor %}
+          </select>
+        </section>
+
         <!-- Toggles -->
         <section class="setting-group">
           <h2>Features</h2>
-          <label class="toggle-row">
-            <span class="toggle-label">
-              <strong>Team News Screensaver</strong>
-              <span class="toggle-description">
-                Show news articles when no games are scheduled
-              </span>
-            </span>
-            <input
-              type="checkbox"
-              name="show_screensaver"
-              class="toggle-input"
-              {% if config.show_screensaver %}checked{% endif %}
-            />
-            <span class="toggle-switch"></span>
-          </label>
           <label class="toggle-row">
             <span class="toggle-label">
               <strong>E-Ink Contrast Optimization</strong>
@@ -737,9 +748,8 @@
         data.timezone = formData.get('timezone');
         data.theme = formData.get('theme');
         data.refresh_interval = parseInt(formData.get('refresh_interval'));
-        data.show_screensaver = form.querySelector(
-          '[name="show_screensaver"]'
-        ).checked;
+        data.screensaver_mode = formData.get('screensaver_mode');
+        data.screensaver_feed_type = formData.get('screensaver_feed_type');
         data.eink_optimized_contrast = form.querySelector(
           '[name="eink_optimized_contrast"]'
         ).checked;

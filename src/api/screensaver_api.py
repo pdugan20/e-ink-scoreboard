@@ -57,8 +57,8 @@ def get_favorite_teams_from_config():
         return {}
 
 
-def get_screensaver_data(league):
-    """Fetch screensaver article for favorite team in specified league"""
+def get_screensaver_data(league, feed_type="news"):
+    """Fetch screensaver article for favorite team in specified league."""
     try:
         # Import and initialize the screensaver service
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -75,7 +75,7 @@ def get_screensaver_data(league):
 
         # Fetch article for the favorite team
         article_data = screensaver_service.fetch_article_for_favorites(
-            favorite_teams, league.lower()
+            favorite_teams, league.lower(), feed_type
         )
 
         return article_data
@@ -83,3 +83,27 @@ def get_screensaver_data(league):
     except Exception as e:
         logger.error(f"Error fetching screensaver data for {league}: {e}")
         return {"error": str(e)}
+
+
+def get_screensaver_data_with_fallback(league, feed_type="news"):
+    """Fetch screensaver data with fallback between feed sources.
+
+    - "both": try photos first (more visual), fall back to news
+    - "news" or "photos": try preferred, fall back to the other
+    - If both fail, return the error response
+    """
+    if feed_type == "both":
+        order = ["photos", "news"]
+    elif feed_type == "photos":
+        order = ["photos", "news"]
+    else:
+        order = ["news", "photos"]
+
+    for source in order:
+        result = get_screensaver_data(league, source)
+        # Success if we got actual article data (title + image)
+        if result and result.get("title") and result.get("image_url"):
+            return result
+
+    # Both failed — return whatever the last attempt returned
+    return result
