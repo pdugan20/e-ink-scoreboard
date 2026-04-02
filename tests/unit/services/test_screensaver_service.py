@@ -6,7 +6,6 @@ image URL formatting, and article processing.
 """
 
 import json
-
 from unittest.mock import MagicMock
 
 import pytest

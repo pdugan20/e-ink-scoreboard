@@ -46,7 +46,8 @@ class TestLoadGameStatusConfig:
 
     def test_load_game_status_config_file_not_found(self):
         """Test handling when config file doesn't exist"""
-        # Arrange
+        # Arrange - ensure cache is clear (may have been set by other tests)
+        game_status_module._config_cache = None
         with patch("builtins.open", side_effect=FileNotFoundError()):
             # Act & Assert
             with pytest.raises(FileNotFoundError):
