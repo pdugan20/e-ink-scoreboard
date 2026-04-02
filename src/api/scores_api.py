@@ -95,7 +95,9 @@ def fetch_mlb_games():
                     venue_name = raw_venue.title()
                     # Lowercase minor words (at, of, the)
                     for word in ("At", "Of", "The"):
-                        venue_name = venue_name.replace(f" {word} ", f" {word.lower()} ")
+                        venue_name = venue_name.replace(
+                            f" {word} ", f" {word.lower()} "
+                        )
                 else:
                     venue_name = raw_venue
 

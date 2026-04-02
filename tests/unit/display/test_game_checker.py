@@ -11,12 +11,17 @@ import pytest
 import requests
 from freezegun import freeze_time
 
+import src.config.game_status as game_status_module
 from src.display.game_checker import GameChecker, load_game_status_config
 
 
 @pytest.mark.unit
 class TestLoadGameStatusConfig:
     """Tests for loading game status configuration"""
+
+    def setup_method(self):
+        """Clear the module-level cache before each test."""
+        game_status_module._config_cache = None
 
     def test_load_game_status_config_success(self):
         """Test successful loading of game status config"""
@@ -696,9 +701,7 @@ class TestWrappedApiResponse:
 
         requests_mock.get(
             "http://localhost:5000/api/scores/MLB",
-            json=[
-                {"status": "In Progress", "away_team": "Cubs", "home_team": "Mets"}
-            ],
+            json=[{"status": "In Progress", "away_team": "Cubs", "home_team": "Mets"}],
         )
 
         state = checker.get_game_state()

@@ -71,10 +71,12 @@ class TestMLBScoresEndpoint:
         # Assert
         assert response.status_code == 200
         data = response.get_json()
-        assert isinstance(data, list)
-        assert len(data) == 1
-        assert data[0]["away_team"] == "New York Yankees"
-        assert data[0]["home_team"] == "Boston Red Sox"
+        assert isinstance(data, dict)
+        assert "games" in data
+        assert "all_games_final" in data
+        assert len(data["games"]) == 1
+        assert data["games"][0]["away_team"] == "New York Yankees"
+        assert data["games"][0]["home_team"] == "Boston Red Sox"
 
     def test_mlb_scores_api_error(self, client, requests_mock):
         """Test MLB scores when API fails"""
@@ -91,8 +93,8 @@ class TestMLBScoresEndpoint:
         # Assert
         assert response.status_code == 200
         data = response.get_json()
-        assert isinstance(data, list)
-        assert len(data) == 0  # Returns empty list on error
+        assert isinstance(data, dict)
+        assert len(data["games"]) == 0  # Returns empty list on error
 
 
 @pytest.mark.integration
@@ -137,10 +139,11 @@ class TestNFLScoresEndpoint:
         # Assert
         assert response.status_code == 200
         data = response.get_json()
-        assert isinstance(data, list)
-        assert len(data) == 1
-        assert data[0]["home_team"] == "Buffalo Bills"
-        assert data[0]["away_team"] == "Kansas City Chiefs"
+        assert isinstance(data, dict)
+        assert "games" in data
+        assert len(data["games"]) == 1
+        assert data["games"][0]["home_team"] == "Buffalo Bills"
+        assert data["games"][0]["away_team"] == "Kansas City Chiefs"
 
     def test_nfl_scores_api_error(self, client, requests_mock):
         """Test NFL scores when API fails"""
@@ -156,8 +159,8 @@ class TestNFLScoresEndpoint:
         # Assert
         assert response.status_code == 200
         data = response.get_json()
-        assert isinstance(data, list)
-        assert len(data) == 0  # Returns empty list on error
+        assert isinstance(data, dict)
+        assert len(data["games"]) == 0  # Returns empty list on error
 
 
 @pytest.mark.integration

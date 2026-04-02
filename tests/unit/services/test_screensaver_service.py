@@ -165,7 +165,10 @@ class TestFormatImageUrl:
         result = service._format_image_url(url)
 
         # Assert
-        assert result == "https://www.seattletimes.com/wp-content/uploads/image.jpg?d=800x480"
+        assert (
+            result
+            == "https://www.seattletimes.com/wp-content/uploads/image.jpg?d=800x480"
+        )
 
     def test_non_seattle_times_url_passes_through(self, tmp_path):
         """Test that non-Seattle Times URLs are returned unchanged."""
@@ -191,7 +194,10 @@ class TestFormatImageUrl:
         result = service._format_image_url(url)
 
         # Assert
-        assert result == "https://mapi.associatedpress.com/v1/items/photo123/renditions/original"
+        assert (
+            result
+            == "https://mapi.associatedpress.com/v1/items/photo123/renditions/original"
+        )
 
 
 @pytest.mark.unit

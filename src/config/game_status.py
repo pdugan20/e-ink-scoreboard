@@ -20,9 +20,7 @@ def load_game_status_config():
         return _config_cache
 
     try:
-        config_path = os.path.join(
-            os.path.dirname(__file__), "game-status-config.json"
-        )
+        config_path = os.path.join(os.path.dirname(__file__), "game-status-config.json")
         with open(config_path) as f:
             _config_cache = json.load(f)
             return _config_cache

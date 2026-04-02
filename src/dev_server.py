@@ -190,9 +190,7 @@ def settings():
                 "screensaver_mode",
                 eink_config.get("screensaver_mode", "no_games"),
             ),
-            "screensaver_feed_type": eink_config.get(
-                "screensaver_feed_type", "news"
-            ),
+            "screensaver_feed_type": eink_config.get("screensaver_feed_type", "news"),
             "available_teams": MLB_TEAMS,
             "available_timezones": list(TIMEZONE_MAP.keys()),
             "available_themes": list(THEME_MAP.keys()),

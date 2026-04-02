@@ -282,15 +282,11 @@ def get_config():
                     "screensaver_mode",
                     eink.get("screensaver_mode", "no_games"),
                 ),
-                "screensaver_feed_type": eink.get(
-                    "screensaver_feed_type", "news"
-                ),
+                "screensaver_feed_type": eink.get("screensaver_feed_type", "news"),
                 "available_teams": MLB_TEAMS,
                 "available_timezones": list(TIMEZONE_MAP.keys()),
                 "available_themes": list(THEME_MAP.keys()),
-                "available_screensaver_modes": list(
-                    SCREENSAVER_MODE_MAP.keys()
-                ),
+                "available_screensaver_modes": list(SCREENSAVER_MODE_MAP.keys()),
                 "available_screensaver_feed_types": SCREENSAVER_FEED_TYPES,
             }
         )
