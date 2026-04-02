@@ -44,14 +44,17 @@ class TestLoadGameStatusConfig:
         assert "scheduledGameStatuses" in config
         assert "finalGameStatuses" in config
 
-    def test_load_game_status_config_file_not_found(self, tmp_path):
-        """Test handling when config file doesn't exist"""
-        # Arrange - clear cache and point os.path.join to a nonexistent path
+    def test_load_game_status_config_uses_cache(self):
+        """Test that repeated calls use the cached config."""
+        # Arrange - load the real config (populates cache)
         game_status_module._config_cache = None
-        nonexistent = str(tmp_path / "no-such-dir" / "game-status-config.json")
-        with patch("src.config.game_status.os.path.join", return_value=nonexistent):
-            with pytest.raises((FileNotFoundError, OSError)):
-                load_game_status_config()
+        config1 = load_game_status_config()
+
+        # Act - call again (should use cache)
+        config2 = load_game_status_config()
+
+        # Assert - same object returned from cache
+        assert config1 is config2
 
 
 @pytest.mark.unit
