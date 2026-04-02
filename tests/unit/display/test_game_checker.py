@@ -34,7 +34,7 @@ class TestLoadGameStatusConfig:
         }
         """
 
-        with patch("builtins.open", mock_open(read_data=mock_config)):
+        with patch("src.config.game_status.open", mock_open(read_data=mock_config)):
             # Act
             config = load_game_status_config()
 
@@ -46,9 +46,9 @@ class TestLoadGameStatusConfig:
 
     def test_load_game_status_config_file_not_found(self):
         """Test handling when config file doesn't exist"""
-        # Arrange - ensure cache is clear (may have been set by other tests)
+        # Arrange - ensure cache is clear
         game_status_module._config_cache = None
-        with patch("builtins.open", side_effect=FileNotFoundError()):
+        with patch("src.config.game_status.open", side_effect=FileNotFoundError()):
             # Act & Assert
             with pytest.raises(FileNotFoundError):
                 load_game_status_config()
