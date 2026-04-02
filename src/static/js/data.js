@@ -112,7 +112,7 @@ export async function fetchLiveData() {
       const prioritizedData = sortGamesByFavorite(games, league);
 
       updateHeaderTitle(league);
-      renderGames(prioritizedData, league, allGamesFinal);
+      renderGames(prioritizedData, league.toLowerCase(), allGamesFinal);
       console.log('Loaded live data:', prioritizedData);
     } else {
       // Show error message
