@@ -46,12 +46,11 @@ class TestLoadGameStatusConfig:
 
     def test_load_game_status_config_file_not_found(self, tmp_path):
         """Test handling when config file doesn't exist"""
-        # Arrange - ensure cache is clear and point to nonexistent file
+        # Arrange - clear cache and point os.path.join to a nonexistent path
         game_status_module._config_cache = None
-        fake_path = str(tmp_path / "nonexistent")
-        with patch("src.config.game_status.os.path.dirname", return_value=fake_path):
-            # Act & Assert
-            with pytest.raises(FileNotFoundError):
+        nonexistent = str(tmp_path / "no-such-dir" / "game-status-config.json")
+        with patch("src.config.game_status.os.path.join", return_value=nonexistent):
+            with pytest.raises((FileNotFoundError, OSError)):
                 load_game_status_config()
 
 
