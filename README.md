@@ -4,18 +4,13 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
 
-Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh and
-team news screensaver.
+Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh
+and team news screensaver.
 
-## Features
-
-- **Live MLB Scores** - Real-time scores with on-base and out displays
-- **Team News Screensaver** - Displays team news when no games are scheduled
-- **Clean Layout** - Optimized for 800x480 e-ink displays, up to 15 games in a 3x5 grid
-- **Auto-refresh** - Configurable refresh interval with power-saving logic
-- **Web Settings Panel** - Configure teams, timezone, theme, and more from any browser
-- **WiFi Management** - Scan and switch WiFi networks from the settings page
-- **Local Network Discovery** - Access at `scoreboard.local:5001` via mDNS
+Up to 15 games render in a 3x5 grid on an 800x480 display, with on-base
+and out indicators on each card. Configure teams, timezone, theme, refresh
+interval, and WiFi from a web panel at `scoreboard.local:5001` — no SSH
+required.
 
 ## Hardware
 
