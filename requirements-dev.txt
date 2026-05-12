@@ -2,7 +2,7 @@
 # Excludes hardware-specific packages that only work on Raspberry Pi
 
 requests>=2.32.0
-pytz>=2025.1
+pytz>=2026.2
 Pillow>=12.2.0
 flask>=3.0.0
 flask-cors>=6.0.2
