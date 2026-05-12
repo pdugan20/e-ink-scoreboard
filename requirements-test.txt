@@ -10,7 +10,7 @@ pytest-xdist>=3.5.0                # Parallel test execution
 pytest-flask>=1.3.0                # Flask-specific test utilities
 
 # Mocking and fixtures
-pytest-mock>=3.14.0                # Enhanced mocking support
+pytest-mock>=3.15.1                # Enhanced mocking support
 requests-mock>=1.12.0              # HTTP request mocking
 responses>=0.25.0                  # Alternative HTTP mocking
 freezegun>=1.5.0                   # Time/date mocking
