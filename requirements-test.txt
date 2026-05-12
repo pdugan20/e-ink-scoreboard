@@ -2,7 +2,7 @@
 # Install with: pip install -r requirements-test.txt
 
 # Core testing framework
-pytest>=8.4.0
+pytest>=8.4.2
 pytest-cov>=7.0.0                  # Coverage reporting
 pytest-xdist>=3.5.0                # Parallel test execution
 
