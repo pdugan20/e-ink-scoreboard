@@ -1,7 +1,7 @@
 # Development requirements (for Mac/non-Pi systems)
 # Excludes hardware-specific packages that only work on Raspberry Pi
 
-requests>=2.32.0
+requests>=2.34.2
 pytz>=2025.1
 Pillow>=12.2.0
 flask>=3.0.0
