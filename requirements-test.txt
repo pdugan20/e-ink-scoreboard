@@ -23,7 +23,7 @@ pytest-randomly>=3.15.0            # Randomize test order
 pytest-timeout>=2.3.0              # Test timeout support
 
 # Better output
-pytest-sugar>=1.0.0                # Better test output formatting
+pytest-sugar>=1.1.1                # Better test output formatting
 pytest-html>=4.1.0                 # HTML test reports
 
 # Coverage tools
