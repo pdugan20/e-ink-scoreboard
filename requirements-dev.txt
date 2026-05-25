@@ -14,7 +14,7 @@ git+https://github.com/hbldh/hitherdither.git
 # Code quality tools
 black==26.5.1
 ruff>=0.15.14
-pre-commit>=4.0.0
+pre-commit>=4.6.0
 
 # Note: inky package excluded as it requires spidev/gpiod which are Linux-only
 # The e-ink display functionality is mocked on Mac
