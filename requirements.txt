@@ -9,4 +9,4 @@ playwright>=1.59.0
 psutil>=7.0.0
 git+https://github.com/hbldh/hitherdither.git
 black==26.5.1
-ruff>=0.14.0
+ruff>=0.15.14
