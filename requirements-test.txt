@@ -24,7 +24,7 @@ pytest-timeout>=2.4.0              # Test timeout support
 
 # Better output
 pytest-sugar>=1.1.1                # Better test output formatting
-pytest-html>=4.1.0                 # HTML test reports
+pytest-html>=4.2.0                 # HTML test reports
 
 # Coverage tools
 coverage[toml]>=7.6.0              # Coverage with pyproject.toml support
