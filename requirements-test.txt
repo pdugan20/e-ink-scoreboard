@@ -27,4 +27,4 @@ pytest-sugar>=1.1.1                # Better test output formatting
 pytest-html>=4.2.0                 # HTML test reports
 
 # Coverage tools
-coverage[toml]>=7.15.0              # Coverage with pyproject.toml support
+coverage[toml]>=7.15.2              # Coverage with pyproject.toml support
