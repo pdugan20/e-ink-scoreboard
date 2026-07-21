@@ -15,8 +15,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "eslint": "^9.39.4",
-    "prettier": "^3.9.4",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
     "@eslint/js": "^9.0.0",
     "vitest": "^3.2.7",
     "@vitest/ui": "^3.0.0",
