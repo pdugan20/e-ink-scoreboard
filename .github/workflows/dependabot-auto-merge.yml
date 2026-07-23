@@ -1,0 +1,55 @@
+name: Dependabot auto-merge
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dependabot-auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  enable-auto-merge:
+    name: Enable protected auto-merge
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read verified Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+      - name: Evaluate automatic merge policy
+        id: policy
+        env:
+          UPDATES_JSON: ${{ steps.metadata.outputs.updated-dependencies-json }}
+        run: |
+          eligible="$(
+            jq -r '
+              type == "array" and
+              length > 0 and
+              all(.[];
+                (
+                  .updateType == "version-update:semver-minor" or
+                  .updateType == "version-update:semver-patch"
+                ) and
+                (.prevVersion | test("^v?[1-9][0-9]*(\\.|$)")) and
+                (.newVersion | test("^v?[1-9][0-9]*(\\.|$)")) and
+                (.maintainerChanges == false)
+              )
+            ' <<<"$UPDATES_JSON"
+          )"
+          echo "eligible=$eligible" >>"$GITHUB_OUTPUT"
+
+      - name: Enable protected squash auto-merge
+        if: steps.policy.outputs.eligible == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --squash --match-head-commit "$HEAD_SHA" "$PR_URL"
