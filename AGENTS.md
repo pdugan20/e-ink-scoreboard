@@ -1,13 +1,17 @@
 # E-Ink Scoreboard
 
-## Work modes
-
-- Default to exploration for design iterations, prototypes, and small changes. Make focused edits directly; do not require a formal spec, separate plan, worktree, or TDD.
-- Apply production rigor when the user explicitly asks to ship, harden, prepare a release, or use strict TDD. Match verification to risk and obey any stronger test requirements below.
-- Ask before deployments, production-data changes, live service mutations, schema migrations, or security-rule changes.
-
 Real-time MLB scores on a Pimoroni Inky e-ink display. Python/Flask backend
 with JavaScript frontend, designed for Raspberry Pi Zero 2 W.
+
+## Code Review Rules
+
+- Flag configuration write endpoints that remain reachable without authentication when
+  `src/.admin_password` is configured, or that allow unvalidated paths, URLs, or values
+  to reach filesystem, browser, or process operations.
+- Flag changes that update only one copy of a setting documented as shared between
+  `src/eink_config.json` and `src/static/js/config.js`.
+- Flag display scheduling or score-status changes that break the wrapped scores response,
+  the shared status helpers, or the no-active-game/screensaver transition.
 
 ## Common Commands
 
