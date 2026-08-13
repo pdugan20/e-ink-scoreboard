@@ -1,8 +1,7 @@
-# E-Ink Scoreboard
+# e-ink-scoreboard
 
-[![CI](https://github.com/pdugan20/e-ink-scoreboard/workflows/CI/badge.svg)](https://github.com/pdugan20/e-ink-scoreboard/actions)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/pdugan20/e-ink-scoreboard/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/pdugan20/e-ink-scoreboard/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/pdugan20/e-ink-scoreboard)](LICENSE)
 
 Real-time MLB scores on a Pimoroni Inky e-ink display with auto-refresh
 and team news screensaver.
