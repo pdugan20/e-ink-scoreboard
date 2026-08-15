@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Validate disabled Renovate bootstrap
+      - name: Validate dependency automation policy
         env:
           BASH_ENV: /dev/null
           SHELLOPTS: ''

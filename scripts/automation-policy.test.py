@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed checks for the disabled-first Renovate bootstrap."""
+"""Fail-closed checks for the Renovate ownership-transfer contract."""
 
 import sys
 
@@ -21,14 +21,127 @@ CI_PATH = ROOT / ".github" / "workflows" / "ci.yml"
 
 CANONICAL_BOOTSTRAP = """{
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabled": false,
-  "enabledManagers": ["npm", "github-actions"]
+  "enabledManagers": ["npm", "github-actions"],
+  "timezone": "America/Los_Angeles",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "dependencyDashboard": true,
+  "labels": ["dependencies", "renovate"],
+  "minimumReleaseAge": "7 days",
+  "vulnerabilityAlerts": { "enabled": false },
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchCurrentVersion": ">=1.0.0",
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchCurrentVersion": "<1.0.0",
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchUpdateTypes": [
+        "pin",
+        "digest",
+        "pinDigest",
+        "rollback",
+        "replacement"
+      ],
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    }
+  ]
 }
 """
 
-EXPECTED_KEYS = ["$schema", "enabled", "enabledManagers"]
+CANONICAL_DEPENDABOT = """version: 2
+updates:
+  # Renovate owns routine npm and GitHub Actions updates; Dependabot keeps
+  # pip proposals (human-merged) and repository security updates.
+  - package-ecosystem: 'pip'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '06:00'
+      timezone: 'America/New_York'
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: 'deps'
+      include: 'scope'
+    labels:
+      - 'dependencies'
+      - 'python'
+    assignees:
+      - 'pdugan20'
+    reviewers:
+      - 'pdugan20'
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    groups:
+      python-dependencies:
+        update-types:
+          - 'minor'
+          - 'patch'
+"""
+
+EXPECTED_KEYS = [
+    "$schema",
+    "enabledManagers",
+    "timezone",
+    "semanticCommits",
+    "semanticCommitType",
+    "dependencyDashboard",
+    "labels",
+    "minimumReleaseAge",
+    "vulnerabilityAlerts",
+    "packageRules",
+]
 EXPECTED_MANAGERS = ["npm", "github-actions"]
-EXPECTED_WORKFLOWS = ["ci.yml", "dependabot-auto-merge.yml", "pr-lint.yml"]
+EXPECTED_PACKAGE_RULES = [
+    {
+        "matchManagers": ["npm"],
+        "matchUpdateTypes": ["patch", "minor"],
+        "matchCurrentVersion": ">=1.0.0",
+        "automerge": True,
+    },
+    {"matchUpdateTypes": ["major"], "dependencyDashboardApproval": True},
+    {
+        "matchCurrentVersion": "<1.0.0",
+        "automerge": False,
+        "dependencyDashboardApproval": True,
+    },
+    {
+        "matchUpdateTypes": ["pin", "digest", "pinDigest", "rollback", "replacement"],
+        "automerge": False,
+        "dependencyDashboardApproval": True,
+    },
+]
+# Keys that re-enable unattended or scheduled behavior anywhere in the tree.
+# Scanned recursively and independently of the canonical constant, so a
+# lockstep edit of file and constant together still fails closed.
+FORBIDDEN_RENOVATE_KEYS = [
+    "extends",
+    "schedule",
+    "prCreation",
+    "platformAutomerge",
+    "automergeType",
+    "automergeSchedule",
+    "ignoreTests",
+    "internalChecksFilter",
+    "osvVulnerabilityAlerts",
+    "respectLatest",
+    "prConcurrentLimit",
+    "prHourlyLimit",
+]
+EXPECTED_WORKFLOWS = ["ci.yml", "pr-lint.yml"]
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
 POLICY_JOB = "python-lint"
 POLICY_COMMAND = "python3 -P scripts/automation-policy.test.py"
@@ -37,14 +150,18 @@ EXPECTED_POLICY_SCRIPTS = ["automation-policy.test.py"]
 ALTERNATE_RENOVATE_CONFIG_PATHS = [
     ".github/renovate.json",
     ".github/renovate.json5",
+    ".github/renovate.jsonc",
     ".gitlab/renovate.json",
     ".gitlab/renovate.json5",
+    ".gitlab/renovate.jsonc",
     ".renovaterc",
     ".renovaterc.json",
     ".renovaterc.json5",
+    ".renovaterc.jsonc",
     "renovate.json5",
+    "renovate.jsonc",
 ]
-POLICY_STEP = f"""      - name: Validate disabled Renovate bootstrap
+POLICY_STEP = f"""      - name: Validate dependency automation policy
         env:
           BASH_ENV: /dev/null
           SHELLOPTS: ''
@@ -74,8 +191,26 @@ def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
+def values_for_key(
+    value: Any, target: str, found: list[Any] | None = None
+) -> list[Any]:
+    """Collect every value for a key at any nesting depth."""
+
+    if found is None:
+        found = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if key == target:
+                found.append(child)
+            values_for_key(child, target, found)
+    elif isinstance(value, list):
+        for child in value:
+            values_for_key(child, target, found)
+    return found
+
+
 def validate_bootstrap(contents: str) -> dict[str, Any]:
-    """Validate the exact disabled bootstrap without Python equality shortcuts."""
+    """Validate the exact activation contract without equality shortcuts."""
 
     try:
         config = json.loads(contents, object_pairs_hook=reject_duplicate_keys)
@@ -88,14 +223,70 @@ def validate_bootstrap(contents: str) -> dict[str, Any]:
         raise PolicyError("renovate.json keys or key order changed")
     if config["$schema"] != "https://docs.renovatebot.com/renovate-schema.json":
         raise PolicyError("Renovate schema changed")
-    if config["enabled"] is not False:
-        raise PolicyError("Renovate must remain exactly disabled")
     if config["enabledManagers"] != EXPECTED_MANAGERS:
         raise PolicyError("Renovate manager scope changed")
+    if (
+        config["semanticCommits"] != "enabled"
+        or config["semanticCommitType"] != "chore"
+    ):
+        raise PolicyError("semantic commit style must stay pinned for the title check")
+    if config["dependencyDashboard"] is not True:
+        raise PolicyError("the Dependency Dashboard must stay on")
+    if config["labels"] != ["dependencies", "renovate"]:
+        raise PolicyError("Renovate PR labels changed")
+    if config["minimumReleaseAge"] != "7 days":
+        raise PolicyError("the seven-day release-age quarantine changed")
+    if config["vulnerabilityAlerts"] != {"enabled": False}:
+        raise PolicyError("security PRs must stay with Dependabot")
+    if config["packageRules"] != EXPECTED_PACKAGE_RULES:
+        raise PolicyError("Renovate admission rules changed")
+
+    # Constant-independent invariants: survive lockstep edits of the file
+    # and canonical constant together.
+    for key in FORBIDDEN_RENOVATE_KEYS:
+        if values_for_key(config, key):
+            raise PolicyError(f"renovate.json must not contain {key}")
+    for rule in values_for_key(config, "packageRules"):
+        for entry in rule:
+            if entry.get("automerge") is True:
+                if entry.get("matchManagers") != ["npm"]:
+                    raise PolicyError("automerge is limited to the npm manager")
+                if not set(entry.get("matchUpdateTypes", [])) <= {"patch", "minor"}:
+                    raise PolicyError("automerge is limited to patch and minor updates")
+                if entry.get("matchCurrentVersion") != ">=1.0.0":
+                    raise PolicyError("automerge is limited to stable releases")
+            if "digest" in entry.get("matchUpdateTypes", []) and (
+                entry.get("automerge") is not False
+                or entry.get("dependencyDashboardApproval") is not True
+            ):
+                raise PolicyError("digest updates must stay dashboard-gated")
+    if values_for_key(config, "automerge").count(True) != 1:
+        raise PolicyError("exactly one admission rule may automerge")
+    if values_for_key(config, "minimumReleaseAge") != ["7 days"]:
+        raise PolicyError("exactly one release-age quarantine, set to 7 days")
+    if not any(
+        "digest" in entry.get("matchUpdateTypes", [])
+        for rule in values_for_key(config, "packageRules")
+        for entry in rule
+    ):
+        raise PolicyError("a dashboard-gated digest rule must exist")
     if contents != CANONICAL_BOOTSTRAP:
-        raise PolicyError("renovate.json is not the canonical bootstrap")
+        raise PolicyError("renovate.json is not the canonical activation contract")
 
     return config
+
+
+def validate_dependabot(contents: str) -> None:
+    """Pin Dependabot to pip proposals only, byte-exactly."""
+
+    if contents.count("package-ecosystem:") != 1:
+        raise PolicyError("Dependabot must own exactly one ecosystem")
+    if "package-ecosystem: 'pip'" not in contents:
+        raise PolicyError("Dependabot's remaining ecosystem must be pip")
+    if "update-types: ['version-update:semver-major']" not in contents:
+        raise PolicyError("Dependabot must keep ignoring pip majors")
+    if contents != CANONICAL_DEPENDABOT:
+        raise PolicyError("dependabot.yml is not the canonical pip-only contract")
 
 
 def extract_ci_jobs(contents: str) -> dict[str, str]:
@@ -294,17 +485,52 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
         with self.assertRaises(PolicyError):
             validate_ci_policy_gate(contents)
 
-    def test_repository_has_exact_disabled_bootstrap(self) -> None:
+    def test_repository_has_exact_activation_contract(self) -> None:
         config = validate_bootstrap(RENOVATE_PATH.read_text(encoding="utf-8"))
 
-        self.assertIs(config["enabled"], False)
+        self.assertNotIn("enabled", config)
         self.assertEqual(config["enabledManagers"], EXPECTED_MANAGERS)
+
+    def test_dependabot_keeps_pip_only(self) -> None:
+        dependabot_path = ROOT / ".github" / "dependabot.yml"
+        self.assertTrue(dependabot_path.is_file(), "dependabot.yml must exist")
+        validate_dependabot(dependabot_path.read_text(encoding="utf-8"))
+
+    def test_dependabot_scope_regrowth_fails_closed(self) -> None:
+        mutations = [
+            CANONICAL_DEPENDABOT.replace(
+                "  - package-ecosystem: 'pip'",
+                "  - package-ecosystem: 'npm'\n"
+                "    directory: '/'\n"
+                "    schedule:\n"
+                "      interval: 'weekly'\n"
+                "  - package-ecosystem: 'pip'",
+                1,
+            ),
+            CANONICAL_DEPENDABOT.replace("'pip'", "'github-actions'", 1),
+            CANONICAL_DEPENDABOT.replace(
+                "    ignore:\n"
+                "      - dependency-name: '*'\n"
+                "        update-types: ['version-update:semver-major']\n",
+                "",
+                1,
+            ),
+            CANONICAL_DEPENDABOT.rstrip("\n"),
+        ]
+
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                self.assertNotEqual(
+                    mutation, CANONICAL_DEPENDABOT, "fixture no longer applies"
+                )
+                with self.assertRaises(PolicyError):
+                    validate_dependabot(mutation)
 
     def test_duplicate_json_keys_fail_closed(self) -> None:
         mutations = [
             CANONICAL_BOOTSTRAP.replace(
-                '  "enabled": false,',
-                '  "enabled": true,\n  "enabled": false,',
+                '  "dependencyDashboard": true,',
+                '  "dependencyDashboard": false,\n  "dependencyDashboard": true,',
             ),
             CANONICAL_BOOTSTRAP.replace(
                 '  "enabledManagers":',
@@ -316,10 +542,91 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             with self.subTest(mutation=mutation):
                 self.assert_rejected(mutation)
 
-    def test_activation_and_python_false_equals_zero_tricks_fail_closed(self) -> None:
-        for replacement in ["true", "0", "0.0", "null", '"false"']:
-            mutation = CANONICAL_BOOTSTRAP.replace("false", replacement, 1)
-            with self.subTest(replacement=replacement):
+    def test_re_disabling_and_gate_weakening_fail_closed(self) -> None:
+        mutations = [
+            CANONICAL_BOOTSTRAP.replace(
+                '  "enabledManagers":', '  "enabled": false,\n  "enabledManagers":', 1
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '"dependencyDashboard": true', '"dependencyDashboard": false', 1
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '"vulnerabilityAlerts": { "enabled": false }',
+                '"vulnerabilityAlerts": { "enabled": true }',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '"minimumReleaseAge": "7 days"', '"minimumReleaseAge": "1 day"', 1
+            ),
+            CANONICAL_BOOTSTRAP.replace('  "minimumReleaseAge": "7 days",\n', "", 1),
+            CANONICAL_BOOTSTRAP.replace(
+                '"matchUpdateTypes": ["major"],\n      "dependencyDashboardApproval": true',
+                '"matchUpdateTypes": ["major"],\n      "automerge": true',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '      "matchCurrentVersion": ">=1.0.0",\n', "", 1
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '"matchUpdateTypes": ["patch", "minor"]',
+                '"matchUpdateTypes": ["patch", "minor", "major"]',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '    {\n      "matchCurrentVersion": "<1.0.0",\n      "automerge": false,\n      "dependencyDashboardApproval": true\n    },\n',
+                "",
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '"labels": ["dependencies", "renovate"]', '"labels": []', 1
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '  "packageRules": [',
+                '  "extends": [":automergeAll"],\n  "packageRules": [',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '  "packageRules": [',
+                '  "schedule": ["at any time"],\n  "packageRules": [',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '  "packageRules": [',
+                '  "prCreation": "immediate",\n  "packageRules": [',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '  "packageRules": [',
+                '  "ignoreTests": true,\n  "packageRules": [',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '  "packageRules": [',
+                '  "internalChecksFilter": "none",\n  "packageRules": [',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace('      "matchManagers": ["npm"],\n', "", 1),
+            CANONICAL_BOOTSTRAP.replace(
+                '"semanticCommits": "enabled"', '"semanticCommits": "auto"', 1
+            ),
+            CANONICAL_BOOTSTRAP.replace('        "digest",\n', "", 1),
+            CANONICAL_BOOTSTRAP.replace(
+                '  "packageRules": [',
+                '  "prConcurrentLimit": 0,\n  "packageRules": [',
+                1,
+            ),
+            CANONICAL_BOOTSTRAP.replace(
+                '      "automerge": false,\n      "dependencyDashboardApproval": true\n    }\n  ]',
+                '      "automerge": true,\n      "dependencyDashboardApproval": true\n    }\n  ]',
+                1,
+            ),
+        ]
+
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                self.assertNotEqual(
+                    mutation, CANONICAL_BOOTSTRAP, "fixture no longer applies"
+                )
                 self.assert_rejected(mutation)
 
     def test_manager_scope_narrowing_expansion_and_reordering_fail_closed(self) -> None:
@@ -341,32 +648,6 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             with self.subTest(managers=managers):
                 self.assert_rejected(mutation)
 
-    def test_extra_policy_unsafe_classes_and_release_age_drift_fail_closed(
-        self,
-    ) -> None:
-        additions = [
-            '  "automerge": true,\n',
-            (
-                '  "packageRules": [{"matchUpdateTypes": '
-                '["pin", "digest", "pinDigest", "lockFileMaintenance"], '
-                '"minimumReleaseAge": "1 day", "automerge": true}],\n'
-            ),
-            (
-                '  "lockFileMaintenance": {"enabled": true, '
-                '"minimumReleaseAge": "1 day", "automerge": true},\n'
-            ),
-            '  "minimumReleaseAge": "1 day",\n',
-        ]
-
-        for addition in additions:
-            mutation = CANONICAL_BOOTSTRAP.replace(
-                '  "enabled": false,\n',
-                f'  "enabled": false,\n{addition}',
-                1,
-            )
-            with self.subTest(addition=addition):
-                self.assert_rejected(mutation)
-
     def test_ci_gates_every_job_before_dependency_installation(self) -> None:
         workflow = CI_PATH.read_text(encoding="utf-8")
 
@@ -380,8 +661,9 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
     def test_added_removed_or_renamed_workflows_fail_closed(self) -> None:
         rosters = [
             [*EXPECTED_WORKFLOWS, "nightly-deps.yml"],
-            ["ci.yml", "pr-lint.yml"],
-            ["ci.yaml", "dependabot-auto-merge.yml", "pr-lint.yml"],
+            ["ci.yml"],
+            ["ci.yml", "dependabot-auto-merge.yml", "pr-lint.yml"],
+            ["ci.yaml", "pr-lint.yml"],
             [*EXPECTED_WORKFLOWS, "ci.yml"],
         ]
 
@@ -488,8 +770,8 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
         workflow = CI_PATH.read_text(encoding="utf-8")
         mutations = [
             workflow.replace(
-                "      - name: Validate disabled Renovate bootstrap\n",
-                "      - name: Validate disabled Renovate bootstrap\n"
+                "      - name: Validate dependency automation policy\n",
+                "      - name: Validate dependency automation policy\n"
                 "        if: false\n",
                 1,
             ),
@@ -680,9 +962,9 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
                 1,
             ),
             workflow.replace(
-                "      - name: Validate disabled Renovate bootstrap\n",
+                "      - name: Validate dependency automation policy\n",
                 "      - uses: attacker/environment-action@deadbeef\n\n"
-                "      - name: Validate disabled Renovate bootstrap\n",
+                "      - name: Validate dependency automation policy\n",
                 1,
             ),
             workflow.replace(
