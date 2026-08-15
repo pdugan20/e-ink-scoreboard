@@ -13,7 +13,7 @@ git+https://github.com/hbldh/hitherdither.git
 
 # Code quality tools
 black==26.5.1
-ruff>=0.15.22
+ruff>=0.16.2
 pre-commit>=4.6.1
 
 # Note: inky package excluded as it requires spidev/gpiod which are Linux-only
