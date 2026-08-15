@@ -31,7 +31,7 @@ jobs:
             chore
             deps
           requireScope: false
-          subjectPattern: ^[a-z].*$
+          subjectPattern: ^(\[[Ss]ecurity\] )?[a-z].*$
           subjectPatternError: |
             The subject must start with a lowercase letter.
         env:

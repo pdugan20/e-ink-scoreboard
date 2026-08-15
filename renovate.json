@@ -1,5 +1,39 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "enabled": false,
-  "enabledManagers": ["npm", "github-actions"]
+  "enabledManagers": ["npm", "github-actions"],
+  "timezone": "America/Los_Angeles",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "dependencyDashboard": true,
+  "labels": ["dependencies", "renovate"],
+  "minimumReleaseAge": "7 days",
+  "vulnerabilityAlerts": { "enabled": false },
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchCurrentVersion": ">=1.0.0",
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchCurrentVersion": "<1.0.0",
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchUpdateTypes": [
+        "pin",
+        "digest",
+        "pinDigest",
+        "rollback",
+        "replacement"
+      ],
+      "automerge": false,
+      "dependencyDashboardApproval": true
+    }
+  ]
 }
