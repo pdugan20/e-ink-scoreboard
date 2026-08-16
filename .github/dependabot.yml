@@ -20,9 +20,6 @@ updates:
       - 'pdugan20'
     reviewers:
       - 'pdugan20'
-    ignore:
-      - dependency-name: '*'
-        update-types: ['version-update:semver-major']
     groups:
       python-dependencies:
         update-types:

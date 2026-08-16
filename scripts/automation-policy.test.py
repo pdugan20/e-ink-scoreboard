@@ -82,9 +82,6 @@ updates:
       - 'pdugan20'
     reviewers:
       - 'pdugan20'
-    ignore:
-      - dependency-name: '*'
-        update-types: ['version-update:semver-major']
     groups:
       python-dependencies:
         update-types:
@@ -283,8 +280,16 @@ def validate_dependabot(contents: str) -> None:
         raise PolicyError("Dependabot must own exactly one ecosystem")
     if "package-ecosystem: 'pip'" not in contents:
         raise PolicyError("Dependabot's remaining ecosystem must be pip")
-    if "update-types: ['version-update:semver-major']" not in contents:
-        raise PolicyError("Dependabot must keep ignoring pip majors")
+    # The canonical contract contains the word nowhere, so a bare-word forbid
+    # covers every YAML spelling (incl. inline flow entries) with no false
+    # positive, and fails closed on comments that mention it.
+    if "ignore" in contents:
+        raise PolicyError(
+            "ignore conditions are forbidden: the documented contract applies"
+            " them to security updates (versions: genuinely filters them), and"
+            " update-types shapes rely on an undocumented implementation"
+            " divergence - neither belongs in the security-only phase"
+        )
     if contents != CANONICAL_DEPENDABOT:
         raise PolicyError("dependabot.yml is not the canonical pip-only contract")
 
@@ -509,10 +514,11 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             ),
             CANONICAL_DEPENDABOT.replace("'pip'", "'github-actions'", 1),
             CANONICAL_DEPENDABOT.replace(
+                "    groups:\n",
                 "    ignore:\n"
                 "      - dependency-name: '*'\n"
-                "        update-types: ['version-update:semver-major']\n",
-                "",
+                "        update-types: ['version-update:semver-major']\n"
+                "    groups:\n",
                 1,
             ),
             CANONICAL_DEPENDABOT.rstrip("\n"),
