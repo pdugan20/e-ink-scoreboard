@@ -280,7 +280,10 @@ def validate_dependabot(contents: str) -> None:
         raise PolicyError("Dependabot must own exactly one ecosystem")
     if "package-ecosystem: 'pip'" not in contents:
         raise PolicyError("Dependabot's remaining ecosystem must be pip")
-    if re.search(r"""(?m)^\s*(?:\?\s*)?['"]?ignore['"]?\s*:""", contents):
+    # The canonical contract contains the word nowhere, so a bare-word forbid
+    # covers every YAML spelling (incl. inline flow entries) with no false
+    # positive, and fails closed on comments that mention it.
+    if "ignore" in contents:
         raise PolicyError(
             "ignore conditions are forbidden: the documented contract applies"
             " them to security updates (versions: genuinely filters them), and"
