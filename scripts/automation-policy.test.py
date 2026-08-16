@@ -280,11 +280,12 @@ def validate_dependabot(contents: str) -> None:
         raise PolicyError("Dependabot must own exactly one ecosystem")
     if "package-ecosystem: 'pip'" not in contents:
         raise PolicyError("Dependabot's remaining ecosystem must be pip")
-    if "ignore:" in contents:
+    if re.search(r"""(?m)^\s*(?:\?\s*)?['"]?ignore['"]?\s*:""", contents):
         raise PolicyError(
-            "ignore conditions are forbidden: they apply to security updates"
-            " too, so a wildcard majors-ignore silently filters a security fix"
-            " that needs a major bump"
+            "ignore conditions are forbidden: the documented contract applies"
+            " them to security updates (versions: genuinely filters them), and"
+            " update-types shapes rely on an undocumented implementation"
+            " divergence - neither belongs in the security-only phase"
         )
     if contents != CANONICAL_DEPENDABOT:
         raise PolicyError("dependabot.yml is not the canonical pip-only contract")
