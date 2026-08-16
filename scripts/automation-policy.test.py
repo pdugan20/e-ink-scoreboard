@@ -82,9 +82,6 @@ updates:
       - 'pdugan20'
     reviewers:
       - 'pdugan20'
-    ignore:
-      - dependency-name: '*'
-        update-types: ['version-update:semver-major']
     groups:
       python-dependencies:
         update-types:
@@ -283,8 +280,12 @@ def validate_dependabot(contents: str) -> None:
         raise PolicyError("Dependabot must own exactly one ecosystem")
     if "package-ecosystem: 'pip'" not in contents:
         raise PolicyError("Dependabot's remaining ecosystem must be pip")
-    if "update-types: ['version-update:semver-major']" not in contents:
-        raise PolicyError("Dependabot must keep ignoring pip majors")
+    if "ignore:" in contents:
+        raise PolicyError(
+            "ignore conditions are forbidden: they apply to security updates"
+            " too, so a wildcard majors-ignore silently filters a security fix"
+            " that needs a major bump"
+        )
     if contents != CANONICAL_DEPENDABOT:
         raise PolicyError("dependabot.yml is not the canonical pip-only contract")
 
@@ -509,10 +510,11 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             ),
             CANONICAL_DEPENDABOT.replace("'pip'", "'github-actions'", 1),
             CANONICAL_DEPENDABOT.replace(
+                "    groups:\n",
                 "    ignore:\n"
                 "      - dependency-name: '*'\n"
-                "        update-types: ['version-update:semver-major']\n",
-                "",
+                "        update-types: ['version-update:semver-major']\n"
+                "    groups:\n",
                 1,
             ),
             CANONICAL_DEPENDABOT.rstrip("\n"),
