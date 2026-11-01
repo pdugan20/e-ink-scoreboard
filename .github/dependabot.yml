@@ -4,6 +4,7 @@ updates:
   # pip proposals (human-merged) and repository security updates.
   - package-ecosystem: 'pip'
     directory: '/'
+    cooldown: { default-days: 7 }
     schedule:
       interval: 'weekly'
       day: 'monday'

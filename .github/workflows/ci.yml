@@ -6,12 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   python-lint:
     name: Python Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -26,10 +31,10 @@ jobs:
         run: python3 -P scripts/automation-policy.test.py
 
       - name: Install Python dependencies
-        run: pip install black==26.3.0 ruff
+        run: pip install ruff==0.15.22
 
-      - name: Run Black
-        run: black --check .
+      - name: Check Python formatting
+        run: ruff format --check .
 
       - name: Run Ruff
         run: ruff check .
@@ -40,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -62,6 +69,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -69,20 +78,10 @@ jobs:
           node-version: '22'
 
       - name: Install markdownlint-cli
-        run: npm install -g markdownlint-cli
+        run: npm install -g markdownlint-cli@0.48.0
 
       - name: Run markdownlint
         run: markdownlint '**/*.md' --ignore node_modules --ignore venv
-
-  claudelint:
-    name: Claude Code Lint
-    needs: python-lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Lint Claude Code config
-        run: npx claude-code-lint@latest
 
   test-python:
     name: Python Tests (${{ matrix.python-version }})
@@ -94,6 +93,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -110,7 +111,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          pip install --upgrade pip==26.2.2
           pip install -r requirements-dev.txt
           pip install -r requirements-test.txt
 
@@ -131,6 +132,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -158,6 +161,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -166,11 +171,36 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          pip install --upgrade pip==26.2.2
           pip install -r requirements-dev.txt
           pip install -r requirements-test.txt
-          pip install playwright
+          pip install playwright==1.62.0
           playwright install chromium
 
       - name: Run integration tests
         run: pytest -m integration
+
+  ci-gate:
+    name: CI Gate
+    if: always()
+    needs:
+      [
+        test-integration,
+        javascript-lint,
+        test-javascript,
+        markdown-lint,
+        python-lint,
+        test-python,
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check job results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            if [ "$result" != success ] && [ "$result" != skipped ]; then
+              echo "A required job finished with: $result"
+              exit 1
+            fi
+          done

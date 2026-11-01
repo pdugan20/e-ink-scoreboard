@@ -66,6 +66,7 @@ updates:
   # pip proposals (human-merged) and repository security updates.
   - package-ecosystem: 'pip'
     directory: '/'
+    cooldown: { default-days: 7 }
     schedule:
       interval: 'weekly'
       day: 'monday'
@@ -138,7 +139,7 @@ FORBIDDEN_RENOVATE_KEYS = [
     "prConcurrentLimit",
     "prHourlyLimit",
 ]
-EXPECTED_WORKFLOWS = ["ci.yml", "pr-lint.yml"]
+EXPECTED_WORKFLOWS = ["ci.yml", "hygiene.yml", "pr-lint.yml"]
 WORKFLOWS_DIR = ROOT / ".github" / "workflows"
 POLICY_JOB = "python-lint"
 POLICY_COMMAND = "python3 -P scripts/automation-policy.test.py"
@@ -164,13 +165,44 @@ POLICY_STEP = f"""      - name: Validate dependency automation policy
           SHELLOPTS: ''
         shell: bash
         run: {POLICY_COMMAND}"""
-CHECKOUT_STEP_PATTERN = r"      - uses: actions/checkout@[0-9a-f]{40}(?: # v[\w.-]+)?"
+CHECKOUT_STEP_PATTERN = (
+    r"      - uses: actions/checkout@[0-9a-f]{40}(?: # v[\w.-]+)?\n"
+    r"        with:\n"
+    r"          persist-credentials: false"
+)
 SETUP_PYTHON_STEP_PATTERN = (
     r"      - name: Set up Python\n"
     r"        uses: actions/setup-python@[0-9a-f]{40}(?: # v[\w.-]+)?\n"
     r"        with:\n"
     r"          python-version: '3\.x'"
 )
+
+
+CI_GATE = """  ci-gate:
+    name: CI Gate
+    if: always()
+    needs:
+      [
+        test-integration,
+        javascript-lint,
+        test-javascript,
+        markdown-lint,
+        python-lint,
+        test-python,
+      ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check job results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            if [ "$result" != success ] && [ "$result" != skipped ]; then
+              echo "A required job finished with: $result"
+              exit 1
+            fi
+          done
+"""
 
 
 class PolicyError(ValueError):
@@ -335,8 +367,17 @@ def extract_ci_jobs(contents: str) -> dict[str, str]:
 
 
 def parse_job_needs(job_name: str, body: str) -> list[str]:
-    """Parse one canonical scalar or inline-list needs declaration."""
+    """Parse one canonical scalar or flow-list needs declaration."""
 
+    body = re.sub(
+        r"(?m)^    needs:\n      \[\n((?:        [a-zA-Z0-9_-]+,\n)+)      \]$",
+        lambda match: (
+            "    needs: ["
+            + ", ".join(line.strip().rstrip(",") for line in match[1].splitlines())
+            + "]"
+        ),
+        body,
+    )
     matches = re.findall(r"(?m)^    needs:\s*(?P<value>[^\n]+?)\s*$", body)
     if len(matches) > 1:
         raise PolicyError(f"CI job {job_name} has ambiguous needs declarations")
@@ -378,13 +419,16 @@ def job_reaches_policy_gate(
 def validate_ci_policy_gate(contents: str) -> None:
     """Require one executable gate before every dependency-consuming job."""
 
+    if not contents.endswith("\n" + CI_GATE):
+        raise PolicyError("CI must end with the exact aggregate gate")
+    without_gate = contents[: -len(CI_GATE)]
     if contents.count(POLICY_PATH) != 1 or contents.count(POLICY_COMMAND) != 1:
         raise PolicyError("CI must contain exactly one policy command reference")
-    if re.search(r"""(?m)^\s*(?:-\s+)?(?:["'?!&*%{|>\[]|<<\s*:)""", contents):
+    if re.search(r"""(?m)^\s*(?:-\s+)?(?:["'?!&*%{|>\[]|<<\s*:)""", without_gate):
         raise PolicyError("CI mapping keys must use canonical plain syntax")
     if re.search(r"(?m)^\s*defaults\s*:", contents):
         raise PolicyError("CI may not override the policy command shell")
-    if re.search(r"(?m)^\s+if\s*:", contents):
+    if re.search(r"(?m)^\s+if\s*:", without_gate):
         raise PolicyError("CI jobs and steps may not bypass the policy gate")
 
     top_level_lines = [
@@ -392,10 +436,14 @@ def validate_ci_policy_gate(contents: str) -> None:
         for line in contents.splitlines()
         if line and not line[0].isspace() and not line.startswith("#")
     ]
-    if top_level_lines != ["name: CI", "on:", "jobs:"]:
+    if top_level_lines != ["name: CI", "on:", "permissions:", "jobs:"]:
         raise PolicyError("CI workflow must preserve its canonical top-level keys")
 
+    if re.findall(r"(?m)^permissions:\n  contents: ([^\n]+)$", contents) != ["read"]:
+        raise PolicyError("CI permissions must be read-only")
     jobs = extract_ci_jobs(contents)
+    if set(parse_job_needs("ci-gate", jobs["ci-gate"])) != set(jobs) - {"ci-gate"}:
+        raise PolicyError("CI Gate must require every other job")
     if POLICY_JOB not in jobs:
         raise PolicyError("required Python Lint policy job is missing")
 
@@ -783,7 +831,7 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             ),
             workflow.replace(
                 f"        run: {POLICY_COMMAND}\n",
-                f"        run: {POLICY_COMMAND}\n" "        continue-on-error: true\n",
+                f"        run: {POLICY_COMMAND}\n        continue-on-error: true\n",
                 1,
             ),
             workflow.replace(
@@ -805,7 +853,7 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             ),
             workflow.replace(
                 f"        run: {POLICY_COMMAND}\n",
-                f"        run: {POLICY_COMMAND}\n" "        shell: python\n",
+                f"        run: {POLICY_COMMAND}\n        shell: python\n",
                 1,
             ),
             workflow.replace(
@@ -899,7 +947,7 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             ),
             workflow.replace(
                 "  python-lint:\n",
-                "  python-lint:\n" "    env:\n" "      SHELLOPTS: noexec\n",
+                "  python-lint:\n    env:\n      SHELLOPTS: noexec\n",
                 1,
             ),
             workflow.replace(
@@ -914,7 +962,7 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             ),
             workflow.replace(
                 "    runs-on: ubuntu-latest\n",
-                "    runs-on: ubuntu-latest\n" "    container: attacker/image\n",
+                "    runs-on: ubuntu-latest\n    container: attacker/image\n",
                 1,
             ),
             workflow.replace(
@@ -942,12 +990,12 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
             ),
             workflow.replace(
                 "    runs-on: ubuntu-latest\n",
-                "    runs-on: ubuntu-latest\n" "    environment: production\n",
+                "    runs-on: ubuntu-latest\n    environment: production\n",
                 1,
             ),
             workflow.replace(
                 "    runs-on: ubuntu-latest\n",
-                "    runs-on: ubuntu-latest\n" "    permissions: write-all\n",
+                "    runs-on: ubuntu-latest\n    permissions: write-all\n",
                 1,
             ),
             workflow.replace(
@@ -994,6 +1042,21 @@ class DisabledRenovateBootstrapTests(unittest.TestCase):
         for mutation in mutations:
             with self.subTest(mutation=mutation):
                 self.assert_workflow_rejected(mutation)
+
+    def test_aggregate_gate_bypasses_fail_closed(self) -> None:
+        workflow = CI_PATH.read_text(encoding="utf-8")
+        for before, after in [
+            ("    if: always()", "    if: success()"),
+            ("        test-python,", ""),
+            ('[ "$result" != skipped ]', '[ "$result" != failure ]'),
+            ("  contents: read", "  contents: write"),
+            (
+                "          persist-credentials: false",
+                "          persist-credentials: true",
+            ),
+        ]:
+            with self.subTest(before=before):
+                self.assert_workflow_rejected(workflow.replace(before, after, 1))
 
     def test_ci_dependency_gate_bypasses_fail_closed(self) -> None:
         workflow = CI_PATH.read_text(encoding="utf-8")

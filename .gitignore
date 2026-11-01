@@ -56,9 +56,6 @@ test_display_output.png
 src/.admin_password
 src/.flask_secret
 
-# Lint caches
-.claudelint-cache/
-
 # Old custom hooks (archived)
 .githooks.backup/
 .coverage

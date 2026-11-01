@@ -349,7 +349,7 @@ it('should call the callback', () => {
 
 All code is automatically checked before commits:
 
-- **Python**: Black (formatter), Ruff (linter)
+- **Python**: Ruff (formatter and linter)
 - **JavaScript**: Prettier (formatter), ESLint (linter)
 - **Markdown**: markdownlint
 
@@ -376,7 +376,7 @@ Two workflows run on every push and PR:
    - Coverage upload to Codecov
 
 2. **Lint & Format** (`.github/workflows/lint-and-format.yml`):
-   - Python checks (black, ruff)
+   - Python checks (ruff format, ruff check)
    - JavaScript checks (prettier, eslint)
    - Markdown checks (markdownlint)
 

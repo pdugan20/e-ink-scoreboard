@@ -41,14 +41,14 @@ pre-commit run --all-files
 
 ### Python
 
-- **Formatter:** Black (line length: 88)
+- **Formatter:** Ruff (line length: 88)
 - **Linter:** Ruff
 - **Configuration:** `pyproject.toml`
 
 Run manually:
 
 ```bash
-black .
+ruff format .
 ruff check --fix .
 ```
 
@@ -90,7 +90,7 @@ The following checks run automatically on commit:
 - YAML/JSON validation
 - Large file detection
 - Merge conflict detection
-- Black formatting (Python)
+- Ruff formatting (Python)
 - Ruff linting (Python)
 - Prettier formatting (JS/JSON/YAML/Markdown)
 - ESLint (JavaScript)
@@ -122,7 +122,7 @@ make test-js        # Run JavaScript tests only
 All PRs must pass GitHub Actions CI checks:
 
 - **Tests**: Python (3.9, 3.10, 3.11), JavaScript, Integration
-- **Python**: Black --check, Ruff check
+- **Python**: Ruff format --check, Ruff check
 - **JavaScript**: Prettier --check, ESLint
 - **Markdown**: markdownlint
 
@@ -138,7 +138,7 @@ pre-commit install
 pre-commit run --all-files
 
 # Run specific tool
-black .
+ruff format .
 ruff check .
 npm run lint && npm run format:check
 ```
