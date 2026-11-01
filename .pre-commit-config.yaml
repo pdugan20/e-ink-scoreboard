@@ -18,16 +18,9 @@ repos:
       - id: mixed-line-ending
         args: [--fix=lf]
 
-  # Python: Black formatter
-  - repo: https://github.com/psf/black
-    rev: 26.3.0
-    hooks:
-      - id: black
-        language_version: python3
-
   # Python: Ruff linter and formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.5
+    rev: v0.15.22
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]

@@ -94,7 +94,7 @@ services/                   # Systemd service and config templates
 
 ## Code Style
 
-- **Python**: Black (88 char, py311 target), Ruff (linter), double quotes
+- **Python**: Ruff (formatter and linter, 88 char, py311 target), double quotes
 - **JavaScript**: Prettier, ESLint, ES modules
 - **Markdown**: markdownlint
 - Pre-commit hooks enforce all formatting rules

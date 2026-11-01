@@ -2,7 +2,7 @@
 
 echo "Running all checks..."
 
-black --check . && \
+ruff format --check . && \
 ruff check . && \
 npx prettier --check . && \
 npx eslint .
