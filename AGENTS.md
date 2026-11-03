@@ -117,3 +117,13 @@ services/                   # Systemd service and config templates
 - Screensaver config split: `screensaver_mode` lives in both config files (frontend needs it for trigger logic), `screensaver_feed_type` lives in `eink_config.json` only (backend-only)
 - Scores API returns wrapped response `{ games: [...], all_games_final: bool }` — game status helpers in `src/config/game_status.py` are shared between web API and display controller
 - RSS feed config (`team-rss-feeds.json`) uses nested format: `{ "team": { "news": "url", "photos": "url" } }`
+
+## Code Review Rules
+
+- Flag configuration write endpoints that remain reachable without authentication when
+  `src/.admin_password` is configured, or that allow unvalidated paths, URLs, or values
+  to reach filesystem, browser, or process operations.
+- Flag changes that update only one copy of a setting documented as shared between
+  `src/eink_config.json` and `src/static/js/config.js`.
+- Flag display scheduling or score-status changes that break the wrapped scores response,
+  the shared status helpers, or the no-active-game/screensaver transition.
